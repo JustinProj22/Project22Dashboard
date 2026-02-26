@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Project 22 — Factory Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -21,6 +24,10 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    zoom: 75%;
+  }
 
   html, body {
     height: 100%;
@@ -179,11 +186,10 @@
     color: var(--muted);
   }
   .spinner {
-    width: 30px; height: 30px;
-    border: 2px solid var(--border);
-    border-top-color: var(--orange);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    width: 48px; height: 48px;
+    animation: spin 1s linear infinite;
+    transform-origin: center center;
+    display: block;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -309,6 +315,7 @@
     display: flex; align-items: center; justify-content: center;
     gap: 10px; padding: 32px; color: var(--muted);
   }
+  .modal-loading .spinner { width: 28px; height: 28px; }
 
   .modal-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .modal-table thead th {
@@ -390,7 +397,10 @@
 
     <div class="jobs-body">
       <div class="loading" id="main-loading">
-        <div class="spinner"></div>
+        <svg class="spinner" viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg">
+          <path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
+          <path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
+        </svg>
         <div>Loading jobs…</div>
       </div>
 
@@ -426,8 +436,22 @@
 </div>
 
 <script>
+// ── Request fullscreen on load (hides TV Bro menu bar) ───────
+window.addEventListener('load', function() {
+  var el = document.documentElement;
+  if (el.requestFullscreen) {
+    el.requestFullscreen();
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen();
+  } else if (el.mozRequestFullScreen) {
+    el.mozRequestFullScreen();
+  } else if (el.msRequestFullscreen) {
+    el.msRequestFullscreen();
+  }
+});
+
 // !! IMPORTANT: Replace this with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbxTmoObcFvEfZhukYX-F1mDOsgOIcZgvKy7bdIq6_SCcpS4YrPcVLXBNRYlgiaVmDcz/exec';
+var API_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 
 // ── Live clock ───────────────────────────────────────────────
 function updateClock() {
@@ -593,7 +617,7 @@ function esc(str) {
 
 function showModal() {
   document.getElementById('modal-body').innerHTML =
-    '<div class="modal-loading"><div class="spinner"></div> Loading…</div>';
+    '<div class="modal-loading"><svg class="spinner" viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></svg> Loading…</div>';
   document.getElementById('modal-overlay').classList.add('open');
 }
 
