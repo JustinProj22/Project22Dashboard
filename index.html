@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 22 — Factory Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:     #0a0a0a;
+    --dark:      #111111;
+    --panel:     #1a1a1a;
+    --border:    #2a2a2a;
+    --orange:    #f5a623;
+    --white:     #f0f0f0;
+    --muted:     #666;
+    --red:       #e04444;
+    --green:     #4caf7d;
+    --row-hover: #1c1c1c;
+    --header-h:  56px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+  }
+
+  /* ══ TOP HEADER BAR ══════════════════════════════════════════ */
+  .topbar {
+    height: var(--header-h);
+    background: var(--dark);
+    border-bottom: 2px solid var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+  }
+
+  .topbar-logo svg {
+    height: 30px;
+    width: auto;
+    display: block;
+  }
+
+  .topbar-clock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--white);
+    text-align: right;
+    line-height: 1.1;
+  }
+  .topbar-clock .date-line {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ══ MAIN LAYOUT ═════════════════════════════════════════════ */
+  .dashboard {
+    position: fixed;
+    top: var(--header-h);
+    left: 0; right: 0; bottom: 0;
+    display: grid;
+    grid-template-columns: 42% 58%;
+  }
+
+  /* ══ LEFT PANEL ══════════════════════════════════════════════ */
+  .left-panel {
+    display: grid;
+    grid-template-rows: 52% 48%;
+    border-right: 2px solid var(--border);
+  }
+
+  .cal-month {
+    border-bottom: 2px solid var(--border);
+    overflow: hidden;
+  }
+  .cal-month iframe {
+    width: 100%; height: 100%;
+    border: none;
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  .cal-agendas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .agenda-block {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--dark);
+  }
+  .agenda-block:first-child { border-right: 1px solid var(--border); }
+
+  .agenda-label {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .agenda-block iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  /* ══ RIGHT PANEL — JOBS TABLE ════════════════════════════════ */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .jobs-header {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: var(--panel);
+    border-bottom: 2px solid var(--orange);
+    flex-shrink: 0;
+  }
+
+  .jobs-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  .jobs-hint {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .jobs-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    color: var(--muted);
+  }
+  .spinner {
+    width: 30px; height: 30px;
+    border: 2px solid var(--border);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+    color: var(--orange);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--orange);
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  tbody tr:hover { background: var(--row-hover); }
+
+  tbody td {
+    padding: 9px 14px;
+    vertical-align: middle;
+    color: var(--white);
+  }
+
+  .cell-job, .cell-lists { cursor: pointer; transition: color 0.12s; }
+  .cell-job:hover, .cell-lists:hover { color: var(--orange); }
+
+  .cell-job::after, .cell-lists::after {
+    content: ' ↗';
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.12s;
+    color: var(--orange);
+  }
+  .cell-job:hover::after, .cell-lists:hover::after { opacity: 1; }
+
+  .no-date  { color: var(--red);   font-weight: 700; }
+  .has-date { color: var(--green); font-weight: 500; }
+
+  .jobs-body::-webkit-scrollbar       { width: 4px; }
+  .jobs-body::-webkit-scrollbar-track { background: var(--dark); }
+  .jobs-body::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  /* ══ MODAL ═══════════════════════════════════════════════════ */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 1000px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.18s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .modal-subtitle { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .modal-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 28px; height: 28px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: all 0.12s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { border-color: var(--orange); color: var(--orange); }
+
+  .modal-body {
+    overflow-y: auto;
+    padding: 14px 18px 18px;
+    font-size: 13px;
+  }
+
+  .modal-loading {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 32px; color: var(--muted);
+  }
+
+  .modal-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .modal-table thead th {
+    position: static;
+    font-size: 11px;
+    padding: 7px 10px;
+    border-bottom-width: 1px;
+  }
+  .modal-table tbody td { padding: 8px 10px; }
+  .modal-table tbody tr:last-child { border-bottom: none; }
+
+  .status-yes { color: var(--green); font-size: 15px; }
+  .status-no  { color: var(--red);   font-size: 15px; }
+
+  .assigned-tag {
+    background: rgba(245,166,35,0.12);
+    color: var(--orange);
+    border: 1px solid rgba(245,166,35,0.25);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .empty-state {
+    text-align: center; padding: 32px;
+    color: var(--muted); font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <svg version="1.1" viewBox="0 0 1605.0933 198.42667" xmlns="http://www.w3.org/2000/svg"><g><g><path d="m 1452.43,1050.75 c -20.51,67.27 -55.46,120.36 -104.9,159.23 -48.5,38.89 -106.05,58.33 -172.65,58.33 H 370.789 L 173.848,985.945 h 926.612 c 38.12,0.614 66.51,-13.879 85.21,-43.511 19.49,-27.77 25.15,-64.801 17,-111.086 -7.83,-44.446 -26.57,-81.469 -56.18,-111.094 -28.71,-27.168 -62.21,-41.66 -100.54,-43.504 H 119.324 L 0,0 h 263.137 l 69.875,396.23 h 688.108 c 66.59,0 130.94,19.122 193.05,57.399 63.14,38.883 116.53,91.652 160.18,158.312 44.69,67.258 74.01,140.395 87.95,219.407 14.04,79.613 10.75,152.75 -9.87,219.402" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 1818.63,739.691 657.68,-0.918 c 30.96,0 57.65,11.711 80.09,35.172 23.94,24.075 38.77,53.696 44.51,88.875 6.99,37.035 2.61,66.653 -13.18,88.871 -13.93,24.676 -36.55,36.106 -67.83,34.254 h -657.86 z m 776.38,528.619 c 93.33,0 166.12,-39.51 218.33,-118.5 52.2,-79.01 68.46,-174.361 48.76,-286.06 -18.18,-103.082 -62.57,-192.559 -133.17,-268.477 -70.3,-74.062 -149.25,-117.562 -236.91,-130.535 L 2723.88,0 H 2417.81 L 2209.07,460.121 H 1769.33 L 1688.2,0 h -263.14 l 223.62,1268.31 h 946.33" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 3298.43,942.434 c -28.71,-27.157 -46.82,-62.024 -54.33,-104.606 l -71.82,-407.34 c -7.18,-40.726 -1.43,-75.918 17.27,-105.539 19.02,-27.769 45.83,-41.98 80.44,-42.59 h 598.75 c 35.51,1.852 67.38,16.352 95.61,43.512 29.17,29.629 47.27,64.488 54.35,104.617 l 71.83,407.34 c 7.51,42.582 1.74,77.762 -17.29,105.535 -18.13,30.235 -44.94,44.434 -80.44,42.582 h -598.75 c -34.6,0.614 -66.47,-13.879 -95.62,-43.511 z m 821.55,325.876 c 86.31,0 153.1,-36.1 200.44,-108.31 47.76,-72.22 62.37,-159.55 43.85,-261.996 L 4271.22,370.309 C 4253.62,267.859 4208.21,180.531 4134.97,108.32 4062.19,36.1094 3982.65,0 3896.35,0 h -753.54 c -85.84,0 -152.64,36.1094 -200.42,108.32 -47.31,72.211 -61.93,159.539 -43.86,261.989 l 93.05,527.695 c 18.06,102.446 63.47,189.776 136.25,261.996 73.24,72.21 152.78,108.31 238.61,108.31 h 753.54" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="M 5278.39,1268.31 5120.04,370.309 C 5101.98,267.859 5056.56,180.531 4983.79,108.32 4910.55,36.1094 4831.01,0 4745.17,0 h -429.19 l 49.79,282.359 h 351.8 c 34.81,0.61 66.4,14.821 94.75,42.59 29.61,29.621 48.02,64.813 55.2,105.539 l 147.72,837.822 h 263.15" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 6648.93,1268.31 -49.8,-282.365 H 5671.8 l -36.56,-207.367 h 803.5 L 6389.77,500.84 h -803.5 l -38.52,-218.481 h 927.32 L 6425.29,0 H 5234.82 l 223.63,1268.31 h 1190.48" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 7800.28,1268.31 c 86.31,0 153.11,-36.1 200.45,-108.31 47.75,-72.22 62.36,-159.55 43.84,-261.996 l -14.35,-81.465 h -263.15 l 3.76,21.289 c 7.5,42.582 1.74,77.762 -17.29,105.535 -18.13,30.235 -44.92,44.434 -80.43,42.582 h -577.65 c -33.66,0.614 -65.54,-13.879 -95.61,-43.511 -28.71,-27.157 -46.82,-62.024 -54.33,-104.606 l -71.83,-407.34 c -7.17,-40.726 -1.2,-75.918 17.98,-105.539 19.49,-27.769 46.07,-41.98 79.74,-42.59 h 577.64 c 35.51,1.852 67.37,16.352 95.61,43.512 29.16,29.629 47.27,64.488 54.35,104.617 l 3.41,19.434 h 263.15 l -14.04,-79.613 C 7933.92,267.859 7888.51,180.531 7815.28,108.32 7742.48,36.1094 7662.95,0 7576.65,0 h -732.43 c -85.84,0 -152.64,36.1094 -200.42,108.32 -47.31,72.211 -61.93,159.539 -43.86,261.989 l 93.04,527.695 c 18.07,102.446 63.73,189.776 136.97,261.996 73.23,72.21 152.54,108.31 237.9,108.31 h 732.43" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="M 9404.8,1268.31 9218.38,985.945 H 8896.94 L 8723.1,0 h -263.15 l 173.85,985.945 h -498.85 l 49.8,282.365 H 9404.8" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 9562.82,469.801 c 8.66,21.137 21.1,39.554 37.5,55.133 25.92,25.945 53.7,38.925 83.28,38.925 h 476.6 c 106.9,0.704 206,45.411 297.2,134.051 91.6,90.82 148.6,200.012 171.2,327.59 22.6,128.28 4.3,237.47 -54.9,327.57 -59.7,90.1 -143.2,135.15 -250.6,135.15 h -510.2 -106.82 l -217.34,-329.11 -0.39,-0.63 -2.55,-3.67 c 19.22,0.24 296.08,0.42 298.78,0.42 h 451.12 c 31.2,0 54.4,-12.62 69.7,-37.84 17.2,-23.78 22.5,-54.43 15.9,-91.89 -6.4,-36.047 -22.2,-66.684 -47.5,-91.902 -25.3,-25.235 -53.2,-37.836 -83.9,-37.836 h -480.64 c -90.09,1.23 -174.83,-31.625 -254.29,-98.379 -13.09,-11.004 -26.06,-22.828 -38.86,-35.68 C 9326.4,672.324 9269.75,563.859 9246.16,436.281 L 9170.48,7.07031 h 294.43 984.09 l 57.5,326.49969 h -971.97 l 17.73,100.551 c 2.42,12.688 5.99,24.539 10.56,35.68" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 10963.1,469.801 c 8.7,21.137 21.1,39.554 37.5,55.133 25.9,25.945 53.7,38.925 83.3,38.925 h 476.5 c 107,0.704 206.1,45.411 297.3,134.051 91.6,90.82 148.6,200.012 171.1,327.59 22.6,128.28 4.4,237.47 -54.8,327.57 -59.7,90.1 -143.2,135.15 -250.6,135.15 h -510.2 -106.8 l -217.4,-329.11 -0.4,-0.63 -2.5,-3.67 c 19.2,0.24 296.1,0.42 298.8,0.42 h 451.1 c 31.2,0 54.4,-12.62 69.7,-37.84 17.1,-23.78 22.4,-54.43 15.8,-91.89 -6.3,-36.047 -22.1,-66.684 -47.4,-91.902 -25.3,-25.235 -53.2,-37.836 -83.9,-37.836 h -480.7 c -90,1.23 -174.8,-31.625 -254.3,-98.379 -13,-11.004 -26,-22.828 -38.8,-35.68 -89.7,-89.379 -146.4,-197.844 -170,-325.422 L 10570.8,7.07031 h 294.4 984.1 l 57.5,326.49969 h -972 l 17.7,100.551 c 2.5,12.688 6,24.539 10.6,35.68" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/></g></g></svg>
+  </div>
+  <div class="topbar-clock">
+    <div id="clock-time">00:00:00</div>
+    <div class="date-line" id="clock-date">—</div>
+  </div>
+</header>
+
+<!-- ══ DASHBOARD GRID ════════════════════════════════════════ -->
+<div class="dashboard">
+
+  <!-- LEFT: Calendars -->
+  <div class="left-panel">
+
+    <div class="cal-month">
+      <iframe id="cal1"
+        src="https://teamup.com/ks823xvrfvfvjmu8pr?date=today&view=mw&tz=Calendar%20default&showHeader=0&showProfileAndInfo=0&disableSidepanel=1&showViewSelector=0&showMenu=0&showViewHeader=1&showAgendaDetails=0&showDateControls=0&showDateRange=0">
+      </iframe>
+    </div>
+
+    <div class="cal-agendas">
+      <div class="agenda-block">
+        <div class="agenda-label">Today</div>
+        <iframe id="cal2"
+          src="https://teamup.com/ks823xvrfvfvjmu8pr?view=a&tz=Calendar%20default&showHeader=0&showLogo=0&showSearch=0&showProfileAndInfo=0&disableSidepanel=1&showTitle=0&showViewSelector=0&showMenu=0&showViewHeader=0&showAgendaDetails=1&showDateControls=0&showDateRange=0">
+        </iframe>
+      </div>
+      <div class="agenda-block">
+        <div class="agenda-label">Tomorrow</div>
+        <iframe id="cal3"
+          src="https://teamup.com/ks823xvrfvfvjmu8pr?view=a&tz=Calendar%20default&showHeader=0&showLogo=0&showSearch=0&showProfileAndInfo=0&disableSidepanel=1&showTitle=0&showViewSelector=0&showMenu=0&showViewHeader=0&showAgendaDetails=1&showDateControls=0&showDateRange=0&date=+1days">
+        </iframe>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Jobs Table -->
+  <div class="right-panel">
+    <div class="jobs-header">
+      <div class="jobs-title">Active Jobs — Delivery Schedule</div>
+      <div class="jobs-hint">Click Job # or List # for details</div>
+    </div>
+
+    <div class="jobs-body">
+      <div class="loading" id="main-loading">
+        <div class="spinner"></div>
+        <div>Loading jobs…</div>
+      </div>
+
+      <table id="main-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>List #(s)</th>
+            <th>Delivery Date</th>
+          </tr>
+        </thead>
+        <tbody id="main-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL ═════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Job Details</div>
+        <div class="modal-subtitle" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="modal-loading"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// !! IMPORTANT: Replace this with your Apps Script deployment URL !!
+var API_URL = 'https://script.google.com/macros/s/AKfycbxTmoObcFvEfZhukYX-F1mDOsgOIcZgvKy7bdIq6_SCcpS4YrPcVLXBNRYlgiaVmDcz/exec';
+
+// ── Live clock ───────────────────────────────────────────────
+function updateClock() {
+  var now  = new Date();
+  var h    = String(now.getHours()).padStart(2,'0');
+  var m    = String(now.getMinutes()).padStart(2,'0');
+  var s    = String(now.getSeconds()).padStart(2,'0');
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('clock-time').textContent = h + ':' + m + ':' + s;
+  document.getElementById('clock-date').textContent =
+    days[now.getDay()] + ' ' + now.getDate() + ' ' + mons[now.getMonth()] + ' ' + now.getFullYear();
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── Refresh calendars every hour ─────────────────────────────
+setInterval(function() {
+  ['cal1','cal2','cal3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.src = el.src;
+  });
+}, 3600000);
+
+// ── API fetch helper ─────────────────────────────────────────
+function apiFetch(params, successFn, errorFn) {
+  var url = API_URL + '?' + Object.keys(params).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+
+  fetch(url)
+    .then(function(res) { return res.json(); })
+    .then(successFn)
+    .catch(errorFn || function(e) { console.error(e); });
+}
+
+// ── Load jobs table ──────────────────────────────────────────
+loadJobs();
+setInterval(loadJobs, 300000); // auto-refresh every 5 mins
+
+function loadJobs() {
+  apiFetch({ action: 'main' }, renderMain, function(e) {
+    console.error('Failed to load jobs:', e);
+  });
+}
+
+function renderMain(rows) {
+  document.getElementById('main-loading').style.display = 'none';
+
+  var tbody = document.getElementById('main-tbody');
+  var table = document.getElementById('main-table');
+  tbody.innerHTML = '';
+
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:32px">No data found.</td></tr>';
+    table.style.display = 'table';
+    return;
+  }
+
+  rows.forEach(function(row) {
+    var tr = document.createElement('tr');
+
+    var tdJob = document.createElement('td');
+    tdJob.className = 'cell-job';
+    tdJob.textContent = row.job;
+    tdJob.title = 'View all items for this job';
+    tdJob.onclick = function() { openJobModal(row.job); };
+    tr.appendChild(tdJob);
+
+    var tdList = document.createElement('td');
+    tdList.className = 'cell-lists';
+    tdList.textContent = row.lists;
+    tdList.title = 'View these specific list items';
+    tdList.onclick = function() { openListModal(row.job, row.lists); };
+    tr.appendChild(tdList);
+
+    var tdDate = document.createElement('td');
+    if (!row.delivery || row.delivery === '') {
+      tdDate.innerHTML = '<strong class="no-date">No Date</strong>';
+    } else {
+      tdDate.innerHTML = '<span class="has-date">' + row.delivery + '</span>';
+    }
+    tr.appendChild(tdDate);
+
+    tbody.appendChild(tr);
+  });
+
+  table.style.display = 'table';
+}
+
+// ── Modals ───────────────────────────────────────────────────
+function openJobModal(jobName) {
+  document.getElementById('modal-title').textContent = jobName;
+  document.getElementById('modal-subtitle').textContent = 'All items for this job';
+  showModal();
+  apiFetch(
+    { action: 'job', job: jobName },
+    renderModal,
+    function(e) { modalError(e); }
+  );
+}
+
+function openListModal(jobName, listsStr) {
+  document.getElementById('modal-title').textContent = jobName;
+  document.getElementById('modal-subtitle').textContent = 'List items: ' + listsStr;
+  showModal();
+  apiFetch(
+    { action: 'lists', job: jobName, lists: listsStr },
+    renderModal,
+    function(e) { modalError(e); }
+  );
+}
+
+function renderModal(rows) {
+  var body = document.getElementById('modal-body');
+
+  if (!rows || rows.length === 0) {
+    body.innerHTML = '<div class="empty-state">No matching items found in Active Jobs.</div>';
+    return;
+  }
+
+  var html = '<table class="modal-table"><thead><tr>'
+    + '<th>List #</th><th>Joinery Item</th><th>Listed</th>'
+    + '<th>Machined</th><th>Assigned</th><th>Assembled</th>'
+    + '<th>Delivered</th><th>Date Required</th>'
+    + '</tr></thead><tbody>';
+
+  rows.forEach(function(r) {
+    html += '<tr>'
+      + '<td>' + esc(r.list) + '</td>'
+      + '<td>' + esc(r.item) + '</td>'
+      + '<td>' + icon(r.listed)       + '</td>'
+      + '<td>' + icon(r.machined)     + '</td>'
+      + '<td>' + assigned(r.assigned) + '</td>'
+      + '<td>' + icon(r.assembled)    + '</td>'
+      + '<td>' + icon(r.delivered)    + '</td>'
+      + '<td>' + (r.dateReq ? esc(r.dateReq) : '<span style="color:var(--muted)">—</span>') + '</td>'
+      + '</tr>';
+  });
+
+  body.innerHTML = html + '</tbody></table>';
+}
+
+function icon(val) {
+  if (val === true)  return '<span class="status-yes">✓</span>';
+  if (val === false) return '<span class="status-no">✗</span>';
+  var s = String(val).trim().toLowerCase();
+  if (s === 'true'  || s === '✓' || s === 'yes' || s === '1') return '<span class="status-yes">✓</span>';
+  if (s === 'false' || s === '✗' || s === 'no'  || s === '0' || s === '') return '<span class="status-no">✗</span>';
+  return '<span style="color:var(--muted)">—</span>';
+}
+
+function assigned(val) {
+  if (!val || String(val).trim() === '') return '<span style="color:var(--muted)">—</span>';
+  return '<span class="assigned-tag">' + esc(val) + '</span>';
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showModal() {
+  document.getElementById('modal-body').innerHTML =
+    '<div class="modal-loading"><div class="spinner"></div> Loading…</div>';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function modalError(e) {
+  document.getElementById('modal-body').innerHTML =
+    '<div class="empty-state" style="color:var(--red)">Error loading data. Check API_URL is set correctly.</div>';
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
