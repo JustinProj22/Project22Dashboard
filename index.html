@@ -188,8 +188,9 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    gap: 12px;
+    gap: 20px;
     color: var(--muted);
+    padding-bottom: 40px;
   }
   .spinner-wrap {
     width: 56px;
@@ -336,13 +337,21 @@
 
   .modal-body {
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 14px 18px 18px;
     font-size: 13px;
+    min-height: 120px;
   }
 
   .modal-loading {
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; padding: 32px; color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 48px 32px;
+    color: var(--muted);
+    overflow: visible;
+    min-height: 120px;
   }
   .modal-loading .spinner { width: 28px; height: 28px; }
 
