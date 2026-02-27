@@ -195,7 +195,7 @@
   }
   .cell-job:hover::after, .cell-lists:hover::after { opacity: 1; }
 
-  .no-date  { color: var(--red);   font-weight: 700; }
+  .no-date  { color: var(--red) !important; font-weight: 700 !important; }
   .has-date { color: var(--green); font-weight: 500; }
 
   .jobs-body::-webkit-scrollbar       { width: 4px; }
@@ -262,6 +262,44 @@
   .modal-table thead th { position: static; font-size: 11px; padding: 7px 10px; border-bottom-width: 1px; }
   .modal-table tbody td { padding: 8px 10px; }
   .modal-table tbody tr:last-child { border-bottom: none; }
+
+  /* Editable date cell */
+  .date-cell {
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .date-edit-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 3px;
+    padding: 2px 6px; font-size: 10px; cursor: pointer;
+    transition: all 0.12s; white-space: nowrap;
+    font-family: 'Barlow', sans-serif;
+  }
+  .date-edit-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .date-input-wrap {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .date-input {
+    background: var(--panel); border: 1px solid var(--orange);
+    color: var(--white); border-radius: 3px;
+    padding: 3px 6px; font-size: 11px;
+    font-family: 'Barlow', sans-serif;
+    outline: none;
+  }
+  .date-save-btn {
+    background: var(--orange); border: none;
+    color: var(--black); border-radius: 3px;
+    padding: 3px 8px; font-size: 10px; font-weight: 700;
+    cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px; transition: opacity 0.12s;
+  }
+  .date-save-btn:hover { opacity: 0.85; }
+  .date-cancel-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 3px;
+    padding: 3px 6px; font-size: 10px; cursor: pointer;
+    font-family: 'Barlow', sans-serif; transition: all 0.12s;
+  }
+  .date-cancel-btn:hover { border-color: var(--red); color: var(--red); }
 
   .status-yes { color: var(--green); font-size: 15px; }
   .status-no  { color: var(--red);   font-size: 15px; }
@@ -657,6 +695,23 @@ function renderMain(rows) {
     return;
   }
 
+  // Sort: dated items first (ascending by date), no-date items at bottom
+  rows.sort(function(a, b) {
+    var aHas = a.delivery && a.delivery !== '';
+    var bHas = b.delivery && b.delivery !== '';
+    if (aHas && bHas) {
+      // Both have dates — parse dd/MM/yyyy and compare
+      var ap = a.delivery.split('/');
+      var bp = b.delivery.split('/');
+      var aDate = new Date(ap[2], ap[1]-1, ap[0]);
+      var bDate = new Date(bp[2], bp[1]-1, bp[0]);
+      return aDate - bDate;
+    }
+    if (aHas && !bHas) return -1; // a first
+    if (!aHas && bHas) return  1; // b first
+    return 0; // both no date
+  });
+
   rows.forEach(function(row) {
     // TV row
     var tr = buildRow(row, false);
@@ -687,7 +742,7 @@ function buildRow(row, isMobile) {
 
   var tdDate = document.createElement('td');
   if (!row.delivery || row.delivery === '') {
-    tdDate.innerHTML = '<strong class="no-date">No Date</strong>';
+    tdDate.innerHTML = '<span class="no-date">No Date</span>';
   } else {
     tdDate.innerHTML = '<span class="has-date">' + row.delivery + '</span>';
   }
@@ -718,13 +773,20 @@ function renderModal(rows) {
     return;
   }
 
+  // Store rows globally so date edits can reference them
+  window._modalRows = rows;
+
   var html = '<table class="modal-table"><thead><tr>'
     + '<th>List #</th><th>Joinery Item</th><th>Listed</th>'
     + '<th>Machined</th><th>Assigned</th><th>Assembled</th>'
     + '<th>Delivered</th><th>Date Required</th>'
     + '</tr></thead><tbody>';
 
-  rows.forEach(function(r) {
+  rows.forEach(function(r, idx) {
+    var dateDisplay = r.dateReq
+      ? '<span class="has-date">' + esc(r.dateReq) + '</span>'
+      : '<span class="no-date">No Date</span>';
+
     html += '<tr>'
       + '<td>' + esc(r.list) + '</td>'
       + '<td>' + esc(r.item) + '</td>'
@@ -733,11 +795,88 @@ function renderModal(rows) {
       + '<td>' + assigned(r.assigned) + '</td>'
       + '<td>' + icon(r.assembled)    + '</td>'
       + '<td>' + icon(r.delivered)    + '</td>'
-      + '<td>' + (r.dateReq ? esc(r.dateReq) : '<span style="color:var(--muted)">—</span>') + '</td>'
+      + '<td>'
+      +   '<div class="date-cell" id="date-cell-' + idx + '">'
+      +     '<span id="date-display-' + idx + '">' + dateDisplay + '</span>'
+      +     '<button class="date-edit-btn" onclick="editDate(' + idx + ')">✎ Edit</button>'
+      +   '</div>'
+      + '</td>'
       + '</tr>';
   });
 
   body.innerHTML = html + '</tbody></table>';
+}
+
+function editDate(idx) {
+  var r = window._modalRows[idx];
+  // Convert dd/MM/yyyy to yyyy-MM-dd for input[type=date]
+  var inputVal = '';
+  if (r.dateReq) {
+    var parts = r.dateReq.split('/');
+    if (parts.length === 3) inputVal = parts[2] + '-' + parts[1] + '-' + parts[0];
+  }
+
+  var cell = document.getElementById('date-cell-' + idx);
+  cell.innerHTML =
+    '<div class="date-input-wrap">'
+    + '<input class="date-input" type="date" id="date-input-' + idx + '" value="' + inputVal + '">'
+    + '<button class="date-save-btn" onclick="saveDate(' + idx + ')">Save</button>'
+    + '<button class="date-cancel-btn" onclick="cancelEdit(' + idx + ')">✕</button>'
+    + '</div>';
+}
+
+function cancelEdit(idx) {
+  var r = window._modalRows[idx];
+  var dateDisplay = r.dateReq
+    ? '<span class="has-date">' + esc(r.dateReq) + '</span>'
+    : '<span class="no-date">No Date</span>';
+
+  var cell = document.getElementById('date-cell-' + idx);
+  cell.innerHTML =
+    '<span id="date-display-' + idx + '">' + dateDisplay + '</span>'
+    + '<button class="date-edit-btn" onclick="editDate(' + idx + ')">✎ Edit</button>';
+}
+
+function saveDate(idx) {
+  var r = window._modalRows[idx];
+  var input = document.getElementById('date-input-' + idx);
+  var val = input.value; // yyyy-MM-dd
+
+  var btn = document.querySelector('#date-cell-' + idx + ' .date-save-btn');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  // Convert yyyy-MM-dd to dd/MM/yyyy for display
+  var displayDate = '';
+  if (val) {
+    var p = val.split('-');
+    displayDate = p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  // Call Apps Script to save
+  fetch(API_URL + '?action=saveDate'
+    + '&job='  + encodeURIComponent(r.job)
+    + '&list=' + encodeURIComponent(r.list)
+    + '&date=' + encodeURIComponent(displayDate))
+    .then(function(res) { return res.json(); })
+    .then(function(result) {
+      if (result.success) {
+        // Update local data
+        window._modalRows[idx].dateReq = displayDate;
+        cancelEdit(idx);
+        // Also refresh main table in background
+        loadJobs();
+      } else {
+        alert('Error saving: ' + (result.error || 'Unknown error'));
+        btn.textContent = 'Save';
+        btn.disabled = false;
+      }
+    })
+    .catch(function() {
+      alert('Failed to save date. Check your connection.');
+      btn.textContent = 'Save';
+      btn.disabled = false;
+    });
 }
 
 function showModal() {
