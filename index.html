@@ -312,6 +312,59 @@
 
   .empty-state { text-align: center; padding: 32px; color: var(--muted); font-style: italic; }
 
+  /* ── Mobile modal cards ── */
+  .item-cards { display: none; flex-direction: column; gap: 10px; padding: 12px; }
+  .item-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .card-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 8px;
+    padding: 10px 12px 6px;
+  }
+  .card-list-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 13px;
+    color: var(--orange); letter-spacing: 1px;
+  }
+  .card-item-name {
+    font-size: 13px; color: var(--white);
+    font-weight: 500; padding: 0 12px 8px;
+    line-height: 1.3;
+  }
+  .card-status-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .card-status-cell {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 4px; gap: 3px;
+  }
+  .card-status-cell:not(:last-child) { border-right: 1px solid var(--border); }
+  .card-status-label {
+    font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
+  }
+  .card-status-val { font-size: 16px; }
+  .card-date-row {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 8px;
+    padding: 8px 12px;
+  }
+  .card-date-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
+    white-space: nowrap;
+  }
+
   /* TV zoom */
   @media (min-width: 769px) {
     html { zoom: 75%; }
@@ -423,11 +476,20 @@
       width: 100%; height: 100%; border: none;
     }
 
+    /* Mobile modal — full screen */
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal {
+      max-height: 92vh; max-width: 100%;
+      border-radius: 12px 12px 0 0;
+      border-left: none; border-right: none; border-bottom: none;
+    }
+    /* Show cards, hide table on mobile */
+    .modal-table { display: none; }
+    .item-cards  { display: flex; }
+
     /* Mobile modal tweaks */
-    .modal { max-height: 90vh; margin: 0; }
-    .modal-table { font-size: 11px; }
-    .modal-table thead th { padding: 6px 8px; font-size: 10px; }
-    .modal-table tbody td { padding: 7px 8px; }
+    .modal-body { padding: 0 0 12px; }
+    .modal-header { padding: 12px 14px; }
   }
 </style>
 </head>
@@ -773,21 +835,31 @@ function renderModal(rows) {
     return;
   }
 
-  // Store rows globally so date edits can reference them
   window._modalRows = rows;
 
-  var html = '<table class="modal-table"><thead><tr>'
+  // ── Desktop table ─────────────────────────────────────────
+  var tableHtml = '<table class="modal-table"><thead><tr>'
     + '<th>List #</th><th>Joinery Item</th><th>Listed</th>'
     + '<th>Machined</th><th>Assigned</th><th>Assembled</th>'
     + '<th>Delivered</th><th>Date Required</th>'
     + '</tr></thead><tbody>';
+
+  // ── Mobile cards ──────────────────────────────────────────
+  var cardsHtml = '<div class="item-cards">';
 
   rows.forEach(function(r, idx) {
     var dateDisplay = r.dateReq
       ? '<span class="has-date">' + esc(r.dateReq) + '</span>'
       : '<span class="no-date">No Date</span>';
 
-    html += '<tr>'
+    var dateCellHtml =
+      '<div class="date-cell" id="date-cell-' + idx + '">'
+      + '<span id="date-display-' + idx + '">' + dateDisplay + '</span>'
+      + '<button class="date-edit-btn" onclick="editDate(' + idx + ')">✎ Edit</button>'
+      + '</div>';
+
+    // Desktop table row
+    tableHtml += '<tr>'
       + '<td>' + esc(r.list) + '</td>'
       + '<td>' + esc(r.item) + '</td>'
       + '<td>' + icon(r.listed)       + '</td>'
@@ -795,65 +867,87 @@ function renderModal(rows) {
       + '<td>' + assigned(r.assigned) + '</td>'
       + '<td>' + icon(r.assembled)    + '</td>'
       + '<td>' + icon(r.delivered)    + '</td>'
-      + '<td>'
-      +   '<div class="date-cell" id="date-cell-' + idx + '">'
-      +     '<span id="date-display-' + idx + '">' + dateDisplay + '</span>'
-      +     '<button class="date-edit-btn" onclick="editDate(' + idx + ')">✎ Edit</button>'
-      +   '</div>'
-      + '</td>'
+      + '<td>' + dateCellHtml + '</td>'
       + '</tr>';
+
+    // Mobile card
+    cardsHtml +=
+      '<div class="item-card">'
+      +   '<div class="card-top">'
+      +     '<div class="card-list-num">List #' + esc(r.list) + '</div>'
+      +     (r.assigned ? '<span class="assigned-tag">' + esc(r.assigned) + '</span>' : '')
+      +   '</div>'
+      +   '<div class="card-item-name">' + esc(r.item) + '</div>'
+      +   '<div class="card-status-row">'
+      +     '<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'    + icon(r.listed)    + '</span></div>'
+      +     '<div class="card-status-cell"><span class="card-status-label">Machined</span><span class="card-status-val">'  + icon(r.machined)  + '</span></div>'
+      +     '<div class="card-status-cell"><span class="card-status-label">Assembled</span><span class="card-status-val">' + icon(r.assembled) + '</span></div>'
+      +     '<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">' + icon(r.delivered) + '</span></div>'
+      +   '</div>'
+      +   '<div class="card-date-row">'
+      +     '<span class="card-date-label">📅 Date Required</span>'
+      +     '<div class="date-cell" id="date-cell-m-' + idx + '">'
+      +       '<span id="date-display-m-' + idx + '">' + dateDisplay + '</span>'
+      +       '<button class="date-edit-btn" onclick="editDate(' + idx + ', true)">✎ Edit</button>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
   });
 
-  body.innerHTML = html + '</tbody></table>';
+  tableHtml += '</tbody></table>';
+  cardsHtml += '</div>';
+
+  body.innerHTML = tableHtml + cardsHtml;
 }
 
-function editDate(idx) {
+function editDate(idx, isMobile) {
   var r = window._modalRows[idx];
-  // Convert dd/MM/yyyy to yyyy-MM-dd for input[type=date]
+  var prefix = isMobile ? 'date-cell-m-' : 'date-cell-';
   var inputVal = '';
   if (r.dateReq) {
     var parts = r.dateReq.split('/');
     if (parts.length === 3) inputVal = parts[2] + '-' + parts[1] + '-' + parts[0];
   }
 
-  var cell = document.getElementById('date-cell-' + idx);
+  var cell = document.getElementById(prefix + idx);
   cell.innerHTML =
     '<div class="date-input-wrap">'
-    + '<input class="date-input" type="date" id="date-input-' + idx + '" value="' + inputVal + '">'
-    + '<button class="date-save-btn" onclick="saveDate(' + idx + ')">Save</button>'
-    + '<button class="date-cancel-btn" onclick="cancelEdit(' + idx + ')">✕</button>'
+    + '<input class="date-input" type="date" id="date-input-' + idx + (isMobile?'-m':'') + '" value="' + inputVal + '">'
+    + '<button class="date-save-btn" onclick="saveDate(' + idx + ',' + (isMobile?'true':'false') + ')">Save</button>'
+    + '<button class="date-cancel-btn" onclick="cancelEdit(' + idx + ',' + (isMobile?'true':'false') + ')">✕</button>'
     + '</div>';
 }
 
-function cancelEdit(idx) {
+function cancelEdit(idx, isMobile) {
   var r = window._modalRows[idx];
+  var prefix = isMobile ? 'date-cell-m-' : 'date-cell-';
   var dateDisplay = r.dateReq
     ? '<span class="has-date">' + esc(r.dateReq) + '</span>'
     : '<span class="no-date">No Date</span>';
 
-  var cell = document.getElementById('date-cell-' + idx);
+  var cell = document.getElementById(prefix + idx);
   cell.innerHTML =
-    '<span id="date-display-' + idx + '">' + dateDisplay + '</span>'
-    + '<button class="date-edit-btn" onclick="editDate(' + idx + ')">✎ Edit</button>';
+    '<span>' + dateDisplay + '</span>'
+    + '<button class="date-edit-btn" onclick="editDate(' + idx + ',' + (isMobile?'true':'false') + ')">✎ Edit</button>';
 }
 
-function saveDate(idx) {
+function saveDate(idx, isMobile) {
   var r = window._modalRows[idx];
-  var input = document.getElementById('date-input-' + idx);
-  var val = input.value; // yyyy-MM-dd
+  var inputId = 'date-input-' + idx + (isMobile ? '-m' : '');
+  var prefix  = isMobile ? 'date-cell-m-' : 'date-cell-';
+  var input = document.getElementById(inputId);
+  var val   = input.value;
 
-  var btn = document.querySelector('#date-cell-' + idx + ' .date-save-btn');
+  var btn = document.querySelector('#' + prefix + idx + ' .date-save-btn');
   btn.textContent = 'Saving…';
   btn.disabled = true;
 
-  // Convert yyyy-MM-dd to dd/MM/yyyy for display
   var displayDate = '';
   if (val) {
     var p = val.split('-');
     displayDate = p[2] + '/' + p[1] + '/' + p[0];
   }
 
-  // Call Apps Script to save
   fetch(API_URL + '?action=saveDate'
     + '&job='  + encodeURIComponent(r.job)
     + '&list=' + encodeURIComponent(r.list)
@@ -861,10 +955,10 @@ function saveDate(idx) {
     .then(function(res) { return res.json(); })
     .then(function(result) {
       if (result.success) {
-        // Update local data
         window._modalRows[idx].dateReq = displayDate;
-        cancelEdit(idx);
-        // Also refresh main table in background
+        // Update both desktop and mobile cells
+        cancelEdit(idx, false);
+        cancelEdit(idx, true);
         loadJobs();
       } else {
         alert('Error saving: ' + (result.error || 'Unknown error'));
