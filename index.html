@@ -274,7 +274,16 @@
 
   .empty-state { text-align: center; padding: 32px; color: var(--muted); font-style: italic; }
 
+  /* TV zoom */
+  @media (min-width: 769px) {
+    html { zoom: 75%; }
+  }
+
   /* ══ MOBILE STYLES ═══════════════════════════════════════════ */
+  .mobile-views { display: none; }
+  .mobile-nav   { display: none; }
+  .nav-overlay  { display: none; }
+
   @media (max-width: 768px) {
 
     html, body { overflow: hidden; }
@@ -291,9 +300,11 @@
 
     /* Hide TV layout, show mobile layout */
     .dashboard { display: none; }
+    .mobile-views { display: block; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; }
 
     /* ── Mobile nav drawer ── */
     .mobile-nav {
+      display: block;
       position: fixed;
       top: 52px; right: 0;
       width: 220px;
