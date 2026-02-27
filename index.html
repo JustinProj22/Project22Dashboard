@@ -28,6 +28,8 @@
   html, body {
     height: 100%;
     overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
     background: var(--black);
     color: var(--white);
     font-family: 'Barlow', sans-serif;
@@ -159,7 +161,7 @@
 
   .jobs-hint { font-size: 11px; color: var(--muted); }
 
-  .jobs-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .jobs-body { flex: 1; overflow-y: auto; overflow-x: hidden; touch-action: pan-y; }
 
   /* Loading state */
   .loading {
@@ -250,6 +252,7 @@
   .modal-body {
     overflow-y: auto; overflow-x: hidden;
     padding: 14px 18px 18px; font-size: 13px; min-height: 120px;
+    touch-action: pan-y;
   }
 
   .modal-loading {
@@ -457,7 +460,7 @@
 
     /* Jobs view */
     .mobile-jobs-body {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
+      flex: 1; overflow-y: auto; overflow-x: hidden; touch-action: pan-y;
     }
 
     .mobile-jobs-body::-webkit-scrollbar       { width: 3px; }
@@ -476,12 +479,11 @@
       width: 100%; height: 100%; border: none;
     }
 
-    /* Mobile modal — full screen */
-    .modal-overlay { padding: 0; align-items: flex-end; }
+    /* Mobile modal — centred */
+    .modal-overlay { padding: 16px; align-items: center; }
     .modal {
-      max-height: 92vh; max-width: 100%;
-      border-radius: 12px 12px 0 0;
-      border-left: none; border-right: none; border-bottom: none;
+      max-height: 88vh; max-width: 100%;
+      border-radius: 8px;
     }
     /* Show cards, hide table on mobile */
     .modal-table { display: none; }
@@ -724,8 +726,10 @@ function apiFetch(params, successFn, errorFn) {
 }
 
 // ── Load jobs (both TV and mobile) ───────────────────────────
+var _lastJobsHash = '';
+
 loadJobs();
-setInterval(loadJobs, 300000);
+setInterval(loadJobs, 30000); // live refresh every 30 seconds
 
 function loadJobs() {
   apiFetch({ action: 'main' }, renderMain, function(e) {
@@ -734,6 +738,11 @@ function loadJobs() {
 }
 
 function renderMain(rows) {
+  // Skip re-render if data hasn't changed
+  var hash = JSON.stringify(rows);
+  if (hash === _lastJobsHash) return;
+  _lastJobsHash = hash;
+
   // Hide both loaders
   var tvLoader = document.getElementById('main-loading');
   var mobLoader = document.getElementById('mobile-loading');
