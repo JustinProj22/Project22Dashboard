@@ -193,7 +193,55 @@
   }
   .cal-nav-today:hover { border-color: var(--orange); color: var(--orange); }
 
-  /* ── Event popup ── */
+  /* ── Installer section ── */
+  .installer-section {
+    border-top: 1px solid var(--border);
+    padding: 10px 16px 14px;
+  }
+  .installer-section-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; margin-bottom: 8px;
+  }
+  .installer-tags {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
+  }
+  .installer-tag {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(245,166,35,0.12);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--orange); border-radius: 3px;
+    padding: 3px 8px; font-size: 11px; font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+  }
+  .installer-tag-remove {
+    background: none; border: none; color: var(--orange);
+    cursor: pointer; font-size: 13px; padding: 0; line-height: 1;
+    opacity: 0.6; transition: opacity 0.12s;
+  }
+  .installer-tag-remove:hover { opacity: 1; }
+  .installer-add-row {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .installer-select {
+    flex: 1; background: var(--panel);
+    border: 1px solid var(--border); color: var(--white);
+    border-radius: 3px; padding: 5px 8px; font-size: 12px;
+    font-family: 'Barlow', sans-serif; outline: none;
+    transition: border-color 0.12s; cursor: pointer;
+  }
+  .installer-select:focus { border-color: var(--orange); }
+  .installer-add-btn {
+    background: var(--orange); border: none; color: var(--black);
+    border-radius: 3px; padding: 5px 12px;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px; transition: opacity 0.12s; white-space: nowrap;
+  }
+  .installer-add-btn:hover { opacity: 0.85; }
+  .installer-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .installer-empty { font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 8px; }
   .event-popup-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.75); z-index: 300;
@@ -760,6 +808,16 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
+    <div class="installer-section" id="modal-installer-section" style="display:none">
+      <div class="installer-section-label">👷 Installers</div>
+      <div class="installer-tags" id="modal-installer-tags"></div>
+      <div class="installer-add-row">
+        <select class="installer-select" id="modal-installer-select">
+          <option value="">Loading…</option>
+        </select>
+        <button class="installer-add-btn" id="modal-installer-add-btn" onclick="addInstallerFromModal()">+ Add</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -771,12 +829,22 @@
       <button class="modal-close" onclick="closeEventPopup()">✕</button>
     </div>
     <div class="event-popup-body" id="event-popup-body"></div>
+    <div class="installer-section" id="installer-section" style="display:none">
+      <div class="installer-section-label">👷 Installers</div>
+      <div class="installer-tags" id="installer-tags"></div>
+      <div class="installer-add-row">
+        <select class="installer-select" id="installer-select">
+          <option value="">Loading…</option>
+        </select>
+        <button class="installer-add-btn" id="installer-add-btn" onclick="addInstaller()">+ Add</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbyVrN1E_R4fvHYdxKcGvcGwfbS0vuW2rJ_clyNWZK38OEnufSRhhBtKFDHkcplQpjsB/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbz5_QaRGH1hLfqKHBmu4xF_5oAxMLsN5Us9xu5KseZs-AMxarQs_0HN57teNIHzlKFH/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -867,6 +935,14 @@ function openEventPopup(event) {
 
   document.getElementById('event-popup-body').innerHTML = html;
   document.getElementById('event-popup-overlay').classList.add('open');
+
+  // Load installer section — only show if event has an ID (i.e. it's from Job Installs calendar)
+  var instSection = document.getElementById('installer-section');
+  if (event.id) {
+    openEventInstallerSection(event.id);
+  } else {
+    instSection.style.display = 'none';
+  }
 }
 
 function closeEventPopup() {
@@ -1026,6 +1102,141 @@ function loadCalendar() {
 
 loadCalendar();
 
+// ── Installers ────────────────────────────────────────────────
+var _installers = [];
+var _currentEventId = null;
+var _currentJobName = null;
+
+function loadInstallers() {
+  apiFetch({ action: 'installers' }, function(data) {
+    if (Array.isArray(data)) {
+      _installers = data;
+      populateInstallerSelects();
+    }
+  });
+}
+loadInstallers();
+
+function populateInstallerSelects() {
+  ['installer-select', 'modal-installer-select'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Select installer…</option>'
+      + _installers.map(function(inst) {
+          return '<option value="' + esc(inst.email) + '">' + esc(inst.name) + '</option>';
+        }).join('');
+  });
+}
+
+function escAttr(str) {
+  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function renderInstallerTags(containerId, guests, isModal) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!guests || guests.length === 0) {
+    el.innerHTML = '<div class="installer-empty">No installers assigned yet</div>';
+    return;
+  }
+  el.innerHTML = guests.map(function(g) {
+    var name = g.name || g.email;
+    var removeCall = isModal
+      ? 'removeInstallerModal(\'' + escAttr(g.email) + '\')'
+      : 'removeInstallerEvent(\'' + escAttr(g.email) + '\')';
+    return '<span class="installer-tag">' + esc(name)
+      + '<button class="installer-tag-remove" onclick="' + removeCall + '" title="Remove">✕</button>'
+      + '</span>';
+  }).join('');
+}
+
+// Event popup installer
+function openEventInstallerSection(eventId) {
+  _currentEventId = eventId;
+  var section = document.getElementById('installer-section');
+  if (!section) return;
+  section.style.display = 'block';
+  document.getElementById('installer-tags').innerHTML = '<div class="installer-empty">Loading…</div>';
+  apiFetch({ action: 'getGuests', eventId: eventId }, function(guests) {
+    renderInstallerTags('installer-tags', guests, false);
+  });
+}
+
+function addInstaller() {
+  var sel = document.getElementById('installer-select');
+  var email = sel.value;
+  if (!email || !_currentEventId) return;
+  var btn = document.getElementById('installer-add-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  apiFetch({ action: 'addInstallers', eventId: _currentEventId, emails: email }, function(res) {
+    btn.disabled = false; btn.textContent = '+ Add'; sel.value = '';
+    if (res && res.success) renderInstallerTags('installer-tags', res.guests, false);
+    else alert('Error: ' + (res && res.error ? res.error : 'Could not add installer'));
+  });
+}
+
+function removeInstallerEvent(email) {
+  if (!_currentEventId) return;
+  apiFetch({ action: 'removeInstaller', eventId: _currentEventId, email: email }, function(res) {
+    if (res && res.success) {
+      apiFetch({ action: 'getGuests', eventId: _currentEventId }, function(guests) {
+        renderInstallerTags('installer-tags', guests, false);
+      });
+    }
+  });
+}
+
+// Job modal installer
+function openModalInstallerSection(jobName) {
+  _currentJobName = jobName;
+  var section = document.getElementById('modal-installer-section');
+  if (!section) return;
+  section.style.display = 'block';
+  document.getElementById('modal-installer-tags').innerHTML = '<div class="installer-empty">Loading…</div>';
+  var eventId = findEventIdForJob(jobName);
+  if (!eventId) {
+    document.getElementById('modal-installer-tags').innerHTML = '<div class="installer-empty">No calendar event found — set a delivery date first.</div>';
+    document.getElementById('modal-installer-add-btn').disabled = true;
+    return;
+  }
+  _currentEventId = eventId;
+  document.getElementById('modal-installer-add-btn').disabled = false;
+  apiFetch({ action: 'getGuests', eventId: eventId }, function(guests) {
+    renderInstallerTags('modal-installer-tags', guests, true);
+  });
+}
+
+function findEventIdForJob(jobName) {
+  for (var i = 0; i < _allEvents.length; i++) {
+    if (_allEvents[i].title === jobName && _allEvents[i].id) return _allEvents[i].id;
+  }
+  return null;
+}
+
+function addInstallerFromModal() {
+  var sel = document.getElementById('modal-installer-select');
+  var email = sel.value;
+  if (!email || !_currentEventId) return;
+  var btn = document.getElementById('modal-installer-add-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  apiFetch({ action: 'addInstallers', eventId: _currentEventId, emails: email }, function(res) {
+    btn.disabled = false; btn.textContent = '+ Add'; sel.value = '';
+    if (res && res.success) renderInstallerTags('modal-installer-tags', res.guests, true);
+    else alert('Error: ' + (res && res.error ? res.error : 'Could not add installer'));
+  });
+}
+
+function removeInstallerModal(email) {
+  if (!_currentEventId) return;
+  apiFetch({ action: 'removeInstaller', eventId: _currentEventId, email: email }, function(res) {
+    if (res && res.success) {
+      apiFetch({ action: 'getGuests', eventId: _currentEventId }, function(guests) {
+        renderInstallerTags('modal-installer-tags', guests, true);
+      });
+    }
+  });
+}
+
 // ── Hamburger menu ───────────────────────────────────────────
 var hamburger   = document.getElementById('hamburger');
 var mobileNav   = document.getElementById('mobile-nav');
@@ -1178,15 +1389,23 @@ function buildRow(row, isMobile) {
 function openJobModal(jobName) {
   document.getElementById('modal-title').textContent = jobName;
   document.getElementById('modal-subtitle').textContent = 'All items for this job';
+  document.getElementById('modal-installer-section').style.display = 'none';
   showModal();
-  apiFetch({ action: 'job', job: jobName }, renderModal, modalError);
+  apiFetch({ action: 'job', job: jobName }, function(rows) {
+    renderModal(rows);
+    openModalInstallerSection(jobName);
+  }, modalError);
 }
 
 function openListModal(jobName, listsStr) {
   document.getElementById('modal-title').textContent = jobName;
   document.getElementById('modal-subtitle').textContent = 'List items: ' + listsStr;
+  document.getElementById('modal-installer-section').style.display = 'none';
   showModal();
-  apiFetch({ action: 'lists', job: jobName, lists: listsStr }, renderModal, modalError);
+  apiFetch({ action: 'lists', job: jobName, lists: listsStr }, function(rows) {
+    renderModal(rows);
+    openModalInstallerSection(jobName);
+  }, modalError);
 }
 
 function renderModal(rows) {
