@@ -876,6 +876,8 @@ function closeEventPopup() {
 document.getElementById('event-popup-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeEventPopup();
 });
+
+function initCalendars(events) {
   _allEvents = events;
 
   var today    = new Date();
@@ -932,7 +934,7 @@ document.getElementById('event-popup-overlay').addEventListener('click', functio
   renderAgenda('agenda-tomorrow',        events, tomorrow);
   renderAgenda('agenda-mobile-today',    events, today);
   renderAgenda('agenda-mobile-tomorrow', events, tomorrow);
-
+}
 
 function renderAgenda(containerId, events, date) {
   var el = document.getElementById(containerId);
