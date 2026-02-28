@@ -164,6 +164,70 @@
   .fc-event:hover { opacity: 0.85; }
   .fc-daygrid-event-dot { border-color: var(--orange) !important; }
 
+  /* ── Calendar nav bar ── */
+  .cal-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 2px 6px; flex-shrink: 0;
+  }
+  .cal-nav-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--white); width: 26px; height: 26px;
+    border-radius: 4px; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; line-height: 1;
+  }
+  .cal-nav-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .cal-nav-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 14px;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--white);
+  }
+  .cal-nav-today {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 2px 8px;
+    border-radius: 4px; cursor: pointer; font-size: 10px;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    transition: all 0.12s;
+  }
+  .cal-nav-today:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* ── Event popup ── */
+  .event-popup-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 300;
+    align-items: center; justify-content: center;
+    padding: 20px; backdrop-filter: blur(4px);
+  }
+  .event-popup-overlay.open { display: flex; }
+  .event-popup {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 6px; width: 100%;
+    max-width: 420px;
+    animation: slideUp 0.15s ease;
+  }
+  .event-popup-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 10px;
+  }
+  .event-popup-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 17px; color: var(--white);
+    line-height: 1.2;
+  }
+  .event-popup-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .event-popup-row { display: flex; gap: 8px; align-items: flex-start; }
+  .event-popup-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .event-popup-text { font-size: 12px; color: var(--white); line-height: 1.4; }
+  .event-popup-text.muted { color: var(--muted); }
+  .agenda-event { cursor: pointer; transition: background 0.12s; }
+  .agenda-event:hover { background: var(--panel); }
+
   /* Agenda list styles */
   .agenda-event {
     display: flex; flex-direction: column;
@@ -579,7 +643,15 @@
 <div class="dashboard">
   <div class="left-panel">
     <div class="cal-month">
-      <div id="fc-month" style="height:100%;"></div>
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calPrev()">&#8249;</button>
+        <div class="cal-nav-title" id="cal-title">—</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="cal-nav-today" onclick="calToday()">Today</button>
+          <button class="cal-nav-btn" onclick="calNext()">&#8250;</button>
+        </div>
+      </div>
+      <div id="fc-month" style="flex:1;min-height:0;"></div>
     </div>
     <div class="cal-agendas">
       <div class="agenda-block">
@@ -645,7 +717,15 @@
 
   <!-- Calendar -->
   <div class="mobile-view" id="view-calendar">
-    <div class="mobile-view-header">📅 Calendar</div>
+    <div class="mobile-view-header">
+      <span>📅 Calendar</span>
+      <div style="display:flex;gap:6px;align-items:center;margin-left:auto;">
+        <button class="cal-nav-btn" onclick="calPrev(true)" style="width:28px;height:28px;">&#8249;</button>
+        <span id="cal-mobile-title" style="font-size:12px;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;">—</span>
+        <button class="cal-nav-today" onclick="calToday(true)">Today</button>
+        <button class="cal-nav-btn" onclick="calNext(true)" style="width:28px;height:28px;">&#8250;</button>
+      </div>
+    </div>
     <div class="mobile-iframe-wrap" style="padding:8px;">
       <div id="fc-mobile-month" style="height:100%;"></div>
     </div>
@@ -680,6 +760,17 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ══ EVENT POPUP ════════════════════════════════════════════ -->
+<div class="event-popup-overlay" id="event-popup-overlay">
+  <div class="event-popup">
+    <div class="event-popup-header">
+      <div class="event-popup-title" id="event-popup-title">Event</div>
+      <button class="modal-close" onclick="closeEventPopup()">✕</button>
+    </div>
+    <div class="event-popup-body" id="event-popup-body"></div>
   </div>
 </div>
 
@@ -718,7 +809,73 @@ var _allEvents = [];
 var _fcMonth = null;
 var _fcMobile = null;
 
-function initCalendars(events) {
+function updateCalTitle() {
+  if (_fcMonth) {
+    var d = _fcMonth.getDate();
+    var title = d.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
+    var el = document.getElementById('cal-title');
+    if (el) el.textContent = title;
+  }
+  if (_fcMobile) {
+    var d2 = _fcMobile.getDate();
+    var title2 = d2.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
+    var el2 = document.getElementById('cal-mobile-title');
+    if (el2) el2.textContent = title2;
+  }
+}
+
+function calPrev(isMobile) {
+  if (!isMobile && _fcMonth)  { _fcMonth.prev();  updateCalTitle(); }
+  if (isMobile  && _fcMobile) { _fcMobile.prev(); updateCalTitle(); }
+}
+function calNext(isMobile) {
+  if (!isMobile && _fcMonth)  { _fcMonth.next();  updateCalTitle(); }
+  if (isMobile  && _fcMobile) { _fcMobile.next(); updateCalTitle(); }
+}
+function calToday(isMobile) {
+  if (!isMobile && _fcMonth)  { _fcMonth.today();  updateCalTitle(); }
+  if (isMobile  && _fcMobile) { _fcMobile.today(); updateCalTitle(); }
+}
+
+function openEventPopup(event) {
+  var title = event.title || '(No title)';
+  var start = event.start;
+  var end   = event.end;
+  var loc   = event.extendedProps && event.extendedProps.location    ? event.extendedProps.location    : '';
+  var desc  = event.extendedProps && event.extendedProps.description ? event.extendedProps.description : '';
+
+  function fmtDate(d, allDay) {
+    if (!d) return '';
+    if (allDay) return new Date(d).toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    return new Date(d).toLocaleString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true });
+  }
+
+  var allDay = event.allDay;
+  var timeStr = fmtDate(start, allDay);
+  if (end) {
+    var endStr = fmtDate(end, allDay);
+    if (endStr !== timeStr) timeStr += ' → ' + endStr;
+  }
+
+  document.getElementById('event-popup-title').textContent = title;
+
+  var html = '';
+  if (timeStr) html += '<div class="event-popup-row"><span class="event-popup-icon">🕐</span><span class="event-popup-text">' + esc(timeStr) + '</span></div>';
+  if (loc)     html += '<div class="event-popup-row"><span class="event-popup-icon">📍</span><span class="event-popup-text">' + esc(loc) + '</span></div>';
+  if (desc)    html += '<div class="event-popup-row"><span class="event-popup-icon">📝</span><span class="event-popup-text muted">' + esc(desc).replace(/\n/g,'<br>') + '</span></div>';
+  if (!timeStr && !loc && !desc) html = '<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
+
+  document.getElementById('event-popup-body').innerHTML = html;
+  document.getElementById('event-popup-overlay').classList.add('open');
+}
+
+function closeEventPopup() {
+  document.getElementById('event-popup-overlay').classList.remove('open');
+}
+
+document.getElementById('event-popup-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeEventPopup();
+});
   _allEvents = events;
 
   var today    = new Date();
@@ -738,8 +895,10 @@ function initCalendars(events) {
       dayMaxEvents: 3,
       fixedWeekCount: false,
       showNonCurrentDates: false,
+      eventClick: function(info) { openEventPopup(info.event); }
     });
     _fcMonth.render();
+    updateCalTitle();
   } else if (_fcMonth) {
     _fcMonth.removeAllEvents();
     events.forEach(function(e) { _fcMonth.addEvent(e); });
@@ -759,8 +918,10 @@ function initCalendars(events) {
       dayMaxEvents: 2,
       fixedWeekCount: false,
       showNonCurrentDates: false,
+      eventClick: function(info) { openEventPopup(info.event); }
     });
     _fcMobile.render();
+    updateCalTitle();
   } else if (_fcMobile) {
     _fcMobile.removeAllEvents();
     events.forEach(function(e) { _fcMobile.addEvent(e); });
@@ -790,10 +951,13 @@ function renderAgenda(containerId, events, date) {
     return;
   }
 
-  // Sort by start time
   dayEvents.sort(function(a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
 
-  el.innerHTML = dayEvents.map(function(e) {
+  // Store events on window for click access
+  window._agendaEvents = window._agendaEvents || {};
+  window._agendaEvents[containerId] = dayEvents;
+
+  el.innerHTML = dayEvents.map(function(e, idx) {
     var timeStr = '';
     if (e.start && e.start.includes('T')) {
       var d = new Date(e.start);
@@ -801,14 +965,27 @@ function renderAgenda(containerId, events, date) {
     } else {
       timeStr = 'All Day';
     }
-    return '<div class="agenda-event">'
+    var loc = e.extendedProps && e.extendedProps.location ? e.extendedProps.location : '';
+    return '<div class="agenda-event" onclick="openAgendaEvent(\'' + containerId + '\',' + idx + ')">'
       + '<span class="agenda-event-time">' + timeStr + '</span>'
       + '<span class="agenda-event-title">' + esc(e.title) + '</span>'
-      + (e.extendedProps && e.extendedProps.location
-          ? '<span class="agenda-event-loc">📍 ' + esc(e.extendedProps.location) + '</span>'
-          : '')
+      + (loc ? '<span class="agenda-event-loc">📍 ' + esc(loc) + '</span>' : '')
       + '</div>';
   }).join('');
+}
+
+function openAgendaEvent(containerId, idx) {
+  var events = window._agendaEvents && window._agendaEvents[containerId];
+  if (!events || !events[idx]) return;
+  var e = events[idx];
+  // Build a pseudo FC event object
+  openEventPopup({
+    title: e.title,
+    start: e.start,
+    end:   e.end,
+    allDay: e.allDay,
+    extendedProps: e.extendedProps || {}
+  });
 }
 
 // ── Load calendar events ─────────────────────────────────────
