@@ -115,8 +115,12 @@
     border-right: 2px solid var(--border);
   }
 
-  .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 8px; display: flex; flex-direction: column; }
-  #fc-month { flex: 1; min-height: 0; }
+  .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 0; display: flex; flex-direction: column; }
+  .cal-nav { padding: 6px 10px 4px; flex-shrink: 0; }
+  #fc-month { flex: 1; min-height: 0; overflow: hidden; }
+  .fc { height: 100% !important; }
+  .fc-daygrid-body, .fc-scrollgrid, .fc-scrollgrid-section, .fc-scrollgrid-section > td { height: 100% !important; }
+  .fc-scrollgrid-sync-table { height: 100% !important; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; }
 
   .agenda-block {
@@ -164,10 +168,11 @@
   .fc-event:hover { opacity: 0.85; }
   .fc-daygrid-event-dot { border-color: var(--orange) !important; }
 
-  /* ── Calendar nav bar ── */
   .cal-nav {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 4px 2px 6px; flex-shrink: 0;
+    padding: 5px 8px 4px; flex-shrink: 0;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
   }
   .cal-nav-btn {
     background: none; border: 1px solid var(--border);
@@ -629,11 +634,12 @@
 
     /* Calendar / agenda views */
     .mobile-iframe-wrap {
-      flex: 1; overflow: hidden;
+      flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;
     }
     .mobile-iframe-wrap iframe {
       width: 100%; height: 100%; border: none;
     }
+    #fc-mobile-month { flex: 1; min-height: 0; overflow: hidden; }
 
     /* Mobile modal — centred */
     .modal-overlay { padding: 16px; align-items: center; }
@@ -774,7 +780,7 @@
         <button class="cal-nav-btn" onclick="calNext(true)" style="width:28px;height:28px;">&#8250;</button>
       </div>
     </div>
-    <div class="mobile-iframe-wrap" style="padding:8px;">
+    <div class="mobile-iframe-wrap">
       <div id="fc-mobile-month" style="height:100%;"></div>
     </div>
   </div>
@@ -965,13 +971,13 @@ function initCalendars(events) {
     _fcMonth = new FullCalendar.Calendar(monthEl, {
       initialView: 'dayGridMonth',
       headerToolbar: false,
-      height: 'auto',
+      height: '100%',
       expandRows: true,
       events: events,
       eventColor: '#f5a623',
       eventTextColor: '#0a0a0a',
       dayMaxEvents: 3,
-      fixedWeekCount: false,
+      fixedWeekCount: true,
       showNonCurrentDates: false,
       eventClick: function(info) { openEventPopup(info.event); }
     });
@@ -988,13 +994,13 @@ function initCalendars(events) {
     _fcMobile = new FullCalendar.Calendar(mobileEl, {
       initialView: 'dayGridMonth',
       headerToolbar: false,
-      height: 'auto',
+      height: '100%',
       expandRows: true,
       events: events,
       eventColor: '#f5a623',
       eventTextColor: '#0a0a0a',
       dayMaxEvents: 2,
-      fixedWeekCount: false,
+      fixedWeekCount: true,
       showNonCurrentDates: false,
       eventClick: function(info) { openEventPopup(info.event); }
     });
