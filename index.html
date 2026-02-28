@@ -116,11 +116,11 @@
   }
 
   .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 0; display: flex; flex-direction: column; }
-  .cal-nav { padding: 6px 10px 4px; flex-shrink: 0; }
-  #fc-month { flex: 1; min-height: 0; overflow: hidden; }
-  .fc { height: 100% !important; }
-  .fc-daygrid-body, .fc-scrollgrid, .fc-scrollgrid-section, .fc-scrollgrid-section > td { height: 100% !important; }
-  .fc-scrollgrid-sync-table { height: 100% !important; }
+  #fc-month { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  #fc-month .fc,
+  #fc-month .fc-view-harness { flex: 1; min-height: 0; }
+  #fc-mobile-month .fc,
+  #fc-mobile-month .fc-view-harness { flex: 1; min-height: 0; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; }
 
   .agenda-block {
@@ -143,7 +143,12 @@
   .agenda-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0; }
 
   /* ── FullCalendar overrides ── */
-  .fc { height: 100%; font-family: 'Barlow', sans-serif; font-size: 11px; }
+  .fc { font-family: 'Barlow', sans-serif; font-size: 11px; height: 100%; }
+  .fc-view-harness { flex: 1 1 auto !important; }
+  .fc-daygrid-body { width: 100% !important; }
+  .fc-scrollgrid { height: 100%; }
+  .fc-scrollgrid-section-body > td { height: 100%; }
+  .fc-daygrid-body-natural .fc-daygrid-day-events { min-height: 0; }
   .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border); }
   .fc-theme-standard .fc-scrollgrid { border-color: var(--border); }
   .fc .fc-daygrid-day { background: var(--black); }
@@ -165,8 +170,24 @@
     font-size: 10px; font-weight: 600;
     border-radius: 2px; padding: 1px 3px;
   }
+  .fc-event.fc-event-outlook {
+    background: #4a9eff !important;
+    border-color: #4a9eff !important;
+    color: #000 !important;
+  }
   .fc-event:hover { opacity: 0.85; }
   .fc-daygrid-event-dot { border-color: var(--orange) !important; }
+
+  .cal-legend {
+    display: flex; align-items: center; gap: 4px;
+    padding: 2px 10px 5px; flex-shrink: 0;
+    font-size: 10px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+  }
+  .cal-legend-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 2px; flex-shrink: 0;
+  }
 
   .cal-nav {
     display: flex; align-items: center; justify-content: space-between;
@@ -636,10 +657,10 @@
     .mobile-iframe-wrap {
       flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;
     }
-    .mobile-iframe-wrap iframe {
-      width: 100%; height: 100%; border: none;
+    #fc-mobile-month {
+      flex: 1; min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
     }
-    #fc-mobile-month { flex: 1; min-height: 0; overflow: hidden; }
 
     /* Mobile modal — centred */
     .modal-overlay { padding: 16px; align-items: center; }
@@ -704,6 +725,10 @@
           <button class="cal-nav-today" onclick="calToday()">Today</button>
           <button class="cal-nav-btn" onclick="calNext()">&#8250;</button>
         </div>
+      </div>
+      <div class="cal-legend">
+        <span class="cal-legend-dot" style="background:#f5a623;"></span><span>Job Installs</span>
+        <span class="cal-legend-dot" style="background:#4a9eff;margin-left:10px;"></span><span>Office</span>
       </div>
       <div id="fc-month" style="flex:1;min-height:0;"></div>
     </div>
@@ -850,7 +875,7 @@
 
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbz5_QaRGH1hLfqKHBmu4xF_5oAxMLsN5Us9xu5KseZs-AMxarQs_0HN57teNIHzlKFH/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbzH0IB3u22bivEHVvzZB6gWVPmW_f9U1-8Hy41BcEto9z0-GfbUlvCVcShmZtW39t_M/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -884,18 +909,19 @@ var _fcMonth = null;
 var _fcMobile = null;
 
 function updateCalTitle() {
-  if (_fcMonth) {
-    var d = _fcMonth.getDate();
-    var title = d.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
-    var el = document.getElementById('cal-title');
-    if (el) el.textContent = title;
+  function rangeTitle(cal) {
+    if (!cal) return '—';
+    var d = cal.getDate();
+    var end = new Date(d);
+    end.setDate(end.getDate() + 27);
+    var startStr = d.toLocaleDateString('en-AU', { day:'numeric', month:'short' });
+    var endStr   = end.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+    return startStr + ' — ' + endStr;
   }
-  if (_fcMobile) {
-    var d2 = _fcMobile.getDate();
-    var title2 = d2.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
-    var el2 = document.getElementById('cal-mobile-title');
-    if (el2) el2.textContent = title2;
-  }
+  var el = document.getElementById('cal-title');
+  if (el) el.textContent = rangeTitle(_fcMonth);
+  var el2 = document.getElementById('cal-mobile-title');
+  if (el2) el2.textContent = rangeTitle(_fcMobile);
 }
 
 function calPrev(isMobile) {
@@ -942,9 +968,10 @@ function openEventPopup(event) {
   document.getElementById('event-popup-body').innerHTML = html;
   document.getElementById('event-popup-overlay').classList.add('open');
 
-  // Load installer section — only show if event has an ID (i.e. it's from Job Installs calendar)
+  // Load installer section — only for Google Calendar (Job Installs) events, not Outlook
   var instSection = document.getElementById('installer-section');
-  if (event.id) {
+  var isGoogleEvent = event.id && event.extendedProps && event.extendedProps.source === 'google';
+  if (isGoogleEvent) {
     openEventInstallerSection(event.id);
   } else {
     instSection.style.display = 'none';
@@ -965,22 +992,36 @@ function initCalendars(events) {
   var today    = new Date();
   var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // ── Desktop month calendar ──
+  // Start from Monday of current week
+  var startOfWeek = new Date(today);
+  var day = startOfWeek.getDay(); // 0=Sun
+  var diff = (day === 0) ? -6 : 1 - day; // Monday
+  startOfWeek.setDate(startOfWeek.getDate() + diff);
+
+  var calOptions = {
+    initialView: 'dayGridFourWeek',
+    initialDate: startOfWeek,
+    views: {
+      dayGridFourWeek: {
+        type: 'dayGrid',
+        duration: { weeks: 4 },
+        buttonText: '4 weeks'
+      }
+    },
+    headerToolbar: false,
+    height: '100%',
+    expandRows: true,
+    events: events,
+    fixedWeekCount: false,
+    showNonCurrentDates: true,
+    firstDay: 1,
+    eventClick: function(info) { openEventPopup(info.event); }
+  };
+
+  // ── Desktop calendar ──
   var monthEl = document.getElementById('fc-month');
   if (monthEl && !_fcMonth) {
-    _fcMonth = new FullCalendar.Calendar(monthEl, {
-      initialView: 'dayGridMonth',
-      headerToolbar: false,
-      height: '100%',
-      expandRows: true,
-      events: events,
-      eventColor: '#f5a623',
-      eventTextColor: '#0a0a0a',
-      dayMaxEvents: 3,
-      fixedWeekCount: true,
-      showNonCurrentDates: false,
-      eventClick: function(info) { openEventPopup(info.event); }
-    });
+    _fcMonth = new FullCalendar.Calendar(monthEl, Object.assign({}, calOptions, { dayMaxEvents: 3 }));
     _fcMonth.render();
     updateCalTitle();
   } else if (_fcMonth) {
@@ -988,22 +1029,10 @@ function initCalendars(events) {
     events.forEach(function(e) { _fcMonth.addEvent(e); });
   }
 
-  // ── Mobile month calendar ──
+  // ── Mobile calendar ──
   var mobileEl = document.getElementById('fc-mobile-month');
   if (mobileEl && !_fcMobile) {
-    _fcMobile = new FullCalendar.Calendar(mobileEl, {
-      initialView: 'dayGridMonth',
-      headerToolbar: false,
-      height: '100%',
-      expandRows: true,
-      events: events,
-      eventColor: '#f5a623',
-      eventTextColor: '#0a0a0a',
-      dayMaxEvents: 2,
-      fixedWeekCount: true,
-      showNonCurrentDates: false,
-      eventClick: function(info) { openEventPopup(info.event); }
-    });
+    _fcMobile = new FullCalendar.Calendar(mobileEl, Object.assign({}, calOptions, { dayMaxEvents: 2 }));
     _fcMobile.render();
     updateCalTitle();
   } else if (_fcMobile) {
@@ -1087,15 +1116,20 @@ function loadCalendar() {
     if (events.length > 0) console.log('First event sample:', JSON.stringify(events[0]));
 
     var fcEvents = events.map(function(e) {
+      var isOutlook = e.source === 'outlook';
       return {
-        id:    e.id    || '',
-        title: e.title || '(No title)',
-        start: e.start || '',
-        end:   e.end   || '',
-        allDay: e.allDay || false,
+        id:        e.id    || '',
+        title:     e.title || '(No title)',
+        start:     e.start || '',
+        end:       e.end   || '',
+        allDay:    e.allDay || false,
+        color:     isOutlook ? '#4a9eff' : '#f5a623',
+        textColor: '#000000',
+        classNames: isOutlook ? ['fc-event-outlook'] : [],
         extendedProps: {
           location:    e.location    || '',
-          description: e.description || ''
+          description: e.description || '',
+          source:      e.source      || ''
         }
       };
     }).filter(function(e) { return e.start !== ''; });
