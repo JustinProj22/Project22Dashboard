@@ -115,7 +115,8 @@
     border-right: 2px solid var(--border);
   }
 
-  .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 8px; }
+  .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 8px; display: flex; flex-direction: column; }
+  #fc-month { flex: 1; min-height: 0; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; }
 
   .agenda-block {
@@ -729,7 +730,8 @@ function initCalendars(events) {
     _fcMonth = new FullCalendar.Calendar(monthEl, {
       initialView: 'dayGridMonth',
       headerToolbar: false,
-      height: '100%',
+      height: 'auto',
+      expandRows: true,
       events: events,
       eventColor: '#f5a623',
       eventTextColor: '#0a0a0a',
@@ -749,7 +751,8 @@ function initCalendars(events) {
     _fcMobile = new FullCalendar.Calendar(mobileEl, {
       initialView: 'dayGridMonth',
       headerToolbar: false,
-      height: '100%',
+      height: 'auto',
+      expandRows: true,
       events: events,
       eventColor: '#f5a623',
       eventTextColor: '#0a0a0a',
@@ -811,20 +814,30 @@ function renderAgenda(containerId, events, date) {
 // ── Load calendar events ─────────────────────────────────────
 function loadCalendar() {
   apiFetch({ action: 'calendar' }, function(events) {
+    console.log('Calendar API response:', events);
+    if (!events || !Array.isArray(events)) {
+      console.error('Calendar: unexpected response format', events);
+      return;
+    }
+    console.log('Calendar events count:', events.length);
+    if (events.length > 0) console.log('First event sample:', JSON.stringify(events[0]));
+
     // Map to FullCalendar event format
-    var fcEvents = (events || []).map(function(e) {
+    var fcEvents = events.map(function(e) {
       return {
-        id:    e.id,
-        title: e.title,
-        start: e.start,
-        end:   e.end,
+        id:    e.id    || '',
+        title: e.title || '(No title)',
+        start: e.start || '',
+        end:   e.end   || '',
         allDay: e.allDay || false,
         extendedProps: {
           location:    e.location    || '',
           description: e.description || ''
         }
       };
-    });
+    }).filter(function(e) { return e.start !== ''; });
+
+    console.log('Mapped FC events:', fcEvents.length);
     initCalendars(fcEvents);
   }, function(err) {
     console.error('Calendar load failed:', err);
