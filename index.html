@@ -1140,7 +1140,9 @@ function renderInstallerTags(containerId, guests, isModal) {
     return;
   }
   el.innerHTML = guests.map(function(g) {
-    var name = g.name || g.email;
+    // Look up name from our loaded installers list first, fall back to g.name, then email
+    var match = _installers.filter(function(i) { return i.email.toLowerCase() === g.email.toLowerCase(); })[0];
+    var name = match ? match.name : (g.name && g.name !== g.email ? g.name : g.email.split('@')[0]);
     var removeCall = isModal
       ? 'removeInstallerModal(\'' + escAttr(g.email) + '\')'
       : 'removeInstallerEvent(\'' + escAttr(g.email) + '\')';
