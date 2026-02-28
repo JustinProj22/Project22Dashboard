@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Project 22 — Factory Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <style>
   :root {
     --black:     #0a0a0a;
@@ -113,9 +115,7 @@
     border-right: 2px solid var(--border);
   }
 
-  .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; }
-  .cal-month iframe { width: 100%; height: 100%; border: none; }
-
+  .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 8px; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; }
 
   .agenda-block {
@@ -135,7 +135,50 @@
     color: var(--orange); flex-shrink: 0;
   }
 
-  .agenda-block iframe { flex: 1; width: 100%; border: none; }
+  .agenda-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0; }
+
+  /* ── FullCalendar overrides ── */
+  .fc { height: 100%; font-family: 'Barlow', sans-serif; font-size: 11px; }
+  .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border); }
+  .fc-theme-standard .fc-scrollgrid { border-color: var(--border); }
+  .fc .fc-daygrid-day { background: var(--black); }
+  .fc .fc-daygrid-day:hover { background: var(--dark); }
+  .fc .fc-daygrid-day.fc-day-today { background: rgba(245,166,35,0.08); }
+  .fc .fc-daygrid-day-number { color: var(--muted); font-size: 11px; padding: 3px 5px; }
+  .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--orange); font-weight: 700; }
+  .fc .fc-col-header-cell { background: var(--panel); }
+  .fc .fc-col-header-cell-cushion {
+    color: var(--orange); font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; text-decoration: none; padding: 4px;
+  }
+  .fc .fc-toolbar { display: none; } /* hide nav — we control it */
+  .fc-event {
+    background: var(--orange) !important;
+    border-color: var(--orange) !important;
+    color: var(--black) !important;
+    font-size: 10px; font-weight: 600;
+    border-radius: 2px; padding: 1px 3px;
+  }
+  .fc-event:hover { opacity: 0.85; }
+  .fc-daygrid-event-dot { border-color: var(--orange) !important; }
+
+  /* Agenda list styles */
+  .agenda-event {
+    display: flex; flex-direction: column;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    gap: 2px;
+  }
+  .agenda-event:last-child { border-bottom: none; }
+  .agenda-event-time {
+    font-size: 10px; color: var(--orange);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .agenda-event-title { font-size: 12px; color: var(--white); font-weight: 500; }
+  .agenda-event-loc { font-size: 10px; color: var(--muted); }
+  .agenda-empty { padding: 16px 12px; color: var(--muted); font-size: 11px; font-style: italic; }
 
   /* ══ RIGHT PANEL — JOBS TABLE ════════════════════════════════ */
   .right-panel {
@@ -535,16 +578,16 @@
 <div class="dashboard">
   <div class="left-panel">
     <div class="cal-month">
-      <iframe id="cal1" src="https://teamup.com/ks823xvrfvfvjmu8pr?date=today&view=mw&tz=Calendar%20default&showHeader=0&showProfileAndInfo=0&disableSidepanel=1&showViewSelector=0&showMenu=0&showViewHeader=1&showAgendaDetails=0&showDateControls=0&showDateRange=0"></iframe>
+      <div id="fc-month" style="height:100%;"></div>
     </div>
     <div class="cal-agendas">
       <div class="agenda-block">
         <div class="agenda-label">Today</div>
-        <iframe id="cal2" src="https://teamup.com/ks823xvrfvfvjmu8pr?view=a&tz=Calendar%20default&showHeader=0&showLogo=0&showSearch=0&showProfileAndInfo=0&disableSidepanel=1&showTitle=0&showViewSelector=0&showMenu=0&showViewHeader=0&showAgendaDetails=1&showDateControls=0&showDateRange=0"></iframe>
+        <div class="agenda-content" id="agenda-today"></div>
       </div>
       <div class="agenda-block">
         <div class="agenda-label">Tomorrow</div>
-        <iframe id="cal3" src="https://teamup.com/ks823xvrfvfvjmu8pr?view=a&tz=Calendar%20default&showHeader=0&showLogo=0&showSearch=0&showProfileAndInfo=0&disableSidepanel=1&showTitle=0&showViewSelector=0&showMenu=0&showViewHeader=0&showAgendaDetails=1&showDateControls=0&showDateRange=0&date=+1days"></iframe>
+        <div class="agenda-content" id="agenda-tomorrow"></div>
       </div>
     </div>
   </div>
@@ -602,24 +645,24 @@
   <!-- Calendar -->
   <div class="mobile-view" id="view-calendar">
     <div class="mobile-view-header">📅 Calendar</div>
-    <div class="mobile-iframe-wrap">
-      <iframe src="https://teamup.com/ks823xvrfvfvjmu8pr?date=today&view=mw&tz=Calendar%20default&showHeader=0&showProfileAndInfo=0&disableSidepanel=1&showViewSelector=0&showMenu=0&showViewHeader=1&showAgendaDetails=0&showDateControls=0&showDateRange=0"></iframe>
+    <div class="mobile-iframe-wrap" style="padding:8px;">
+      <div id="fc-mobile-month" style="height:100%;"></div>
     </div>
   </div>
 
   <!-- Today -->
   <div class="mobile-view" id="view-today">
     <div class="mobile-view-header">☀️ Today's Schedule</div>
-    <div class="mobile-iframe-wrap">
-      <iframe src="https://teamup.com/ks823xvrfvfvjmu8pr?view=a&tz=Calendar%20default&showHeader=0&showLogo=0&showSearch=0&showProfileAndInfo=0&disableSidepanel=1&showTitle=0&showViewSelector=0&showMenu=0&showViewHeader=0&showAgendaDetails=1&showDateControls=0&showDateRange=0"></iframe>
+    <div class="mobile-iframe-wrap" style="overflow-y:auto;">
+      <div id="agenda-mobile-today" style="padding:4px 0;"></div>
     </div>
   </div>
 
   <!-- Tomorrow -->
   <div class="mobile-view" id="view-tomorrow">
     <div class="mobile-view-header">🌅 Tomorrow's Schedule</div>
-    <div class="mobile-iframe-wrap">
-      <iframe src="https://teamup.com/ks823xvrfvfvjmu8pr?view=a&tz=Calendar%20default&showHeader=0&showLogo=0&showSearch=0&showProfileAndInfo=0&disableSidepanel=1&showTitle=0&showViewSelector=0&showMenu=0&showViewHeader=0&showAgendaDetails=1&showDateControls=0&showDateRange=0&date=+1days"></iframe>
+    <div class="mobile-iframe-wrap" style="overflow-y:auto;">
+      <div id="agenda-mobile-tomorrow" style="padding:4px 0;"></div>
     </div>
   </div>
 
@@ -641,7 +684,7 @@
 
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbzaTkKhbO77S8jhk9kfNa-NhfsT0ebHw7xAapp0rYzkGci9APvi5bRPrVizyYVYJzpd/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbw3CyXS3-UJZ6dfikDMxisJurfUGc5uOdvSb0xG_8WeSEImJ-nZJuEVonBizQGMbvaa/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -669,13 +712,126 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-// ── Calendar refresh ─────────────────────────────────────────
-setInterval(function() {
-  ['cal1','cal2','cal3'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.src = el.src;
+// ── FullCalendar setup ───────────────────────────────────────
+var _allEvents = [];
+var _fcMonth = null;
+var _fcMobile = null;
+
+function initCalendars(events) {
+  _allEvents = events;
+
+  var today    = new Date();
+  var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // ── Desktop month calendar ──
+  var monthEl = document.getElementById('fc-month');
+  if (monthEl && !_fcMonth) {
+    _fcMonth = new FullCalendar.Calendar(monthEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: false,
+      height: '100%',
+      events: events,
+      eventColor: '#f5a623',
+      eventTextColor: '#0a0a0a',
+      dayMaxEvents: 3,
+      fixedWeekCount: false,
+      showNonCurrentDates: false,
+    });
+    _fcMonth.render();
+  } else if (_fcMonth) {
+    _fcMonth.removeAllEvents();
+    events.forEach(function(e) { _fcMonth.addEvent(e); });
+  }
+
+  // ── Mobile month calendar ──
+  var mobileEl = document.getElementById('fc-mobile-month');
+  if (mobileEl && !_fcMobile) {
+    _fcMobile = new FullCalendar.Calendar(mobileEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: false,
+      height: '100%',
+      events: events,
+      eventColor: '#f5a623',
+      eventTextColor: '#0a0a0a',
+      dayMaxEvents: 2,
+      fixedWeekCount: false,
+      showNonCurrentDates: false,
+    });
+    _fcMobile.render();
+  } else if (_fcMobile) {
+    _fcMobile.removeAllEvents();
+    events.forEach(function(e) { _fcMobile.addEvent(e); });
+  }
+
+  // ── Agenda panels ──
+  renderAgenda('agenda-today',           events, today);
+  renderAgenda('agenda-tomorrow',        events, tomorrow);
+  renderAgenda('agenda-mobile-today',    events, today);
+  renderAgenda('agenda-mobile-tomorrow', events, tomorrow);
+}
+
+function renderAgenda(containerId, events, date) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+
+  var dateStr = date.toISOString().substring(0, 10);
+
+  var dayEvents = events.filter(function(e) {
+    var start = (e.start || '').substring(0, 10);
+    var end   = e.end ? e.end.substring(0, 10) : start;
+    return start <= dateStr && dateStr <= end;
   });
-}, 3600000);
+
+  if (dayEvents.length === 0) {
+    el.innerHTML = '<div class="agenda-empty">No events scheduled</div>';
+    return;
+  }
+
+  // Sort by start time
+  dayEvents.sort(function(a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
+
+  el.innerHTML = dayEvents.map(function(e) {
+    var timeStr = '';
+    if (e.start && e.start.includes('T')) {
+      var d = new Date(e.start);
+      timeStr = d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
+    } else {
+      timeStr = 'All Day';
+    }
+    return '<div class="agenda-event">'
+      + '<span class="agenda-event-time">' + timeStr + '</span>'
+      + '<span class="agenda-event-title">' + esc(e.title) + '</span>'
+      + (e.extendedProps && e.extendedProps.location
+          ? '<span class="agenda-event-loc">📍 ' + esc(e.extendedProps.location) + '</span>'
+          : '')
+      + '</div>';
+  }).join('');
+}
+
+// ── Load calendar events ─────────────────────────────────────
+function loadCalendar() {
+  apiFetch({ action: 'calendar' }, function(events) {
+    // Map to FullCalendar event format
+    var fcEvents = (events || []).map(function(e) {
+      return {
+        id:    e.id,
+        title: e.title,
+        start: e.start,
+        end:   e.end,
+        allDay: e.allDay || false,
+        extendedProps: {
+          location:    e.location    || '',
+          description: e.description || ''
+        }
+      };
+    });
+    initCalendars(fcEvents);
+  }, function(err) {
+    console.error('Calendar load failed:', err);
+  });
+}
+
+loadCalendar();
 
 // ── Hamburger menu ───────────────────────────────────────────
 var hamburger   = document.getElementById('hamburger');
@@ -729,7 +885,10 @@ function apiFetch(params, successFn, errorFn) {
 var _lastJobsHash = '';
 
 loadJobs();
-setInterval(loadJobs, 30000); // live refresh every 30 seconds
+setInterval(function() {
+  loadJobs();
+  loadCalendar();
+}, 30000); // live refresh every 30 seconds
 
 function loadJobs() {
   apiFetch({ action: 'main' }, renderMain, function(e) {
@@ -969,6 +1128,7 @@ function saveDate(idx, isMobile) {
         cancelEdit(idx, false);
         cancelEdit(idx, true);
         loadJobs();
+        loadCalendar();
       } else {
         alert('Error saving: ' + (result.error || 'Unknown error'));
         btn.textContent = 'Save';
