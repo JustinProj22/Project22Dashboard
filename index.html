@@ -117,27 +117,7 @@
 
   .cal-month { border-bottom: 2px solid var(--border); overflow: hidden; padding: 0; display: flex; flex-direction: column; }
   #fc-month { flex: 1; min-height: 0; overflow: hidden; }
-  #fc-month .fc { height: 100%; }
-  #fc-month .fc-view-harness { flex: 1 1 auto !important; height: auto !important; }
-  #fc-month .fc-scrollgrid,
-  #fc-month .fc-scrollgrid-section,
-  #fc-month .fc-scrollgrid-section table,
-  #fc-month .fc-scrollgrid-section-body,
-  #fc-month .fc-scrollgrid-section-body td,
-  #fc-month .fc-daygrid-body,
-  #fc-month .fc-daygrid-body table { height: 100% !important; width: 100% !important; }
-  #fc-month .fc-daygrid-day-frame { min-height: unset; height: 100%; }
-  #fc-mobile-month { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-  #fc-mobile-month .fc { height: 100%; }
-  #fc-mobile-month .fc-view-harness { flex: 1 1 auto !important; height: auto !important; }
-  #fc-mobile-month .fc-scrollgrid,
-  #fc-mobile-month .fc-scrollgrid-section,
-  #fc-mobile-month .fc-scrollgrid-section table,
-  #fc-mobile-month .fc-scrollgrid-section-body,
-  #fc-mobile-month .fc-scrollgrid-section-body td,
-  #fc-mobile-month .fc-daygrid-body,
-  #fc-mobile-month .fc-daygrid-body table { height: 100% !important; width: 100% !important; }
-  #fc-mobile-month .fc-daygrid-day-frame { min-height: unset; height: 100%; }
+  #fc-mobile-month { flex: 1; min-height: 0; overflow: hidden; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; }
 
   .agenda-block {
@@ -161,9 +141,6 @@
 
   /* ── FullCalendar overrides ── */
   .fc { font-family: 'Barlow', sans-serif; font-size: 11px; }
-  .fc-view-harness { flex: 1 1 auto !important; }
-  .fc-daygrid-body { width: 100% !important; }
-  .fc-scrollgrid-section-body > td { height: 100%; }
   .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border); }
   .fc-theme-standard .fc-scrollgrid { border-color: var(--border); }
   .fc .fc-daygrid-day { background: var(--black); }
@@ -1006,9 +983,18 @@ document.getElementById('event-popup-overlay').addEventListener('click', functio
   if (e.target === this) closeEventPopup();
 });
 
-function getCalHeight(el) {
-  // Get the actual pixel height of the container to pass to FullCalendar
-  return el.parentElement ? el.parentElement.clientHeight - el.parentElement.querySelector('.cal-nav').offsetHeight - (el.parentElement.querySelector('.cal-legend') ? el.parentElement.querySelector('.cal-legend').offsetHeight : 0) : 400;
+function getCalHeight(containerId) {
+  // Measure the actual available pixel height for the calendar grid
+  var container = document.getElementById(containerId);
+  if (!container) return 400;
+  var parent = container.closest('.cal-month') || container.parentElement;
+  var total = parent.clientHeight;
+  // Subtract nav and legend heights
+  var nav    = parent.querySelector('.cal-nav');
+  var legend = parent.querySelector('.cal-legend');
+  var used   = (nav    ? nav.offsetHeight    : 0)
+             + (legend ? legend.offsetHeight : 0);
+  return Math.max(total - used, 200);
 }
 
 function initCalendars(events) {
@@ -1034,7 +1020,6 @@ function initCalendars(events) {
       }
     },
     headerToolbar: false,
-    height: '100%',
     expandRows: true,
     events: events,
     fixedWeekCount: false,
@@ -1046,9 +1031,15 @@ function initCalendars(events) {
   // ── Desktop calendar ──
   var monthEl = document.getElementById('fc-month');
   if (monthEl && !_fcMonth) {
-    _fcMonth = new FullCalendar.Calendar(monthEl, Object.assign({}, calOptions, { dayMaxEvents: 3 }));
+    _fcMonth = new FullCalendar.Calendar(monthEl, Object.assign({}, calOptions, {
+      dayMaxEvents: 3,
+      height: getCalHeight('fc-month')
+    }));
     _fcMonth.render();
-    setTimeout(function() { _fcMonth.updateSize(); }, 100);
+    setTimeout(function() {
+      _fcMonth.setOption('height', getCalHeight('fc-month'));
+      _fcMonth.updateSize();
+    }, 150);
     updateCalTitle();
   } else if (_fcMonth) {
     _fcMonth.removeAllEvents();
@@ -1058,9 +1049,15 @@ function initCalendars(events) {
   // ── Mobile calendar ──
   var mobileEl = document.getElementById('fc-mobile-month');
   if (mobileEl && !_fcMobile) {
-    _fcMobile = new FullCalendar.Calendar(mobileEl, Object.assign({}, calOptions, { dayMaxEvents: 2 }));
+    _fcMobile = new FullCalendar.Calendar(mobileEl, Object.assign({}, calOptions, {
+      dayMaxEvents: 2,
+      height: getCalHeight('fc-mobile-month')
+    }));
     _fcMobile.render();
-    setTimeout(function() { _fcMobile.updateSize(); }, 100);
+    setTimeout(function() {
+      _fcMobile.setOption('height', getCalHeight('fc-mobile-month'));
+      _fcMobile.updateSize();
+    }, 150);
     updateCalTitle();
   } else if (_fcMobile) {
     _fcMobile.removeAllEvents();
@@ -1312,18 +1309,30 @@ function removeInstallerModal(email) {
 
 // Force calendar to recompute size once all fonts/layout settled
 function nudgeCalSize() {
-  [100, 300, 600, 1200].forEach(function(ms) {
+  [150, 400, 800].forEach(function(ms) {
     setTimeout(function() {
-      if (_fcMonth)  _fcMonth.updateSize();
-      if (_fcMobile) _fcMobile.updateSize();
+      if (_fcMonth) {
+        _fcMonth.setOption('height', getCalHeight('fc-month'));
+        _fcMonth.updateSize();
+      }
+      if (_fcMobile) {
+        _fcMobile.setOption('height', getCalHeight('fc-mobile-month'));
+        _fcMobile.updateSize();
+      }
     }, ms);
   });
 }
 
 window.addEventListener('load', nudgeCalSize);
 window.addEventListener('resize', function() {
-  if (_fcMonth)  _fcMonth.updateSize();
-  if (_fcMobile) _fcMobile.updateSize();
+  if (_fcMonth) {
+    _fcMonth.setOption('height', getCalHeight('fc-month'));
+    _fcMonth.updateSize();
+  }
+  if (_fcMobile) {
+    _fcMobile.setOption('height', getCalHeight('fc-mobile-month'));
+    _fcMobile.updateSize();
+  }
 });
 var hamburger   = document.getElementById('hamburger');
 var mobileNav   = document.getElementById('mobile-nav');
@@ -1358,7 +1367,10 @@ function switchView(view) {
   closeNav();
   // FullCalendar can't measure itself when hidden — force resize when shown
   if (view === 'calendar' && _fcMobile) {
-    setTimeout(function() { _fcMobile.updateSize(); }, 50);
+    setTimeout(function() {
+      _fcMobile.setOption('height', getCalHeight('fc-mobile-month'));
+      _fcMobile.updateSize();
+    }, 50);
   }
 }
 
