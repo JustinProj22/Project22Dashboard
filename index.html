@@ -119,6 +119,9 @@
   .cal-month { border-bottom: 2px solid var(--border); padding: 0; overflow: hidden; display: flex; flex-direction: column; }
   #fc-month { flex: 1; min-height: 0; }
   #fc-month .fc { height: 100%; }
+  #fc-month .fc-view-harness { flex: 1 !important; }
+  #fc-month .fc-daygrid-body,
+  #fc-month .fc-daygrid-body > table { height: 100% !important; }
   #fc-mobile-month { width: 100%; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
 
