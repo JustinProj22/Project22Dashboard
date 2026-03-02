@@ -110,17 +110,17 @@
   }
 
   .left-panel {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr 160px;
     border-right: 2px solid var(--border);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
   }
 
-  .cal-month { border-bottom: 2px solid var(--border); padding: 0; flex-shrink: 0; }
-  #fc-month { width: 100%; }
+  .cal-month { border-bottom: 2px solid var(--border); padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  #fc-month { flex: 1; min-height: 0; }
+  #fc-month .fc { height: 100%; }
   #fc-mobile-month { width: 100%; }
-  .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; flex-shrink: 0; min-height: 180px; max-height: 260px; }
+  .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
 
   .agenda-block {
     display: flex; flex-direction: column;
@@ -129,12 +129,12 @@
   .agenda-block:first-child { border-right: 1px solid var(--border); }
 
   .agenda-label {
-    height: 34px;
+    height: 26px;
     display: flex; align-items: center; justify-content: center;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 13px;
+    font-weight: 700; font-size: 12px;
     letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--orange); flex-shrink: 0;
   }
@@ -144,7 +144,11 @@
   /* ── FullCalendar overrides ── */
   .fc { font-family: 'Barlow', sans-serif; font-size: 11px; }
   .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border); }
-  .fc-theme-standard .fc-scrollgrid { border-color: var(--border); }
+  .fc-theme-standard .fc-scrollgrid { border-color: var(--border); width: 100%; }
+  .fc-daygrid-body { width: 100% !important; }
+  .fc-daygrid-body table { width: 100% !important; }
+  .fc-col-header { width: 100% !important; }
+  .fc-scroller-harness, .fc-scroller { width: 100% !important; overflow: hidden !important; }
   .fc .fc-daygrid-day { background: var(--black); }
   .fc .fc-daygrid-day:hover { background: var(--dark); }
   .fc .fc-daygrid-day.fc-day-today { background: rgba(245,166,35,0.08); }
@@ -876,7 +880,7 @@
 
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbwj1aDlNY7Uo5ky1cRdu6McRxQXJ9cLRRKcpptFsfSQlbvUhXCoJ3vC9XEwbXc2SIc4/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwIzTtLOYnfqJ2qgBgjv2_cVA3wRVVyMRvAteivvPJDJPlRLw258uRrf38e-1szwjo/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -1011,8 +1015,8 @@ function initCalendars(events) {
       dayGridFourWeek: { type: 'dayGrid', duration: { weeks: 4 } }
     },
     headerToolbar: false,
-    height: 'auto',
-    expandRows: false,
+    height: '100%',
+    expandRows: true,
     events: events,
     fixedWeekCount: false,
     showNonCurrentDates: true,
@@ -1037,6 +1041,7 @@ function initCalendars(events) {
   if (monthEl && !_fcMonth) {
     _fcMonth = new FullCalendar.Calendar(monthEl, calOptions);
     _fcMonth.render();
+    setTimeout(function() { _fcMonth.updateSize(); }, 50);
     updateCalTitle();
   } else if (_fcMonth) {
     _fcMonth.removeAllEvents();
@@ -1065,15 +1070,27 @@ function renderAgenda(containerId, events, date) {
   var el = document.getElementById(containerId);
   if (!el) return;
 
-  // Use local date parts to avoid UTC offset shifting the date
+  // Build local date string for the target date
   var y  = date.getFullYear();
   var m  = String(date.getMonth() + 1).padStart(2, '0');
   var d  = String(date.getDate()).padStart(2, '0');
   var dateStr = y + '-' + m + '-' + d;
 
+  // Helper: convert an event date string to local YYYY-MM-DD
+  // ICS times may come as UTC (with Z) — convert to local before comparing
+  function toLocalDateStr(s) {
+    if (!s) return '';
+    if (s.length === 10) return s; // already YYYY-MM-DD, no conversion needed
+    var dt = new Date(s);
+    var ly = dt.getFullYear();
+    var lm = String(dt.getMonth() + 1).padStart(2, '0');
+    var ld = String(dt.getDate()).padStart(2, '0');
+    return ly + '-' + lm + '-' + ld;
+  }
+
   var dayEvents = events.filter(function(e) {
-    var start = (e.start || '').substring(0, 10);
-    var end   = e.end ? e.end.substring(0, 10) : start;
+    var start = toLocalDateStr(e.start);
+    var end   = e.end ? toLocalDateStr(e.end) : start;
     return start <= dateStr && dateStr <= end;
   });
 
