@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <style>
   :root {
     --black:     #0a0a0a;
@@ -994,10 +995,10 @@
   <button class="slideshow-nav slideshow-prev" onclick="slideshowNav(-1)">&#8249;</button>
   <button class="slideshow-nav slideshow-next" onclick="slideshowNav(1)">&#8250;</button>
 </div>
-
+  
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbzaHhOGuJaLdA2zx7DEyAzExNlKnAZLVm-JvltTK6vbLi46jynUJizlom5fytdI06SJ/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwii-B0zC5HdmWPC7ZCAK3lvdC_E9GgMymaTT33Jhl-Jz41DXRhMHJbNwhRAyxaEbjW/exec';
 // !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
 var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs';
 
@@ -1414,36 +1415,57 @@ function handlePhotoUpload(event, context) {
     fill.style.width = pct + '%';
     status.textContent = 'Uploading ' + (idx + 1) + ' of ' + files.length + ': ' + file.name;
 
-    // Get a short-lived token from Apps Script, then upload directly to Dropbox
-    apiFetch({ action: 'dropboxUploadUrl', path: folderPath, name: file.name }, function(res) {
-      if (res.error) { failed++; uploadNext(idx + 1); return; }
+    // Convert HEIC to JPEG if needed, then upload
+    function doUpload(fileToUpload, fileName) {
+      apiFetch({ action: 'dropboxUploadUrl', path: folderPath, name: fileName }, function(res) {
+        if (res.error) { failed++; uploadNext(idx + 1); return; }
 
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var arrayBuffer = e.target.result;
-        fetch('https://content.dropboxapi.com/2/files/upload', {
-          method: 'POST',
-          headers: {
-            'Authorization':    'Bearer ' + res.token,
-            'Content-Type':     'application/octet-stream',
-            'Dropbox-API-Arg':  JSON.stringify({
-              path: res.uploadPath,
-              mode: 'add',
-              autorename: true,
-              mute: false
-            })
-          },
-          body: arrayBuffer
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var arrayBuffer = e.target.result;
+          fetch('https://content.dropboxapi.com/2/files/upload', {
+            method: 'POST',
+            headers: {
+              'Authorization':   'Bearer ' + res.token,
+              'Content-Type':    'application/octet-stream',
+              'Dropbox-API-Arg': JSON.stringify({
+                path: res.uploadPath,
+                mode: 'add',
+                autorename: true,
+                mute: false
+              })
+            },
+            body: arrayBuffer
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.name) completed++; else failed++;
+            uploadNext(idx + 1);
+          })
+          .catch(function() { failed++; uploadNext(idx + 1); });
+        };
+        reader.readAsArrayBuffer(fileToUpload);
+      });
+    }
+
+    var isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+              || file.name.toLowerCase().endsWith('.heic')
+              || file.name.toLowerCase().endsWith('.heif');
+
+    if (isHeic && typeof heic2any !== 'undefined') {
+      status.textContent = 'Converting ' + (idx + 1) + ' of ' + files.length + ': ' + file.name;
+      heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 })
+        .then(function(jpegBlob) {
+          var jpegName = file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg');
+          doUpload(jpegBlob, jpegName);
         })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.name) completed++; else failed++;
-          uploadNext(idx + 1);
-        })
-        .catch(function() { failed++; uploadNext(idx + 1); });
-      };
-      reader.readAsArrayBuffer(file);
-    });
+        .catch(function() {
+          // Conversion failed — upload original as fallback
+          doUpload(file, file.name);
+        });
+    } else {
+      doUpload(file, file.name);
+    }
   }
 
   uploadNext(0);
