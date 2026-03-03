@@ -228,7 +228,81 @@
   }
   .cal-nav-today:hover { border-color: var(--orange); color: var(--orange); }
 
-  /* ── Installer section ── */
+  /* ── Dropbox photo upload ── */
+  .photo-section {
+    border-top: 1px solid var(--border);
+    padding: 10px 16px 14px;
+  }
+  .photo-section-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; margin-bottom: 8px;
+  }
+  .photo-btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .photo-upload-btn, .photo-view-btn {
+    display: flex; align-items: center; gap: 6px;
+    border: none; border-radius: 3px;
+    padding: 6px 14px; font-size: 11px; font-weight: 700;
+    cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px; transition: opacity 0.12s;
+  }
+  .photo-upload-btn { background: var(--orange); color: var(--black); }
+  .photo-view-btn   { background: var(--panel); color: var(--white); border: 1px solid var(--border); }
+  .photo-upload-btn:hover, .photo-view-btn:hover { opacity: 0.8; }
+  .photo-upload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .photo-status { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; }
+  .photo-progress { margin-top: 6px; }
+  .photo-progress-bar {
+    height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .photo-progress-fill {
+    height: 100%; background: var(--orange);
+    border-radius: 2px; transition: width 0.2s;
+    width: 0%;
+  }
+
+  /* ── Slideshow ── */
+  .slideshow-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.95); z-index: 9999;
+    flex-direction: column; align-items: center; justify-content: center;
+  }
+  .slideshow-overlay.open { display: flex; }
+  .slideshow-header {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: rgba(0,0,0,0.6);
+  }
+  .slideshow-title { font-size: 13px; color: var(--white); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+  .slideshow-counter { font-size: 12px; color: var(--muted); }
+  .slideshow-close {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); width: 28px; height: 28px;
+    border-radius: 3px; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .slideshow-close:hover { border-color: var(--orange); color: var(--orange); }
+  .slideshow-img-wrap {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%; padding: 60px 80px;
+  }
+  .slideshow-img {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain; border-radius: 4px;
+  }
+  .slideshow-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+    color: var(--white); width: 40px; height: 40px;
+    border-radius: 4px; cursor: pointer; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .slideshow-nav:hover { background: var(--orange); border-color: var(--orange); color: var(--black); }
+  .slideshow-prev { left: 12px; }
+  .slideshow-next { right: 12px; }
+  .slideshow-loading { color: var(--muted); font-size: 13px; }
   .installer-section {
     border-top: 1px solid var(--border);
     padding: 10px 16px 14px;
@@ -858,6 +932,18 @@
         <button class="installer-add-btn" id="modal-installer-add-btn" onclick="addInstallerFromModal()">+ Add</button>
       </div>
     </div>
+    <div class="photo-section" id="modal-photo-section" style="display:none">
+      <div class="photo-section-label">📷 Job Photos</div>
+      <div class="photo-btn-row">
+        <button class="photo-upload-btn" id="modal-upload-btn" onclick="triggerPhotoUpload('modal')">📷 Upload Photos</button>
+        <button class="photo-view-btn" id="modal-view-btn" onclick="openSlideshow('modal')" style="display:none">🖼️ View Photos</button>
+      </div>
+      <div class="photo-status" id="modal-photo-status"></div>
+      <div class="photo-progress" id="modal-photo-progress" style="display:none">
+        <div class="photo-progress-bar"><div class="photo-progress-fill" id="modal-progress-fill"></div></div>
+      </div>
+      <input type="file" id="modal-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoUpload(event,'modal')">
+    </div>
   </div>
 </div>
 
@@ -879,12 +965,41 @@
         <button class="installer-add-btn" id="installer-add-btn" onclick="addInstaller()">+ Add</button>
       </div>
     </div>
+    <div class="photo-section" id="popup-photo-section" style="display:none">
+      <div class="photo-section-label">📷 Job Photos</div>
+      <div class="photo-btn-row">
+        <button class="photo-upload-btn" id="popup-upload-btn" onclick="triggerPhotoUpload('popup')">📷 Upload Photos</button>
+        <button class="photo-view-btn" id="popup-view-btn" onclick="openSlideshow('popup')" style="display:none">🖼️ View Photos</button>
+      </div>
+      <div class="photo-status" id="popup-photo-status"></div>
+      <div class="photo-progress" id="popup-photo-progress" style="display:none">
+        <div class="photo-progress-bar"><div class="photo-progress-fill" id="popup-progress-fill"></div></div>
+      </div>
+      <input type="file" id="popup-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoUpload(event,'popup')">
+    </div>
   </div>
+</div>
+
+<!-- ══ SLIDESHOW ══════════════════════════════════════════════ -->
+<div class="slideshow-overlay" id="slideshow-overlay">
+  <div class="slideshow-header">
+    <div class="slideshow-title" id="slideshow-title">Photos</div>
+    <div class="slideshow-counter" id="slideshow-counter"></div>
+    <button class="slideshow-close" onclick="closeSlideshow()">✕</button>
+  </div>
+  <div class="slideshow-img-wrap">
+    <div class="slideshow-loading" id="slideshow-loading">Loading…</div>
+    <img class="slideshow-img" id="slideshow-img" style="display:none" alt="Job photo">
+  </div>
+  <button class="slideshow-nav slideshow-prev" onclick="slideshowNav(-1)">&#8249;</button>
+  <button class="slideshow-nav slideshow-next" onclick="slideshowNav(1)">&#8250;</button>
 </div>
 
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbwIzTtLOYnfqJ2qgBgjv2_cVA3wRVVyMRvAteivvPJDJPlRLw258uRrf38e-1szwjo/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbxaO-5VDH0uYDVDOoKSMws3VEI22ckd_yV8lBvQZahEhwEEMLONyLyaiG1ZOeFLImbQ/exec';
+// !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
+var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs/Projects';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -985,10 +1100,13 @@ function openEventPopup(event) {
 
   // Show installer section only for Google Calendar events
   var instSection = document.getElementById('installer-section');
+  var popupPhotoSection = document.getElementById('popup-photo-section');
   if (source === 'google' && evId) {
     openEventInstallerSection(evId);
+    initPhotoSection('popup', title);
   } else {
     instSection.style.display = 'none';
+    popupPhotoSection.style.display = 'none';
   }
 }
 
@@ -1185,7 +1303,198 @@ function loadCalendar() {
 
 loadCalendar();
 
-// ── Installers ────────────────────────────────────────────────
+// ── Dropbox photos ────────────────────────────────────────────
+var _dropboxFolder = { modal: null, popup: null }; // cached folder paths per context
+var _slideshow = { photos: [], index: 0, context: null, title: '' };
+
+function initPhotoSection(context, jobName) {
+  var section = document.getElementById(context === 'modal' ? 'modal-photo-section' : 'popup-photo-section');
+  if (!section) return;
+  section.style.display = 'block';
+
+  var status   = document.getElementById(context + '-photo-status');
+  var viewBtn  = document.getElementById(context + '-view-btn');
+  var uploadBtn = document.getElementById(context + '-upload-btn');
+
+  status.textContent = 'Finding job folder…';
+  viewBtn.style.display = 'none';
+  uploadBtn.disabled = true;
+  _dropboxFolder[context] = null;
+
+  apiFetch({ action: 'dropboxFolder', job: jobName }, function(res) {
+    if (res.error) {
+      status.textContent = '⚠️ ' + res.error;
+      return;
+    }
+    _dropboxFolder[context] = res.folderPath;
+    _slideshow.title = jobName;
+    uploadBtn.disabled = false;
+    status.textContent = '📁 ' + res.jobFolder;
+
+    // Check if any photos already exist
+    apiFetch({ action: 'dropboxPhotos', path: res.folderPath }, function(pr) {
+      if (pr.success && pr.photos && pr.photos.length > 0) {
+        viewBtn.style.display = '';
+        status.textContent = '📁 ' + res.jobFolder + ' — ' + pr.photos.length + ' photo' + (pr.photos.length !== 1 ? 's' : '');
+      }
+    });
+  });
+}
+
+function triggerPhotoUpload(context) {
+  document.getElementById(context + '-file-input').click();
+}
+
+function handlePhotoUpload(event, context) {
+  var files = Array.from(event.target.files);
+  if (!files.length) return;
+
+  var folderPath = _dropboxFolder[context];
+  if (!folderPath) { alert('Folder not found yet, please wait.'); return; }
+
+  var uploadBtn  = document.getElementById(context + '-upload-btn');
+  var status     = document.getElementById(context + '-photo-status');
+  var progress   = document.getElementById(context + '-photo-progress');
+  var fill       = document.getElementById(context + '-progress-fill');
+  var viewBtn    = document.getElementById(context + '-view-btn');
+
+  uploadBtn.disabled = true;
+  progress.style.display = 'block';
+  status.textContent = 'Uploading 0 of ' + files.length + '…';
+
+  var completed = 0;
+  var failed = 0;
+
+  function uploadNext(idx) {
+    if (idx >= files.length) {
+      uploadBtn.disabled = false;
+      progress.style.display = 'none';
+      fill.style.width = '0%';
+      event.target.value = '';
+      var msg = completed + ' photo' + (completed !== 1 ? 's' : '') + ' uploaded';
+      if (failed > 0) msg += ', ' + failed + ' failed';
+      status.textContent = '✅ ' + msg;
+      viewBtn.style.display = '';
+      return;
+    }
+
+    var file = files[idx];
+    var pct = Math.round((idx / files.length) * 100);
+    fill.style.width = pct + '%';
+    status.textContent = 'Uploading ' + (idx + 1) + ' of ' + files.length + ': ' + file.name;
+
+    // Get a short-lived token from Apps Script, then upload directly to Dropbox
+    apiFetch({ action: 'dropboxUploadUrl', path: folderPath, name: file.name }, function(res) {
+      if (res.error) { failed++; uploadNext(idx + 1); return; }
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var arrayBuffer = e.target.result;
+        fetch('https://content.dropboxapi.com/2/files/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization':    'Bearer ' + res.token,
+            'Content-Type':     'application/octet-stream',
+            'Dropbox-API-Arg':  JSON.stringify({
+              path: res.uploadPath,
+              mode: 'add',
+              autorename: true,
+              mute: false
+            })
+          },
+          body: arrayBuffer
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.name) completed++; else failed++;
+          uploadNext(idx + 1);
+        })
+        .catch(function() { failed++; uploadNext(idx + 1); });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  uploadNext(0);
+}
+
+// ── Slideshow ─────────────────────────────────────────────────
+function openSlideshow(context) {
+  var folderPath = _dropboxFolder[context];
+  if (!folderPath) return;
+
+  _slideshow.context = context;
+  document.getElementById('slideshow-overlay').classList.add('open');
+  document.getElementById('slideshow-title').textContent = _slideshow.title + ' — Photos';
+  document.getElementById('slideshow-loading').style.display = 'block';
+  document.getElementById('slideshow-img').style.display = 'none';
+  document.getElementById('slideshow-counter').textContent = '';
+
+  apiFetch({ action: 'dropboxPhotos', path: folderPath }, function(res) {
+    if (!res.success || !res.photos || res.photos.length === 0) {
+      document.getElementById('slideshow-loading').textContent = 'No photos found.';
+      return;
+    }
+    _slideshow.photos = res.photos;
+    _slideshow.index  = 0;
+    showSlideshowPhoto(0);
+  });
+}
+
+function showSlideshowPhoto(idx) {
+  var photos = _slideshow.photos;
+  if (!photos.length) return;
+  idx = ((idx % photos.length) + photos.length) % photos.length;
+  _slideshow.index = idx;
+
+  document.getElementById('slideshow-counter').textContent = (idx + 1) + ' / ' + photos.length;
+  document.getElementById('slideshow-loading').style.display = 'block';
+  document.getElementById('slideshow-img').style.display = 'none';
+
+  // Get a temporary link to display the image
+  apiFetch({ action: 'dropboxUploadUrl', path: _dropboxFolder[_slideshow.context], name: '__view__' }, function(res) {
+    if (!res.token) return;
+    fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + res.token,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({ path: photos[idx].path })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.link) {
+        var img = document.getElementById('slideshow-img');
+        img.onload = function() {
+          document.getElementById('slideshow-loading').style.display = 'none';
+          img.style.display = 'block';
+        };
+        img.src = data.link;
+      }
+    });
+  });
+}
+
+function slideshowNav(dir) {
+  showSlideshowPhoto(_slideshow.index + dir);
+}
+
+function closeSlideshow() {
+  document.getElementById('slideshow-overlay').classList.remove('open');
+  document.getElementById('slideshow-img').src = '';
+}
+
+document.getElementById('slideshow-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSlideshow();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('slideshow-overlay').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft')  slideshowNav(-1);
+  if (e.key === 'ArrowRight') slideshowNav(1);
+  if (e.key === 'Escape')     closeSlideshow();
+});
 var _installers = [];
 var _currentEventId = null;
 var _currentJobName = null;
@@ -1481,10 +1790,12 @@ function openJobModal(jobName) {
   document.getElementById('modal-title').textContent = jobName;
   document.getElementById('modal-subtitle').textContent = 'All items for this job';
   document.getElementById('modal-installer-section').style.display = 'none';
+  document.getElementById('modal-photo-section').style.display = 'none';
   showModal();
   apiFetch({ action: 'job', job: jobName }, function(rows) {
     renderModal(rows);
     openModalInstallerSection(jobName);
+    initPhotoSection('modal', jobName);
   }, modalError);
 }
 
@@ -1492,10 +1803,12 @@ function openListModal(jobName, listsStr) {
   document.getElementById('modal-title').textContent = jobName;
   document.getElementById('modal-subtitle').textContent = 'List items: ' + listsStr;
   document.getElementById('modal-installer-section').style.display = 'none';
+  document.getElementById('modal-photo-section').style.display = 'none';
   showModal();
   apiFetch({ action: 'lists', job: jobName, lists: listsStr }, function(rows) {
     renderModal(rows);
     openModalInstallerSection(jobName);
+    initPhotoSection('modal', jobName);
   }, modalError);
 }
 
