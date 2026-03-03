@@ -997,7 +997,7 @@
 
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbxBkDNaquyfNSbB6jvmWjIC3-1QYHsHR30JoU5YV9eRBJiyS3ROTbbloqR3vm4VIJYk/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbzaHhOGuJaLdA2zx7DEyAzExNlKnAZLVm-JvltTK6vbLi46jynUJizlom5fytdI06SJ/exec';
 // !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
 var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs';
 
@@ -1312,8 +1312,8 @@ function initPhotoSection(context, jobName) {
   if (!section) return;
   section.style.display = 'block';
 
-  var status   = document.getElementById(context + '-photo-status');
-  var viewBtn  = document.getElementById(context + '-view-btn');
+  var status    = document.getElementById(context + '-photo-status');
+  var viewBtn   = document.getElementById(context + '-view-btn');
   var uploadBtn = document.getElementById(context + '-upload-btn');
 
   status.textContent = 'Finding job folder…';
@@ -1326,18 +1326,49 @@ function initPhotoSection(context, jobName) {
       status.textContent = '⚠️ ' + res.error;
       return;
     }
-    _dropboxFolder[context] = res.folderPath;
-    _slideshow.title = jobName;
-    uploadBtn.disabled = false;
-    status.textContent = '📁 ' + res.jobFolder;
 
-    // Check if any photos already exist
-    apiFetch({ action: 'dropboxPhotos', path: res.folderPath }, function(pr) {
-      if (pr.success && pr.photos && pr.photos.length > 0) {
-        viewBtn.style.display = '';
-        status.textContent = '📁 ' + res.jobFolder + ' — ' + pr.photos.length + ' photo' + (pr.photos.length !== 1 ? 's' : '');
-      }
-    });
+    if (res.multiple) {
+      // Show a picker for multiple matches
+      var html = 'Multiple folders found — select one:<br>';
+      res.matches.forEach(function(m) {
+        html += '<button class="photo-view-btn" style="margin:3px 0;width:100%;text-align:left;display:block;" '
+          + 'onclick="selectDropboxFolder(\'' + context + '\',\'' + escAttr(m.path) + '\',\'' + escAttr(m.name) + '\')">'
+          + esc(m.name) + '</button>';
+      });
+      status.innerHTML = html;
+      return;
+    }
+
+    setDropboxFolder(context, res.folderPath, res.jobFolder);
+  });
+}
+
+function selectDropboxFolder(context, folderPath, folderName) {
+  var status = document.getElementById(context + '-photo-status');
+  status.textContent = 'Confirming folder…';
+  apiFetch({ action: 'dropboxConfirm', path: folderPath }, function(res) {
+    if (res.error) { status.textContent = '⚠️ ' + res.error; return; }
+    setDropboxFolder(context, res.folderPath, folderName);
+  });
+}
+
+function setDropboxFolder(context, folderPath, folderName) {
+  _dropboxFolder[context] = folderPath;
+  _slideshow.title = folderName;
+
+  var status    = document.getElementById(context + '-photo-status');
+  var uploadBtn = document.getElementById(context + '-upload-btn');
+  var viewBtn   = document.getElementById(context + '-view-btn');
+
+  uploadBtn.disabled = false;
+  status.textContent = '📁 ' + folderName;
+
+  // Check if photos already exist
+  apiFetch({ action: 'dropboxPhotos', path: folderPath }, function(pr) {
+    if (pr.success && pr.photos && pr.photos.length > 0) {
+      viewBtn.style.display = '';
+      status.textContent = '📁 ' + folderName + ' — ' + pr.photos.length + ' photo' + (pr.photos.length !== 1 ? 's' : '');
+    }
   });
 }
 
