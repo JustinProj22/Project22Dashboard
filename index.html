@@ -998,7 +998,7 @@
   
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbwii-B0zC5HdmWPC7ZCAK3lvdC_E9GgMymaTT33Jhl-Jz41DXRhMHJbNwhRAyxaEbjW/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwxVYL9sb1QGVHsZtqhBAREnELfk6TPLNtPNa1YX8MpqNyUj45c4oJJags4KYHUocSn/exec';
 // !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
 var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs';
 
@@ -1477,19 +1477,38 @@ function openSlideshow(context) {
   if (!folderPath) return;
 
   _slideshow.context = context;
-  document.getElementById('slideshow-overlay').classList.add('open');
-  document.getElementById('slideshow-title').textContent = _slideshow.title + ' — Photos';
-  document.getElementById('slideshow-loading').style.display = 'block';
-  document.getElementById('slideshow-img').style.display = 'none';
-  document.getElementById('slideshow-counter').textContent = '';
+  _slideshow.photos  = [];
+  _slideshow.index   = 0;
 
-  apiFetch({ action: 'dropboxPhotos', path: folderPath }, function(res) {
+  var overlay  = document.getElementById('slideshow-overlay');
+  var loading  = document.getElementById('slideshow-loading');
+  var img      = document.getElementById('slideshow-img');
+  var counter  = document.getElementById('slideshow-counter');
+
+  overlay.classList.add('open');
+  document.getElementById('slideshow-title').textContent = _slideshow.title + ' — Photos';
+  loading.textContent = 'Loading photos…';
+  loading.style.display = 'block';
+  img.style.display = 'none';
+  counter.textContent = '';
+
+  // Fetch all temp links in one batch call
+  apiFetch({ action: 'dropboxTempLinks', path: folderPath }, function(res) {
     if (!res.success || !res.photos || res.photos.length === 0) {
-      document.getElementById('slideshow-loading').textContent = 'No photos found.';
+      loading.textContent = 'No photos found.';
       return;
     }
+
     _slideshow.photos = res.photos;
-    _slideshow.index  = 0;
+
+    // Preload all images in the background
+    res.photos.forEach(function(p, i) {
+      var preload = new Image();
+      preload.src = p.link;
+      _slideshow.photos[i]._img = preload;
+    });
+
+    // Show first image immediately
     showSlideshowPhoto(0);
   });
 }
@@ -1500,33 +1519,30 @@ function showSlideshowPhoto(idx) {
   idx = ((idx % photos.length) + photos.length) % photos.length;
   _slideshow.index = idx;
 
-  document.getElementById('slideshow-counter').textContent = (idx + 1) + ' / ' + photos.length;
-  document.getElementById('slideshow-loading').style.display = 'block';
-  document.getElementById('slideshow-img').style.display = 'none';
+  var loading = document.getElementById('slideshow-loading');
+  var imgEl   = document.getElementById('slideshow-img');
+  var counter = document.getElementById('slideshow-counter');
 
-  // Get a temporary link to display the image
-  apiFetch({ action: 'dropboxUploadUrl', path: _dropboxFolder[_slideshow.context], name: '__view__' }, function(res) {
-    if (!res.token) return;
-    fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + res.token,
-        'Content-Type':  'application/json'
-      },
-      body: JSON.stringify({ path: photos[idx].path })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.link) {
-        var img = document.getElementById('slideshow-img');
-        img.onload = function() {
-          document.getElementById('slideshow-loading').style.display = 'none';
-          img.style.display = 'block';
-        };
-        img.src = data.link;
-      }
-    });
-  });
+  counter.textContent = (idx + 1) + ' / ' + photos.length;
+
+  var photo = photos[idx];
+
+  // If already preloaded and complete, show instantly
+  if (photo._img && photo._img.complete && photo._img.naturalWidth > 0) {
+    imgEl.src = photo.link;
+    loading.style.display = 'none';
+    imgEl.style.display = 'block';
+  } else {
+    // Still loading — show spinner and wait
+    loading.textContent = 'Loading…';
+    loading.style.display = 'block';
+    imgEl.style.display = 'none';
+    imgEl.onload = function() {
+      loading.style.display = 'none';
+      imgEl.style.display = 'block';
+    };
+    imgEl.src = photo.link;
+  }
 }
 
 function slideshowNav(dir) {
