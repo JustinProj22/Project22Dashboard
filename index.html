@@ -1,3 +1,7 @@
+
+Index · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,6 +183,11 @@
   .fc-event.fc-event-outlook {
     background: #4a9eff !important;
     border-color: #4a9eff !important;
+    color: #000 !important;
+  }
+  .fc-event.fc-event-holiday {
+    background: #AAA7AD !important;
+    border-color: #AAA7AD !important;
     color: #000 !important;
   }
   .fc-event:hover { opacity: 0.85; }
@@ -813,6 +822,7 @@
       <div class="cal-legend">
         <span class="cal-legend-dot" style="background:#f5a623;"></span><span>Job Installs</span>
         <span class="cal-legend-dot" style="background:#4a9eff;margin-left:10px;"></span><span>Office</span>
+        <span class="cal-legend-dot" style="background:#AAA7AD;margin-left:10px;"></span><span>Public Holiday</span>
       </div>
       <div id="fc-month" style="flex:1;min-height:0;"></div>
     </div>
@@ -998,7 +1008,7 @@
   
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbwxVYL9sb1QGVHsZtqhBAREnELfk6TPLNtPNa1YX8MpqNyUj45c4oJJags4KYHUocSn/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbydKHgjk5lhDk7-41N2Ob9ecZhtkCdNuJJnXSf_ToHj46ZbscvctW8Q_440XT1T5zfo/exec';
 // !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
 var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs';
 
@@ -1278,16 +1288,26 @@ function loadCalendar() {
     if (events.length > 0) console.log('First event sample:', JSON.stringify(events[0]));
 
     var fcEvents = events.map(function(e) {
-      var isOutlook = e.source === 'outlook';
+      var isOutlook       = e.source === 'outlook';
+      var isPublicHoliday = e.source === 'PublicHoliday';
+
+      var eventColor = isOutlook       ? '#4a9eff'
+                     : isPublicHoliday ? '#AAA7AD'
+                     : '#f5a623';
+
+      var eventClass = isOutlook       ? ['fc-event-outlook']
+                     : isPublicHoliday ? ['fc-event-holiday']
+                     : [];
+
       return {
         id:        e.id    || '',
         title:     e.title || '(No title)',
         start:     e.start || '',
         end:       e.end   || '',
         allDay:    e.allDay || false,
-        color:     isOutlook ? '#4a9eff' : '#f5a623',
+        color:     eventColor,
         textColor: '#000000',
-        classNames: isOutlook ? ['fc-event-outlook'] : [],
+        classNames: eventClass,
         extendedProps: {
           location:    e.location    || '',
           description: e.description || '',
