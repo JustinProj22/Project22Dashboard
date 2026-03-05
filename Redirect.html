@@ -117,16 +117,17 @@
         return;
       }
 
+      // Add a unique timestamp to every request so the browser
+      // never serves a cached response — every scan is a fresh call
+      const cacheBust = Date.now();
+
       const url = APPS_SCRIPT_URL
         + "?bench=" + encodeURIComponent(bench)
-        + "&office=" + encodeURIComponent(office);
+        + "&office=" + encodeURIComponent(office)
+        + "&t=" + cacheBust;
 
       try {
-        // fetch() with no-cors sends the request without following Google's
-        // login redirects — the script still executes on Google's servers
         await fetch(url, { method: "GET", mode: "no-cors" });
-
-        // Show success immediately — script has been triggered
         showSuccess(bench, office);
       } catch (err) {
         showError("Could not reach the server. Check your connection and try again.");
