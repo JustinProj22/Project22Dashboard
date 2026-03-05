@@ -1,7 +1,3 @@
-
-Index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1005,6 +1001,7 @@ Copy
   <button class="slideshow-nav slideshow-prev" onclick="slideshowNav(-1)">&#8249;</button>
   <button class="slideshow-nav slideshow-next" onclick="slideshowNav(1)">&#8250;</button>
 </div>
+
   
 <script>
 // !! Replace with your Apps Script deployment URL !!
@@ -1223,7 +1220,19 @@ function renderAgenda(containerId, events, date) {
 
   var dayEvents = events.filter(function(e) {
     var start = toLocalDateStr(e.start);
-    var end   = e.end ? toLocalDateStr(e.end) : start;
+    var rawEnd = e.end ? toLocalDateStr(e.end) : start;
+
+    // ICS all-day events use exclusive end dates (e.g. an event "on Friday" has end = Saturday)
+    // Subtract one day from the end for all-day events before comparing
+    var end = rawEnd;
+    if (e.allDay && rawEnd && rawEnd !== start) {
+      var d = new Date(rawEnd + 'T00:00:00');
+      d.setDate(d.getDate() - 1);
+      end = d.getFullYear() + '-'
+          + String(d.getMonth() + 1).padStart(2, '0') + '-'
+          + String(d.getDate()).padStart(2, '0');
+    }
+
     return start <= dateStr && dateStr <= end;
   });
 
