@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Project 22 — Sheet Display</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:     #0a0a0a;
+    --dark:      #111111;
+    --panel:     #1a1a1a;
+    --border:    #2a2a2a;
+    --orange:    #f5a623;
+    --white:     #f0f0f0;
+    --muted:     #666;
+    --red:       #e04444;
+    --green:     #4caf7d;
+    --row-hover: #1c1c1c;
+    --header-h:  56px;
+
+    /* Portrait TV tweaks — scale up text slightly since we have more vertical room */
+    --table-font: 15px;
+    --th-font: 13px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+  }
+
+  /* ══ SPINNER ═════════════════════════════════════════════════ */
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ══ TOP HEADER BAR ══════════════════════════════════════════ */
+  .topbar {
+    height: var(--header-h);
+    background: var(--dark);
+    border-bottom: 2px solid var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+  }
+
+  .topbar-logo { display: flex; align-items: center; overflow: visible; }
+  .topbar-logo svg { height: 34px; width: auto; display: block; overflow: visible; }
+
+  .topbar-clock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 600;
+    letter-spacing: 2px; color: var(--white);
+    text-align: right; line-height: 1.1;
+  }
+  .topbar-clock .date-line {
+    font-size: 11px; font-weight: 400;
+    color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  /* ══ MAIN LAYOUT ═════════════════════════════════════════════ */
+  .page {
+    position: fixed;
+    top: var(--header-h);
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Sub-header strip — matches .jobs-header */
+  .table-header {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: var(--panel);
+    border-bottom: 2px solid var(--orange);
+    flex-shrink: 0;
+  }
+
+  .table-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 14px;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  .table-meta {
+    font-size: 12px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  /* ══ SCROLLABLE TABLE BODY ═══════════════════════════════════ */
+  .table-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    /* Keyboard / remote scroll: give it focus so arrow keys work */
+    outline: none;
+  }
+
+  /* Custom scrollbar — matches existing dashboard */
+  .table-body::-webkit-scrollbar       { width: 5px; height: 5px; }
+  .table-body::-webkit-scrollbar-track { background: var(--dark); }
+  .table-body::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  .table-body::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+  /* ══ TABLE ═══════════════════════════════════════════════════ */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--table-font);
+  }
+
+  thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--panel);
+    color: var(--orange);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: var(--th-font);
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 10px 16px; text-align: left;
+    border-bottom: 1px solid var(--orange);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  tbody tr:hover { background: var(--row-hover); }
+
+  /* Highlight focused row (keyboard nav) */
+  tbody tr.focused { background: rgba(245,166,35,0.07); outline: none; }
+  tbody tr.focused td:first-child {
+    border-left: 3px solid var(--orange);
+  }
+
+  tbody td {
+    padding: 10px 16px;
+    vertical-align: middle;
+    color: var(--white);
+    line-height: 1.35;
+  }
+
+  /* First column — slightly bolder */
+  tbody td:first-child {
+    font-weight: 600;
+    color: var(--white);
+    border-left: 3px solid transparent;
+  }
+
+  /* Status / tick columns */
+  .status-yes { color: var(--green); font-size: 16px; }
+  .status-no  { color: var(--red);   font-size: 16px; }
+  .status-na  { color: var(--muted); }
+
+  /* Tag-style values */
+  .cell-tag {
+    display: inline-block;
+    background: rgba(245,166,35,0.12);
+    color: var(--orange);
+    border: 1px solid rgba(245,166,35,0.25);
+    padding: 2px 8px; border-radius: 3px;
+    font-size: 12px; font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  /* Date styling */
+  .has-date { color: var(--green); font-weight: 500; }
+  .no-date  { color: var(--red);   font-weight: 700; }
+
+  /* ══ LOADING / EMPTY STATES ══════════════════════════════════ */
+  .loading {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; gap: 20px;
+    color: var(--muted); padding-bottom: 60px;
+  }
+
+  .spinner-wrap {
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .spinner-wrap svg { width: 56px; height: 56px; display: block; }
+
+  .empty-state {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; color: var(--muted);
+    font-size: 14px; font-style: italic;
+  }
+
+  .error-state {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; color: var(--red);
+    font-size: 14px;
+  }
+
+  /* ══ PORTRAIT TV SCALING ══════════════════════════════════════
+     A portrait 4K TV running at native resolution would be
+     3840×2160 rotated → 2160px wide × 3840px tall.
+     Most TV browsers report a more typical CSS pixel width.
+     We target ~1080px logical width; zoom slightly to fill the
+     portrait viewport and make text comfortable to read from
+     across a room.
+  ════════════════════════════════════════════════════════════ */
+  @media (orientation: portrait) and (min-width: 769px) {
+    :root {
+      --table-font: 18px;
+      --th-font:    14px;
+      --header-h:   64px;
+    }
+    .topbar-logo svg  { height: 38px; }
+    .topbar-clock     { font-size: 26px; }
+    .table-header     { height: 50px; }
+    .table-title      { font-size: 16px; }
+    thead th          { padding: 12px 20px; }
+    tbody td          { padding: 13px 20px; }
+
+    /* Wider row padding for portrait — plenty of horizontal space */
+    html { zoom: 100%; }
+  }
+
+  /* Landscape TV (existing dashboard style) */
+  @media (orientation: landscape) and (min-width: 769px) {
+    html { zoom: 75%; }
+  }
+
+  /* ══ SCROLL HINT BAR ══════════════════════════════════════════
+     Subtle fixed hint at the bottom so operators know it scrolls
+  ════════════════════════════════════════════════════════════ */
+  .scroll-hint {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(transparent, rgba(10,10,10,0.95));
+    font-size: 11px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px; text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .scroll-hint.hidden { opacity: 0; }
+
+  /* ══ COLUMN HEADER CUSTOMISATION ══════════════════════════════
+     Adjust min-widths so columns don't crush on portrait width.
+     Column order: A B C D E F G I (skipping H)
+  ════════════════════════════════════════════════════════════ */
+  .col-a { min-width: 90px;  }  /* Job #        */
+  .col-b { min-width: 80px;  }  /* List #        */
+  .col-c { min-width: 260px; }  /* Joinery Item  */
+  .col-d { min-width: 120px; }  /* Listed By     */
+  .col-e { min-width: 110px; }  /* Machined      */
+  .col-f { min-width: 130px; }  /* Assigned To   */
+  .col-g { min-width: 110px; }  /* Assembled     */
+  .col-i { min-width: 130px; }  /* Date Required */
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <!-- Same P22 logo SVG as the main dashboard -->
+    <svg version="1.1" viewBox="0 0 1605.0933 198.42667" xmlns="http://www.w3.org/2000/svg"><g><g><path d="m 1452.43,1050.75 c -20.51,67.27 -55.46,120.36 -104.9,159.23 -48.5,38.89 -106.05,58.33 -172.65,58.33 H 370.789 L 173.848,985.945 h 926.612 c 38.12,0.614 66.51,-13.879 85.21,-43.511 19.49,-27.77 25.15,-64.801 17,-111.086 -7.83,-44.446 -26.57,-81.469 -56.18,-111.094 -28.71,-27.168 -62.21,-41.66 -100.54,-43.504 H 119.324 L 0,0 h 263.137 l 69.875,396.23 h 688.108 c 66.59,0 130.94,19.122 193.05,57.399 63.14,38.883 116.53,91.652 160.18,158.312 44.69,67.258 74.01,140.395 87.95,219.407 14.04,79.613 10.75,152.75 -9.87,219.402" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 1818.63,739.691 657.68,-0.918 c 30.96,0 57.65,11.711 80.09,35.172 23.94,24.075 38.77,53.696 44.51,88.875 6.99,37.035 2.61,66.653 -13.18,88.871 -13.93,24.676 -36.55,36.106 -67.83,34.254 h -657.86 z m 776.38,528.619 c 93.33,0 166.12,-39.51 218.33,-118.5 52.2,-79.01 68.46,-174.361 48.76,-286.06 -18.18,-103.082 -62.57,-192.559 -133.17,-268.477 -70.3,-74.062 -149.25,-117.562 -236.91,-130.535 L 2723.88,0 H 2417.81 L 2209.07,460.121 H 1769.33 L 1688.2,0 h -263.14 l 223.62,1268.31 h 946.33" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 3298.43,942.434 c -28.71,-27.157 -46.82,-62.024 -54.33,-104.606 l -71.82,-407.34 c -7.18,-40.726 -1.43,-75.918 17.27,-105.539 19.02,-27.769 45.83,-41.98 80.44,-42.59 h 598.75 c 35.51,1.852 67.38,16.352 95.61,43.512 29.17,29.629 47.27,64.488 54.35,104.617 l 71.83,407.34 c 7.51,42.582 1.74,77.762 -17.29,105.535 -18.13,30.235 -44.94,44.434 -80.44,42.582 h -598.75 c -34.6,0.614 -66.47,-13.879 -95.62,-43.511 z m 821.55,325.876 c 86.31,0 153.1,-36.1 200.44,-108.31 47.76,-72.22 62.37,-159.55 43.85,-261.996 L 4271.22,370.309 C 4253.62,267.859 4208.21,180.531 4134.97,108.32 4062.19,36.1094 3982.65,0 3896.35,0 h -753.54 c -85.84,0 -152.64,36.1094 -200.42,108.32 -47.31,72.211 -61.93,159.539 -43.86,261.989 l 93.05,527.695 c 18.06,102.446 63.47,189.776 136.25,261.996 73.24,72.21 152.78,108.31 238.61,108.31 h 753.54" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="M 5278.39,1268.31 5120.04,370.309 C 5101.98,267.859 5056.56,180.531 4983.79,108.32 4910.55,36.1094 4831.01,0 4745.17,0 h -429.19 l 49.79,282.359 h 351.8 c 34.81,0.61 66.4,14.821 94.75,42.59 29.61,29.621 48.02,64.813 55.2,105.539 l 147.72,837.822 h 263.15" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 6648.93,1268.31 -49.8,-282.365 H 5671.8 l -36.56,-207.367 h 803.5 L 6389.77,500.84 h -803.5 l -38.52,-218.481 h 927.32 L 6425.29,0 H 5234.82 l 223.63,1268.31 h 1190.48" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 7800.28,1268.31 c 86.31,0 153.11,-36.1 200.45,-108.31 47.75,-72.22 62.36,-159.55 43.84,-261.996 l -14.35,-81.465 h -263.15 l 3.76,21.289 c 7.5,42.582 1.74,77.762 -17.29,105.535 -18.13,30.235 -44.92,44.434 -80.43,42.582 h -577.65 c -33.66,0.614 -65.54,-13.879 -95.61,-43.511 -28.71,-27.157 -46.82,-62.024 -54.33,-104.606 l -71.83,-407.34 c -7.17,-40.726 -1.2,-75.918 17.98,-105.539 19.49,-27.769 46.07,-41.98 79.74,-42.59 h 577.64 c 35.51,1.852 67.37,16.352 95.61,43.512 29.16,29.629 47.27,64.488 54.35,104.617 l 3.41,19.434 h 263.15 l -14.04,-79.613 C 7933.92,267.859 7888.51,180.531 7815.28,108.32 7742.48,36.1094 7662.95,0 7576.65,0 h -732.43 c -85.84,0 -152.64,36.1094 -200.42,108.32 -47.31,72.211 -61.93,159.539 -43.86,261.989 l 93.04,527.695 c 18.07,102.446 63.73,189.776 136.97,261.996 73.23,72.21 152.54,108.31 237.9,108.31 h 732.43" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="M 9404.8,1268.31 9218.38,985.945 H 8896.94 L 8723.1,0 h -263.15 l 173.85,985.945 h -498.85 l 49.8,282.365 H 9404.8" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 9562.82,469.801 c 8.66,21.137 21.1,39.554 37.5,55.133 25.92,25.945 53.7,38.925 83.28,38.925 h 476.6 c 106.9,0.704 206,45.411 297.2,134.051 91.6,90.82 148.6,200.012 171.2,327.59 22.6,128.28 4.3,237.47 -54.9,327.57 -59.7,90.1 -143.2,135.15 -250.6,135.15 h -510.2 -106.82 l -217.34,-329.11 -0.39,-0.63 -2.55,-3.67 c 19.22,0.24 296.08,0.42 298.78,0.42 h 451.12 c 31.2,0 54.4,-12.62 69.7,-37.84 17.2,-23.78 22.5,-54.43 15.9,-91.89 -6.4,-36.047 -22.2,-66.684 -47.5,-91.902 -25.3,-25.235 -53.2,-37.836 -83.9,-37.836 h -480.64 c -90.09,1.23 -174.83,-31.625 -254.29,-98.379 -13.09,-11.004 -26.06,-22.828 -38.86,-35.68 C 9326.4,672.324 9269.75,563.859 9246.16,436.281 L 9170.48,7.07031 h 294.43 984.09 l 57.5,326.49969 h -971.97 l 17.73,100.551 c 2.42,12.688 5.99,24.539 10.56,35.68" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 10963.1,469.801 c 8.7,21.137 21.1,39.554 37.5,55.133 25.9,25.945 53.7,38.925 83.3,38.925 h 476.5 c 107,0.704 206.1,45.411 297.3,134.051 91.6,90.82 148.6,200.012 171.1,327.59 22.6,128.28 4.4,237.47 -54.8,327.57 -59.7,90.1 -143.2,135.15 -250.6,135.15 h -510.2 -106.8 l -217.4,-329.11 -0.4,-0.63 -2.5,-3.67 c 19.2,0.24 296.1,0.42 298.8,0.42 h 451.1 c 31.2,0 54.4,-12.62 69.7,-37.84 17.1,-23.78 22.4,-54.43 15.8,-91.89 -6.3,-36.047 -22.1,-66.684 -47.4,-91.902 -25.3,-25.235 -53.2,-37.836 -83.9,-37.836 h -480.7 c -90,1.23 -174.8,-31.625 -254.3,-98.379 -13,-11.004 -26,-22.828 -38.8,-35.68 -89.7,-89.379 -146.4,-197.844 -170,-325.422 L 10570.8,7.07031 h 294.4 984.1 l 57.5,326.49969 h -972 l 17.7,100.551 c 2.5,12.688 6,24.539 10.6,35.68" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/></g></g></svg>
+  </div>
+
+  <div class="topbar-clock" id="clock-wrap">
+    <div id="clock-time">00:00:00</div>
+    <div class="date-line" id="clock-date">—</div>
+  </div>
+</header>
+
+<!-- ══ MAIN PAGE ══════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- Sub-header -->
+  <div class="table-header">
+    <div class="table-title" id="sheet-title">Loading…</div>
+    <div class="table-meta" id="sheet-meta"></div>
+  </div>
+
+  <!--
+    The table-body div is the scrollable area.
+    tabindex="0" makes it focusable so arrow keys / Page Up/Down work
+    without clicking. On a Google TV remote, the D-pad will scroll this.
+  -->
+  <div class="table-body" id="table-body" tabindex="0">
+
+    <!-- Loading state -->
+    <div class="loading" id="loading-state">
+      <div class="spinner-wrap">
+        <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="56" height="56">
+          <g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;">
+            <path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
+            <path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
+          </g>
+        </svg>
+      </div>
+      <div>Loading data…</div>
+    </div>
+
+    <!-- Data table (shown after load) -->
+    <table id="data-table" style="display:none;">
+      <thead>
+        <tr id="thead-row">
+          <!-- Column headers injected by JS — customise COLUMN_HEADERS below -->
+        </tr>
+      </thead>
+      <tbody id="data-tbody"></tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- Scroll hint overlay -->
+<div class="scroll-hint" id="scroll-hint">▼ Scroll for more</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURATION — edit these values to match your setup
+// ══════════════════════════════════════════════════════════════
+
+// Same Apps Script deployment URL as the main dashboard
+var API_URL = 'https://script.google.com/macros/s/AKfycbydKHgjk5lhDk7-41N2Ob9ecZhtkCdNuJJnXSf_ToHj46ZbscvctW8Q_440XT1T5zfo/exec';
+
+// The sheet name to read (different tab in the same Google Sheet)
+var SHEET_NAME = 'Sheet2'; // ← change to your actual sheet tab name
+
+// Display title shown in the sub-header
+var DISPLAY_TITLE = 'Factory Floor Schedule'; // ← change as needed
+
+// Column labels — 8 columns: A B C D E F G I (skipping H)
+var COLUMN_HEADERS = [
+  'Job #',         // Col A
+  'List #',        // Col B
+  'Joinery Item',  // Col C
+  'Listed By',     // Col D
+  'Machined',      // Col E  (Checkbox)
+  'Assigned To',   // Col F
+  'Assembled',     // Col G  (Checkbox)
+  'Date Required'  // Col I  (H is skipped)
+];
+
+// Column index of any "date" columns (0-based, matching COLUMN_HEADERS above)
+var DATE_COLUMNS = [7]; // Col I — Date Required
+
+// Column index of any yes/no tick columns (0-based)
+var TICK_COLUMNS = [4, 6]; // Col E — Machined, Col G — Assembled
+
+// How often to refresh the data (milliseconds). 30s matches the main dashboard.
+var REFRESH_INTERVAL = 30000;
+
+// ══════════════════════════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════════════════════════
+function updateClock() {
+  var now  = new Date();
+  var h = String(now.getHours()).padStart(2,'0');
+  var m = String(now.getMinutes()).padStart(2,'0');
+  var s = String(now.getSeconds()).padStart(2,'0');
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('clock-time').textContent = h+':'+m+':'+s;
+  document.getElementById('clock-date').textContent =
+    days[now.getDay()]+' '+now.getDate()+' '+mons[now.getMonth()]+' '+now.getFullYear();
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ══════════════════════════════════════════════════════════════
+//  KEYBOARD / REMOTE SCROLL
+//  The .table-body div has tabindex="0" — click or auto-focus it
+//  so arrow keys, Page Up/Down, Home/End all scroll it natively.
+// ══════════════════════════════════════════════════════════════
+var tableBody = document.getElementById('table-body');
+
+// Auto-focus once page loads so remotes work immediately
+window.addEventListener('load', function() {
+  tableBody.focus();
+});
+
+// Re-focus if user clicks anywhere on the page (except interactive elements)
+document.body.addEventListener('click', function(e) {
+  if (!e.target.closest('button, a, input, select')) {
+    tableBody.focus();
+  }
+});
+
+// Scroll hint — hide when user has scrolled past the first screenful
+tableBody.addEventListener('scroll', function() {
+  var hint = document.getElementById('scroll-hint');
+  if (tableBody.scrollTop > 80) {
+    hint.classList.add('hidden');
+  } else {
+    hint.classList.remove('hidden');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  FULLSCREEN (TV Bro / portrait TV)
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('load', function() {
+  var el = document.documentElement;
+  if (el.requestFullscreen)            el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+  else if (el.msRequestFullscreen)     el.msRequestFullscreen();
+});
+
+// ══════════════════════════════════════════════════════════════
+//  BUILD COLUMN HEADERS
+// ══════════════════════════════════════════════════════════════
+var colClasses = ['col-a','col-b','col-c','col-d','col-e','col-f','col-g','col-i'];
+
+(function buildHeaders() {
+  var tr = document.getElementById('thead-row');
+  COLUMN_HEADERS.forEach(function(label, i) {
+    var th = document.createElement('th');
+    th.textContent = label;
+    th.className = colClasses[i] || '';
+    tr.appendChild(th);
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════
+//  DATA LOADING
+// ══════════════════════════════════════════════════════════════
+var _lastHash = '';
+
+function loadSheet() {
+  var url = API_URL + '?action=sheetDisplay&sheet=' + encodeURIComponent(SHEET_NAME);
+
+  fetch(url)
+    .then(function(res) { return res.json(); })
+    .then(function(data) { renderSheet(data); })
+    .catch(function(err) {
+      console.error('Sheet load error:', err);
+      showError();
+    });
+}
+
+function renderSheet(data) {
+  // data should be an array of row arrays: [[a,b,c,d,e,f,g,i], ...]
+  // The Apps Script action returns rows from row 3, columns A-G and I (skipping H)
+
+  var hash = JSON.stringify(data);
+  if (hash === _lastHash) return; // no change — skip re-render
+  _lastHash = hash;
+
+  var loading = document.getElementById('loading-state');
+  var table   = document.getElementById('data-table');
+  var tbody   = document.getElementById('data-tbody');
+  var meta    = document.getElementById('sheet-meta');
+  var title   = document.getElementById('sheet-title');
+
+  title.textContent = DISPLAY_TITLE;
+  loading.style.display = 'none';
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    table.style.display = 'none';
+    var emptyDiv = document.createElement('div');
+    emptyDiv.className = 'empty-state';
+    emptyDiv.textContent = 'No data found in sheet.';
+    tableBody.appendChild(emptyDiv);
+    meta.textContent = '0 rows';
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  var rowCount = 0;
+
+  data.forEach(function(row) {
+    // Skip completely empty rows
+    if (!row || row.every(function(c) { return !c && c !== 0; })) return;
+
+    rowCount++;
+    var tr = document.createElement('tr');
+
+    row.forEach(function(cell, colIdx) {
+      var td = document.createElement('td');
+      td.className = colClasses[colIdx] || '';
+
+      var val = cell == null ? '' : String(cell).trim();
+
+      if (TICK_COLUMNS.indexOf(colIdx) !== -1) {
+        // Yes/No tick rendering
+        td.innerHTML = renderTick(val);
+      } else if (DATE_COLUMNS.indexOf(colIdx) !== -1) {
+        // Date rendering
+        td.innerHTML = val
+          ? '<span class="has-date">' + esc(val) + '</span>'
+          : '<span class="no-date">No Date</span>';
+      } else if (val === '') {
+        td.innerHTML = '<span class="status-na">—</span>';
+      } else {
+        td.textContent = val;
+      }
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  meta.textContent = rowCount + ' row' + (rowCount !== 1 ? 's' : '');
+  table.style.display = 'table';
+
+  // Update scroll hint visibility
+  var hint = document.getElementById('scroll-hint');
+  if (tableBody.scrollHeight <= tableBody.clientHeight) {
+    hint.classList.add('hidden');
+  } else {
+    hint.classList.remove('hidden');
+  }
+
+  // Re-focus so keyboard still works after refresh
+  tableBody.focus({ preventScroll: true });
+}
+
+function renderTick(val) {
+  var s = val.toLowerCase();
+  if (s === 'true' || s === 'yes' || s === '1' || s === '✓' || s === 'y') {
+    return '<span class="status-yes">✓</span>';
+  }
+  if (s === 'false' || s === 'no' || s === '0' || s === '✗' || s === 'n' || s === '') {
+    return '<span class="status-no">✗</span>';
+  }
+  // Treat as a tag if it has text content (e.g. a name)
+  return '<span class="cell-tag">' + esc(val) + '</span>';
+}
+
+function showError() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('sheet-title').textContent = DISPLAY_TITLE;
+  var errDiv = document.createElement('div');
+  errDiv.className = 'error-state';
+  errDiv.textContent = 'Error loading data — check the API and sheet name.';
+  tableBody.appendChild(errDiv);
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Initial load + auto-refresh ──────────────────────────────
+loadSheet();
+setInterval(loadSheet, REFRESH_INTERVAL);
+</script>
+</body>
+</html>
