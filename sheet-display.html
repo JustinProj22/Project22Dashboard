@@ -53,10 +53,8 @@
     width: 100vh;
     height: 100vw;
 
-    /* Rotate around top-left, then nudge down by the full viewport width
-       so the content lands back in the visible screen area */
     transform-origin: top left;
-    transform: rotate(90deg) translateX(0) translateY(-100%);
+    transform: rotate(-90deg) translateX(-100vh);
 
     overflow: hidden;
   }
