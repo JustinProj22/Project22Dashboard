@@ -41,16 +41,12 @@
   }
 
   /* ══ PORTRAIT ROTATION ═══════════════════════════════════════
-     TV is 4K (3840×2160) reporting landscape to the browser.
-     We swap the dimensions so it fills the portrait screen.
+     Dimensions set by JS at runtime using actual screen size.
   ════════════════════════════════════════════════════════════ */
   #rotate-wrap {
     position: fixed;
     top: 0; left: 0;
-    width: 2160px;
-    height: 3840px;
     transform-origin: top left;
-    transform: rotate(-90deg) translateX(-2160px);
     overflow: hidden;
   }
 
@@ -233,22 +229,8 @@
     font-size: 14px;
   }
 
-  /* TV display — scaled for 4K (3840×2160) */
-  @media (min-width: 769px) {
-    html { zoom: 1; font-size: 28px; }
-    :root {
-      --header-h: 100px;
-    }
-    .topbar-logo svg  { height: 60px; }
-    .topbar-clock     { font-size: 48px; }
-    .topbar-clock .date-line { font-size: 20px; }
-    .table-header     { height: 80px; }
-    .table-title      { font-size: 28px; }
-    .table-meta       { font-size: 22px; }
-    thead th          { font-size: 22px; padding: 16px 12px; }
-    tbody td          { font-size: 24px; padding: 16px 12px; }
-    .status-yes, .status-no { font-size: 28px; }
-  }
+  /* Base font size — JS will scale via zoom on the rotate-wrap */
+  html { font-size: 14px; }
 
   /* ══ SCROLL HINT BAR ══════════════════════════════════════════
      Subtle fixed hint at the bottom so operators know it scrolls
@@ -586,7 +568,22 @@ function esc(str) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Initial load + auto-refresh ──────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  ROTATION — read actual screen dimensions at runtime so it
+//  fills exactly regardless of what the browser reports.
+// ══════════════════════════════════════════════════════════════
+function applyRotation() {
+  var wrap = document.getElementById('rotate-wrap');
+  // innerWidth/innerHeight = actual CSS pixel dimensions the browser reports
+  var W = window.innerWidth;
+  var H = window.innerHeight;
+  // After -90deg rotation, width becomes height and vice versa
+  wrap.style.width  = H + 'px';
+  wrap.style.height = W + 'px';
+  wrap.style.transform = 'rotate(-90deg) translateX(-' + H + 'px)';
+}
+applyRotation();
+window.addEventListener('resize', applyRotation);
 loadSheet();
 setInterval(loadSheet, REFRESH_INTERVAL);
 </script>
