@@ -187,21 +187,19 @@
   .status-no  { color: var(--red);   font-size: 16px; }
   .status-na  { color: var(--muted); }
 
-  /* Tag-style values */
+  /* Tag-style values — no box, just plain orange text */
   .cell-tag {
-    display: inline-block;
-    background: rgba(245,166,35,0.12);
     color: var(--orange);
-    border: 1px solid rgba(245,166,35,0.25);
-    padding: 2px 8px; border-radius: 3px;
-    font-size: 12px; font-weight: 600;
+    font-weight: 600;
     font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 0.5px;
   }
 
   /* Date styling */
   .has-date { color: var(--green); font-weight: 500; }
   .no-date  { color: var(--red);   font-weight: 700; }
+
+  /* Centre-aligned columns: List#, Listed By, Machined, Assigned To, Assembled, Date Required */
+  .col-b, .col-d, .col-e, .col-f, .col-g, .col-i { text-align: center; }
 
   /* ══ LOADING / EMPTY STATES ══════════════════════════════════ */
   .loading {
