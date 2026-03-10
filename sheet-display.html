@@ -40,6 +40,27 @@
     font-size: 14px;
   }
 
+  /* ══ PORTRAIT ROTATION ═══════════════════════════════════════
+     The TV is physically mounted in portrait but runs landscape.
+     We rotate the entire app 90° and swap width/height so it
+     fills the screen correctly.
+  ════════════════════════════════════════════════════════════ */
+  #rotate-wrap {
+    position: fixed;
+    top: 0; left: 0;
+
+    /* Swap width and height — content is rotated 90° so these flip */
+    width: 100vh;
+    height: 100vw;
+
+    /* Rotate around the top-left corner, then shift back into view */
+    transform: rotate(90deg);
+    transform-origin: top left;
+    translate: 0 -100vw;
+
+    overflow: hidden;
+  }
+
   /* ══ SPINNER ═════════════════════════════════════════════════ */
   @keyframes spin { to { transform: rotate(360deg); } }
   svg g[style*="animation"] { transform-box: fill-box; transform-origin: center center; }
@@ -53,7 +74,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    position: fixed;
+    position: absolute;
     top: 0; left: 0; right: 0;
     z-index: 100;
   }
@@ -74,7 +95,7 @@
 
   /* ══ MAIN LAYOUT ═════════════════════════════════════════════ */
   .page {
-    position: fixed;
+    position: absolute;
     top: var(--header-h);
     left: 0; right: 0; bottom: 0;
     display: flex;
@@ -249,7 +270,7 @@
      Subtle fixed hint at the bottom so operators know it scrolls
   ════════════════════════════════════════════════════════════ */
   .scroll-hint {
-    position: fixed;
+    position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 28px;
     display: flex; align-items: center; justify-content: center;
@@ -277,6 +298,7 @@
 </style>
 </head>
 <body>
+<div id="rotate-wrap">
 
 <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
 <header class="topbar">
@@ -406,6 +428,20 @@ document.body.addEventListener('click', function(e) {
     tableBody.focus();
   }
 });
+
+// ── Mouse wheel scroll fix ────────────────────────────────────
+// Because the page is CSS-rotated 90°, the browser still thinks
+// it's landscape. A vertical scroll wheel sends deltaY, but the
+// visually "up/down" direction is actually the horizontal axis.
+// We intercept the wheel event and manually drive scrollTop so
+// it always feels natural regardless of rotation.
+document.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  // deltaY from the wheel = visually scrolling up/down in portrait
+  // Use deltaY if it has a value, otherwise fall back to deltaX
+  var delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+  tableBody.scrollTop += delta;
+}, { passive: false });
 
 // Scroll hint — hide when user has scrolled past the first screenful
 tableBody.addEventListener('scroll', function() {
@@ -570,5 +606,6 @@ function esc(str) {
 loadSheet();
 setInterval(loadSheet, REFRESH_INTERVAL);
 </script>
+</div><!-- /rotate-wrap -->
 </body>
 </html>
