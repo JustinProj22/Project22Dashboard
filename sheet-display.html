@@ -41,21 +41,16 @@
   }
 
   /* ══ PORTRAIT ROTATION ═══════════════════════════════════════
-     The TV is physically mounted in portrait but runs landscape.
-     We rotate the entire app 90° and swap width/height so it
-     fills the screen correctly.
+     TV reports 1920×1080 (landscape) but is physically portrait.
+     We hardcode the pixel dimensions to exactly fill the screen.
   ════════════════════════════════════════════════════════════ */
   #rotate-wrap {
     position: fixed;
     top: 0; left: 0;
-
-    /* Swap width and height — content is rotated 90° so these flip */
-    width: 100vh;
-    height: 100vw;
-
+    width: 1080px;
+    height: 1920px;
     transform-origin: top left;
-    transform: rotate(-90deg) translateX(-100vh);
-
+    transform: rotate(-90deg) translateX(-1080px);
     overflow: hidden;
   }
 
@@ -238,9 +233,9 @@
     font-size: 14px;
   }
 
-  /* TV display scaling */
+  /* TV display — no zoom needed, exact pixel dimensions used */
   @media (min-width: 769px) {
-    html { zoom: 75%; }
+    html { zoom: 1; }
   }
 
   /* ══ SCROLL HINT BAR ══════════════════════════════════════════
