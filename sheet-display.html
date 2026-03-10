@@ -41,16 +41,16 @@
   }
 
   /* ══ PORTRAIT ROTATION ═══════════════════════════════════════
-     TV reports 1920×1080 (landscape) but is physically portrait.
-     We hardcode the pixel dimensions to exactly fill the screen.
+     TV is 4K (3840×2160) reporting landscape to the browser.
+     We swap the dimensions so it fills the portrait screen.
   ════════════════════════════════════════════════════════════ */
   #rotate-wrap {
     position: fixed;
     top: 0; left: 0;
-    width: 1080px;
-    height: 1920px;
+    width: 2160px;
+    height: 3840px;
     transform-origin: top left;
-    transform: rotate(-90deg) translateX(-1080px);
+    transform: rotate(-90deg) translateX(-2160px);
     overflow: hidden;
   }
 
@@ -233,9 +233,21 @@
     font-size: 14px;
   }
 
-  /* TV display — no zoom needed, exact pixel dimensions used */
+  /* TV display — scaled for 4K (3840×2160) */
   @media (min-width: 769px) {
-    html { zoom: 1; }
+    html { zoom: 1; font-size: 28px; }
+    :root {
+      --header-h: 100px;
+    }
+    .topbar-logo svg  { height: 60px; }
+    .topbar-clock     { font-size: 48px; }
+    .topbar-clock .date-line { font-size: 20px; }
+    .table-header     { height: 80px; }
+    .table-title      { font-size: 28px; }
+    .table-meta       { font-size: 22px; }
+    thead th          { font-size: 22px; padding: 16px 12px; }
+    tbody td          { font-size: 24px; padding: 16px 12px; }
+    .status-yes, .status-no { font-size: 28px; }
   }
 
   /* ══ SCROLL HINT BAR ══════════════════════════════════════════
