@@ -130,9 +130,7 @@
   .table-body {
     flex: 1;
     overflow-y: auto;
-    overflow-x: auto;
-
-    /* Keyboard / remote scroll: give it focus so arrow keys work */
+    overflow-x: hidden;
     outline: none;
   }
 
@@ -146,7 +144,8 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--table-font);
+    font-size: 11px;
+    table-layout: fixed; /* Forces columns to fit within the container width */
   }
 
   thead th {
@@ -154,11 +153,13 @@
     background: var(--panel);
     color: var(--orange);
     font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: var(--th-font);
-    letter-spacing: 1px; text-transform: uppercase;
-    padding: 10px 16px; text-align: left;
+    font-weight: 700; font-size: 11px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 6px 6px; text-align: left;
     border-bottom: 1px solid var(--orange);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   tbody tr {
@@ -174,10 +175,13 @@
   }
 
   tbody td {
-    padding: 10px 16px;
+    padding: 8px 6px;
     vertical-align: middle;
     color: var(--white);
-    line-height: 1.35;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* First column — slightly bolder */
@@ -234,33 +238,8 @@
     font-size: 14px;
   }
 
-  /* ══ PORTRAIT TV SCALING ══════════════════════════════════════
-     A portrait 4K TV running at native resolution would be
-     3840×2160 rotated → 2160px wide × 3840px tall.
-     Most TV browsers report a more typical CSS pixel width.
-     We target ~1080px logical width; zoom slightly to fill the
-     portrait viewport and make text comfortable to read from
-     across a room.
-  ════════════════════════════════════════════════════════════ */
-  @media (orientation: portrait) and (min-width: 769px) {
-    :root {
-      --table-font: 18px;
-      --th-font:    14px;
-      --header-h:   64px;
-    }
-    .topbar-logo svg  { height: 38px; }
-    .topbar-clock     { font-size: 26px; }
-    .table-header     { height: 50px; }
-    .table-title      { font-size: 16px; }
-    thead th          { padding: 12px 20px; }
-    tbody td          { padding: 13px 20px; }
-
-    /* Wider row padding for portrait — plenty of horizontal space */
-    html { zoom: 100%; }
-  }
-
-  /* Landscape TV (existing dashboard style) */
-  @media (orientation: landscape) and (min-width: 769px) {
+  /* TV display scaling */
+  @media (min-width: 769px) {
     html { zoom: 75%; }
   }
 
@@ -281,18 +260,18 @@
   }
   .scroll-hint.hidden { opacity: 0; }
 
-  /* ══ COLUMN HEADER CUSTOMISATION ══════════════════════════════
-     Adjust min-widths so columns don't crush on portrait width.
+  /* ══ COLUMN WIDTHS ════════════════════════════════════════════
+     Percentages — must add up to 100% so no horizontal scroll.
      Column order: A B C D E F G I (skipping H)
   ════════════════════════════════════════════════════════════ */
-  .col-a { min-width: 90px;  }  /* Job #        */
-  .col-b { min-width: 80px;  }  /* List #        */
-  .col-c { min-width: 260px; }  /* Joinery Item  */
-  .col-d { min-width: 120px; }  /* Listed By     */
-  .col-e { min-width: 110px; }  /* Machined      */
-  .col-f { min-width: 130px; }  /* Assigned To   */
-  .col-g { min-width: 110px; }  /* Assembled     */
-  .col-i { min-width: 130px; }  /* Date Required */
+  .col-a { width: 8%;  }  /* Job #        */
+  .col-b { width: 7%;  }  /* List #        */
+  .col-c { width: 28%; }  /* Joinery Item  */
+  .col-d { width: 13%; }  /* Listed By     */
+  .col-e { width: 10%; }  /* Machined      */
+  .col-f { width: 13%; }  /* Assigned To   */
+  .col-g { width: 10%; }  /* Assembled     */
+  .col-i { width: 11%; }  /* Date Required */
 </style>
 </head>
 <body>
