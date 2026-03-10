@@ -135,7 +135,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 10px;
+    font-size: 8px;
     table-layout: fixed;
   }
 
@@ -144,9 +144,9 @@
     background: var(--panel);
     color: var(--orange);
     font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 10px;
+    font-weight: 700; font-size: 8px;
     letter-spacing: 0.5px; text-transform: uppercase;
-    padding: 5px 4px; text-align: left;
+    padding: 4px 3px; text-align: left;
     border-bottom: 1px solid var(--orange);
     white-space: nowrap;
     overflow: hidden;
@@ -166,7 +166,7 @@
   }
 
   tbody td {
-    padding: 5px 4px;
+    padding: 4px 3px;
     vertical-align: middle;
     color: var(--white);
     line-height: 1.2;
@@ -250,17 +250,24 @@
   .scroll-hint.hidden { opacity: 0; }
 
   /* ══ COLUMN WIDTHS ════════════════════════════════════════════
-     Percentages — must add up to 100% so no horizontal scroll.
-     Column order: A B C D E F G I (skipping H)
+     Based on actual content:
+     - Job #: "3062 - Backcare & Seating Dandenong" = needs most space
+     - List #: single number "1" = tiny
+     - Joinery Item: long descriptions = needs lots of space
+     - Listed By: 2 initials "JB" = tiny
+     - Machined: tick only = tiny
+     - Assigned To: short name = small
+     - Assembled: tick only = tiny
+     - Date Required: "dd/mm/yyyy" = medium
   ════════════════════════════════════════════════════════════ */
-  .col-a { width: 10%; }  /* Job #         — wider */
-  .col-b { width: 5%;  }  /* List #         — narrow */
-  .col-c { width: 32%; }  /* Joinery Item   — widest */
-  .col-d { width: 9%;  }  /* Listed By      — narrow */
-  .col-e { width: 8%;  }  /* Machined       — narrow */
-  .col-f { width: 11%; }  /* Assigned To    — narrow */
-  .col-g { width: 8%;  }  /* Assembled      — narrow */
-  .col-i { width: 17%; }  /* Date Required  — needs room for dd/mm/yyyy */
+  .col-a { width: 22%; }  /* Job #         — long text */
+  .col-b { width: 4%;  }  /* List #         — single digit */
+  .col-c { width: 34%; }  /* Joinery Item   — longest text */
+  .col-d { width: 4%;  }  /* Listed By      — 2 initials */
+  .col-e { width: 6%;  }  /* Machined       — tick only */
+  .col-f { width: 10%; }  /* Assigned To    — short name */
+  .col-g { width: 6%;  }  /* Assembled      — tick only */
+  .col-i { width: 14%; }  /* Date Required  — dd/mm/yyyy */
 </style>
 </head>
 <body>
