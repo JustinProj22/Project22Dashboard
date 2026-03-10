@@ -135,8 +135,8 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
-    table-layout: fixed; /* Forces columns to fit within the container width */
+    font-size: 10px;
+    table-layout: fixed;
   }
 
   thead th {
@@ -144,9 +144,9 @@
     background: var(--panel);
     color: var(--orange);
     font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 11px;
+    font-weight: 700; font-size: 10px;
     letter-spacing: 0.5px; text-transform: uppercase;
-    padding: 6px 6px; text-align: left;
+    padding: 5px 4px; text-align: left;
     border-bottom: 1px solid var(--orange);
     white-space: nowrap;
     overflow: hidden;
@@ -166,10 +166,10 @@
   }
 
   tbody td {
-    padding: 8px 6px;
+    padding: 5px 4px;
     vertical-align: middle;
     color: var(--white);
-    line-height: 1.3;
+    line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -253,14 +253,14 @@
      Percentages — must add up to 100% so no horizontal scroll.
      Column order: A B C D E F G I (skipping H)
   ════════════════════════════════════════════════════════════ */
-  .col-a { width: 8%;  }  /* Job #        */
-  .col-b { width: 7%;  }  /* List #        */
-  .col-c { width: 28%; }  /* Joinery Item  */
-  .col-d { width: 13%; }  /* Listed By     */
-  .col-e { width: 10%; }  /* Machined      */
-  .col-f { width: 13%; }  /* Assigned To   */
-  .col-g { width: 10%; }  /* Assembled     */
-  .col-i { width: 11%; }  /* Date Required */
+  .col-a { width: 10%; }  /* Job #         — wider */
+  .col-b { width: 5%;  }  /* List #         — narrow */
+  .col-c { width: 32%; }  /* Joinery Item   — widest */
+  .col-d { width: 9%;  }  /* Listed By      — narrow */
+  .col-e { width: 8%;  }  /* Machined       — narrow */
+  .col-f { width: 11%; }  /* Assigned To    — narrow */
+  .col-g { width: 8%;  }  /* Assembled      — narrow */
+  .col-i { width: 17%; }  /* Date Required  — needs room for dd/mm/yyyy */
 </style>
 </head>
 <body>
