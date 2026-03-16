@@ -1005,7 +1005,7 @@
   
 <script>
 // !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbwaM7Vh2GV6zl0xYaA2on6IW12bPVgE6tyBp7xl4TsJl3QwdW-APvxhGEKRNHCL6LZ5/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbzpclXmZnMLbCa8wrKg2ySUsG-Ohn3K0PPv4CphaHNqoxt7PcrcD1jjbUz_pEBm6Iit/exec';
 // !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
 var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs';
 
@@ -1284,7 +1284,8 @@ function openAgendaEvent(containerId, idx) {
 
 // ── Load calendar events ─────────────────────────────────────
 function loadCalendar() {
-  apiFetch({ action: 'calendar' }, function(response) {
+  var today = new Date().toISOString().slice(0, 10);
+  apiFetch({ action: 'calendar', _d: today }, function(response) {
     // Handle debug response format when no events found
     if (response && response._debug) {
       console.warn('Calendar debug info:', response._debug);
