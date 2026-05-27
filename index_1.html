@@ -564,6 +564,8 @@
       </div>
       <!-- All jobs panel -->
       <div id="panel-all" style="display:none">
+        <!-- Stale index warning -->
+        <div id="alljobs-stale-banner" style="display:none;padding:7px 14px;background:rgba(245,166,35,0.10);border-bottom:1px solid rgba(245,166,35,0.25);font-size:11px;color:var(--orange);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.3px;"></div>
         <div class="loading" id="alljobs-loading" style="display:none">
           <div class="spinner-wrap">
             <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="56" height="56"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>
@@ -772,9 +774,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbykpngzAwmcb8aOUrjDfEXnI6OwXjSJEsi_FzDjAgjUknjezdRSqTxGUEpIq7gCpLsE/exec';
-// The Projects subfolder where all year folders live
-var DROPBOX_PROJECTS_PATH = '/Factory Shared Folders/P22 Jobs/Projects';
+var API_URL = 'https://script.google.com/macros/s/AKfycbynAKXuPUluzeR19kkPB8ZBdDxiuF5AX7gA45SIlrZxbUDaZRPVe-SJM-sOLHvQk2oa/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -814,6 +814,10 @@ function setJobsTab(tab) {
   document.getElementById('tv-jobs-hint').textContent = tab === 'active'
     ? 'Click Job # or List # for details'
     : 'Click a job folder to view details';
+  // Pre-load the index the first time All Jobs is opened
+  if (tab === 'all' && _allJobsCache === null && !_indexLoaded) {
+    ensureIndexLoaded(function() { renderAllJobs(_allJobsCache); });
+  }
 }
 
 // ══ FULLCALENDAR ════════════════════════════════════════════════
@@ -1275,81 +1279,184 @@ function removeInstallerModal(email) {
   });
 }
 
-// ══ ALL JOBS — DROPBOX BROWSE ══════════════════════════════════
-var _allJobsCache    = null;
-var _allJobsFiltered = [];
+// ══ ALL JOBS — INDEX-BACKED INSTANT SEARCH ═════════════════════
+// The index is built nightly by Apps Script and stored in a Google
+// Sheet. We fetch it once per session, cache it in memory, then
+// all searching/filtering happens client-side — no Dropbox calls.
+
+var _allJobsCache    = null;   // full index from sheet (loaded once)
+var _allJobsFiltered = [];     // currently displayed subset
+var _indexLoaded     = false;  // have we fetched from server this session?
+
+// Pre-load the index as soon as the All Jobs tab is first activated
+// (called from setJobsTab and switchView)
+function ensureIndexLoaded(callback) {
+  if (_allJobsCache !== null) {
+    if (callback) callback();
+    return;
+  }
+  if (_indexLoaded) return; // already in flight
+  _indexLoaded = true;
+
+  showAllJobsLoading('Loading job index…');
+
+  apiFetch({ action:'dropboxAllJobs' }, function(res) {
+    hideAllJobsLoading();
+
+    if (!res.success) {
+      // Index missing or error — show helpful message
+      var prompt = document.getElementById('alljobs-prompt');
+      prompt.innerHTML = res.needsRebuild
+        ? '⚠️ Job index not built yet. It will build automatically tonight at 2am.<br>'
+          +'<span style="color:var(--muted);font-size:11px;">To build it now, run <code>buildJobIndex()</code> in the Apps Script editor.</span>'
+        : '⚠️ ' + (res.error || 'Failed to load index.');
+      prompt.style.display = 'block';
+      _indexLoaded = false; // allow retry
+      return;
+    }
+
+    _allJobsCache = res.jobs || [];
+
+    // Show stale warning banner if index is more than 25 hours old
+    if (res.stale) {
+      showStaleWarning(res.staleHours, res.lastUpdated);
+    } else {
+      hideStaleWarning();
+    }
+
+    if (callback) callback();
+    else renderAllJobs(_allJobsCache);
+
+  }, function() {
+    hideAllJobsLoading();
+    var prompt = document.getElementById('alljobs-prompt');
+    prompt.textContent = '⚠️ Network error loading index. Check your connection.';
+    prompt.style.display = 'block';
+    _indexLoaded = false;
+  });
+}
+
+function showStaleWarning(hours, lastUpdated) {
+  var banner = document.getElementById('alljobs-stale-banner');
+  if (!banner) return;
+  var when = lastUpdated ? new Date(lastUpdated).toLocaleString('en-AU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'unknown';
+  banner.textContent = '⚠️ Index last updated ' + hours + ' hour' + (hours !== 1 ? 's' : '') + ' ago (' + when + '). Nightly rebuild runs at 2am.';
+  banner.style.display = 'block';
+}
+function hideStaleWarning() {
+  var banner = document.getElementById('alljobs-stale-banner');
+  if (banner) banner.style.display = 'none';
+}
 
 function loadAllJobsList() {
-  showAllJobsLoading('Loading all job folders…');
-  apiFetch({ action:'dropboxAllJobs', basePath:DROPBOX_PROJECTS_PATH }, function(res) {
-    if (res.error) { hideAllJobsLoading(); document.getElementById('alljobs-prompt').textContent='⚠️ Error: '+res.error; document.getElementById('alljobs-prompt').style.display='block'; return; }
-    _allJobsCache = res.jobs||[]; renderAllJobs(_allJobsCache);
-  }, function(){ hideAllJobsLoading(); document.getElementById('alljobs-prompt').textContent='⚠️ Failed to load folders.'; document.getElementById('alljobs-prompt').style.display='block'; });
+  ensureIndexLoaded(function() { renderAllJobs(_allJobsCache); });
 }
 
 function loadAllJobsListMobile() {
-  var body=document.getElementById('mobile-alljobs-body');
-  body.innerHTML='<div class="loading"><div>'+SPINNER_SVG+'</div><div>Loading folders…</div></div>';
-  apiFetch({ action:'dropboxAllJobs', basePath:DROPBOX_PROJECTS_PATH }, function(res) {
-    _allJobsCache = res.jobs||[]; renderAllJobsMobile(_allJobsCache);
-  }, function(){ body.innerHTML='<div style="padding:24px;text-align:center;color:var(--red);">Failed to load.</div>'; });
+  if (_allJobsCache !== null) { renderAllJobsMobile(_allJobsCache); return; }
+  var body = document.getElementById('mobile-alljobs-body');
+  body.innerHTML = '<div class="loading"><div>'+SPINNER_SVG+'</div><div>Loading index…</div></div>';
+  apiFetch({ action:'dropboxAllJobs' }, function(res) {
+    if (!res.success) {
+      body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);">'
+        + (res.error || 'Failed to load index.') + '</div>';
+      return;
+    }
+    _allJobsCache = res.jobs || [];
+    if (res.stale) showStaleWarning(res.staleHours, res.lastUpdated);
+    renderAllJobsMobile(_allJobsCache);
+  }, function() {
+    body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);">Network error.</div>';
+  });
 }
 
+// All searching is pure client-side filtering — instant
 function searchAllJobs() {
-  var q=document.getElementById('tv-alljobs-input').value.trim().toLowerCase();
-  if (!q) { loadAllJobsList(); return; }
-  if (_allJobsCache) { renderAllJobs(_allJobsCache.filter(function(j){ return j.name.toLowerCase().includes(q); })); return; }
-  showAllJobsLoading('Searching…');
-  apiFetch({ action:'dropboxAllJobs', basePath:DROPBOX_PROJECTS_PATH }, function(res) {
-    _allJobsCache = res.jobs||[];
-    renderAllJobs(_allJobsCache.filter(function(j){ return j.name.toLowerCase().includes(q); }));
+  var q = document.getElementById('tv-alljobs-input').value.trim().toLowerCase();
+  ensureIndexLoaded(function() {
+    var filtered = q
+      ? _allJobsCache.filter(function(j) {
+          return j.name.toLowerCase().includes(q) || (j.source && j.source.toLowerCase().includes(q));
+        })
+      : _allJobsCache;
+    renderAllJobs(filtered);
   });
 }
 
 function searchAllJobsMobile() {
-  var q=document.getElementById('mobile-alljobs-input').value.trim().toLowerCase();
-  var body=document.getElementById('mobile-alljobs-body');
-  if (_allJobsCache) { renderAllJobsMobile(q?_allJobsCache.filter(function(j){return j.name.toLowerCase().includes(q);}):_allJobsCache); return; }
-  body.innerHTML='<div class="loading"><div>'+SPINNER_SVG+'</div><div>Searching…</div></div>';
-  apiFetch({ action:'dropboxAllJobs', basePath:DROPBOX_PROJECTS_PATH }, function(res) {
-    _allJobsCache = res.jobs||[];
-    renderAllJobsMobile(q?_allJobsCache.filter(function(j){return j.name.toLowerCase().includes(q);}):_allJobsCache);
-  });
+  var q    = document.getElementById('mobile-alljobs-input').value.trim().toLowerCase();
+  var body = document.getElementById('mobile-alljobs-body');
+  if (_allJobsCache === null) { loadAllJobsListMobile(); return; }
+  var filtered = q
+    ? _allJobsCache.filter(function(j) {
+        return j.name.toLowerCase().includes(q) || (j.source && j.source.toLowerCase().includes(q));
+      })
+    : _allJobsCache;
+  renderAllJobsMobile(filtered);
 }
 
 function showAllJobsLoading(txt) {
-  document.getElementById('alljobs-loading').style.display='flex';
-  document.getElementById('alljobs-loading-text').textContent=txt||'Loading…';
-  document.getElementById('alljobs-prompt').style.display='none';
-  document.getElementById('alljobs-table').style.display='none';
+  document.getElementById('alljobs-loading').style.display = 'flex';
+  document.getElementById('alljobs-loading-text').textContent = txt || 'Loading…';
+  document.getElementById('alljobs-prompt').style.display = 'none';
+  document.getElementById('alljobs-table').style.display  = 'none';
 }
-function hideAllJobsLoading() { document.getElementById('alljobs-loading').style.display='none'; }
+function hideAllJobsLoading() { document.getElementById('alljobs-loading').style.display = 'none'; }
 
 function renderAllJobs(jobs) {
-  _allJobsFiltered = jobs||[];
+  _allJobsFiltered = jobs || [];
   hideAllJobsLoading();
-  var prompt=document.getElementById('alljobs-prompt'), table=document.getElementById('alljobs-table'), tbody=document.getElementById('alljobs-tbody');
-  if (!jobs||!jobs.length) { prompt.textContent='No job folders found.'; prompt.style.display='block'; table.style.display='none'; return; }
-  prompt.style.display='none';
-  tbody.innerHTML = jobs.map(function(j,i) {
-    return '<tr><td class="cell-job" onclick="openAllJobModal('+i+')">'+esc(j.name)+'</td>'
-      +'<td style="color:var(--muted);font-size:11px;">'+esc(j.year)+'</td>'
-      +'<td>'+fmtListBadges(j.lists)+'</td></tr>';
+  var prompt = document.getElementById('alljobs-prompt');
+  var table  = document.getElementById('alljobs-table');
+  var tbody  = document.getElementById('alljobs-tbody');
+
+  if (!jobs || !jobs.length) {
+    prompt.textContent   = _allJobsCache && _allJobsCache.length ? 'No jobs match your search.' : 'No job folders found in index.';
+    prompt.style.display = 'block';
+    table.style.display  = 'none';
+    return;
+  }
+
+  prompt.style.display = 'none';
+  tbody.innerHTML = jobs.map(function(j, i) {
+    var srcBadge = j.source
+      ? '<span style="font-size:10px;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:0.5px;">'+esc(j.source)+'</span>'
+      : '';
+    return '<tr>'
+      + '<td class="cell-job" onclick="openAllJobModal('+i+')" style="line-height:1.3;">'
+      +   esc(j.name) + (srcBadge ? '<br>' + srcBadge : '')
+      + '</td>'
+      + '<td style="color:var(--muted);font-size:11px;white-space:nowrap;">'+esc(j.year)+'</td>'
+      + '<td>'+fmtListBadges(j.lists)+'</td>'
+      + '</tr>';
   }).join('');
-  table.style.display='table';
+  table.style.display = 'table';
 }
 
 function renderAllJobsMobile(jobs) {
-  var body=document.getElementById('mobile-alljobs-body');
-  if (!jobs||!jobs.length) { body.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);">No folders found.</div>'; return; }
+  var body = document.getElementById('mobile-alljobs-body');
+  if (!jobs || !jobs.length) {
+    body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);">'
+      + (_allJobsCache && _allJobsCache.length ? 'No jobs match your search.' : 'No folders found.') + '</div>';
+    return;
+  }
   window._mobileAllJobs = jobs;
-  body.innerHTML='<table><thead><tr><th>Folder</th><th>Year</th><th>Lists</th></tr></thead><tbody>'
-    +jobs.map(function(j,i){ return '<tr><td class="cell-job" onclick="openAllJobModalMobile('+i+')">'+esc(j.name)+'</td><td style="color:var(--muted);font-size:11px;">'+esc(j.year)+'</td><td>'+fmtListBadges(j.lists)+'</td></tr>'; }).join('')
-    +'</tbody></table>';
+  body.innerHTML = '<table><thead><tr><th>Folder</th><th>Year</th><th>Lists</th></tr></thead><tbody>'
+    + jobs.map(function(j, i) {
+        return '<tr>'
+          + '<td class="cell-job" onclick="openAllJobModalMobile('+i+')" style="line-height:1.3;">'
+          +   esc(j.name)
+          +   (j.source ? '<br><span style="font-size:10px;color:var(--muted);">'+esc(j.source)+'</span>' : '')
+          + '</td>'
+          + '<td style="color:var(--muted);font-size:11px;">'+esc(j.year)+'</td>'
+          + '<td>'+fmtListBadges(j.lists)+'</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table>';
 }
 
 function fmtListBadges(lists) {
-  if (!lists||!lists.length) return '<span class="no-info">No List Information Available</span>';
+  if (!lists || !lists.length) return '<span class="no-info">No List Information Available</span>';
   return lists.map(function(l){ return '<span class="alljob-list-num">'+esc(String(l.listNum))+'</span> '; }).join('');
 }
 
@@ -1417,6 +1524,8 @@ function switchView(v) {
   document.getElementById('view-'+v).classList.add('active');
   currentView=v; closeNav();
   if(v==='calendar'&&_fcMobile) setTimeout(function(){ _fcMobile.updateSize(); },50);
+  // Pre-load index the first time the All Jobs mobile view is opened
+  if(v==='alljobs' && _allJobsCache === null && !_indexLoaded) loadAllJobsListMobile();
 }
 
 // ══ API FETCH ══════════════════════════════════════════════════
