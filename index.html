@@ -25,128 +25,58 @@
     --muted:     #666;
     --red:       #e04444;
     --green:     #4caf7d;
+    --blue:      #4a9eff;
     --row-hover: #1c1c1c;
     --header-h:  56px;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html, body {
-    height: 100%;
-    overflow: hidden;
-    touch-action: none;
-    overscroll-behavior: none;
-    background: var(--black);
-    color: var(--white);
-    font-family: 'Barlow', sans-serif;
-    font-size: 13px;
+    height: 100%; overflow: hidden; touch-action: none;
+    overscroll-behavior: none; background: var(--black);
+    color: var(--white); font-family: 'Barlow', sans-serif; font-size: 13px;
   }
-
-  /* ══ SHARED SPINNER ══════════════════════════════════════════ */
-  .spinner-wrap {
-    width: 56px; height: 56px;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .spinner-wrap { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
   .spinner-wrap svg { width: 56px; height: 56px; display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
   svg g[style*="animation"] { transform-box: fill-box; transform-origin: center center; }
-
-  /* ══ TOP HEADER BAR ══════════════════════════════════════════ */
   .topbar {
-    height: var(--header-h);
-    background: var(--dark);
-    border-bottom: 2px solid var(--orange);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
+    height: var(--header-h); background: var(--dark); border-bottom: 2px solid var(--orange);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   }
-
   .topbar-logo { display: flex; align-items: center; overflow: visible; }
   .topbar-logo svg { height: 34px; width: auto; display: block; overflow: visible; }
-
   .topbar-clock {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px; font-weight: 600;
-    letter-spacing: 2px; color: var(--white);
-    text-align: right; line-height: 1.1;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 600;
+    letter-spacing: 2px; color: var(--white); text-align: right; line-height: 1.1;
   }
-  .topbar-clock .date-line {
-    font-size: 11px; font-weight: 400;
-    color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
-  }
-
-  /* Hamburger button — hidden on TV, shown on mobile */
+  .topbar-clock .date-line { font-size: 11px; font-weight: 400; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   .hamburger {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    width: 36px; height: 36px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 7px;
-    flex-shrink: 0;
+    display: none; flex-direction: column; justify-content: center; gap: 5px;
+    width: 36px; height: 36px; background: none; border: 1px solid var(--border);
+    border-radius: 4px; cursor: pointer; padding: 7px; flex-shrink: 0;
   }
-  .hamburger span {
-    display: block;
-    height: 2px;
-    background: var(--white);
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
+  .hamburger span { display: block; height: 2px; background: var(--white); border-radius: 2px; transition: all 0.2s; }
   .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .hamburger.open span:nth-child(2) { opacity: 0; }
   .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-  /* ══ TV LAYOUT ═══════════════════════════════════════════════ */
-  .dashboard {
-    position: fixed;
-    top: var(--header-h);
-    left: 0; right: 0; bottom: 0;
-    display: grid;
-    grid-template-columns: 42% 58%;
-  }
-
-  .left-panel {
-    display: flex;
-    flex-direction: column;
-    border-right: 2px solid var(--border);
-    overflow: hidden;
-  }
-
+  .dashboard { position: fixed; top: var(--header-h); left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 42% 58%; }
+  .left-panel { display: flex; flex-direction: column; border-right: 2px solid var(--border); overflow: hidden; }
   .cal-month { border-bottom: 2px solid var(--border); padding: 0; flex-shrink: 0; }
   #fc-month { width: 100%; }
   #fc-month .fc { width: 100%; }
   #fc-month .fc-view-harness { height: auto !important; }
   #fc-mobile-month { width: 100%; }
   .cal-agendas { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
-
-  .agenda-block {
-    display: flex; flex-direction: column;
-    overflow: hidden; background: var(--dark);
-  }
+  .agenda-block { display: flex; flex-direction: column; overflow: hidden; background: var(--dark); }
   .agenda-block:first-child { border-right: 1px solid var(--border); }
-
   .agenda-label {
-    height: 26px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 12px;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--orange); flex-shrink: 0;
+    height: 26px; display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px;
+    letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); flex-shrink: 0;
   }
-
   .agenda-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0; }
-
-  /* ── FullCalendar overrides ── */
   .fc { font-family: 'Barlow', sans-serif; font-size: 11px; }
   .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border); }
   .fc-theme-standard .fc-scrollgrid { border-color: var(--border); width: 100%; }
@@ -165,93 +95,131 @@
     font-weight: 700; font-size: 11px; letter-spacing: 1px;
     text-transform: uppercase; text-decoration: none; padding: 4px;
   }
-  .fc .fc-toolbar { display: none; } /* hide nav — we control it */
+  .fc .fc-toolbar { display: none; }
   .fc-event {
-    background: var(--orange) !important;
-    border-color: var(--orange) !important;
-    color: var(--black) !important;
-    font-size: 11px !important; font-weight: 600;
-    border-radius: 3px; padding: 2px 5px !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    cursor: pointer;
+    background: var(--orange) !important; border-color: var(--orange) !important;
+    color: var(--black) !important; font-size: 11px !important; font-weight: 600;
+    border-radius: 3px; padding: 2px 5px !important; white-space: normal !important;
+    overflow: visible !important; cursor: pointer;
   }
-  .fc-event.fc-event-outlook {
-    background: #4a9eff !important;
-    border-color: #4a9eff !important;
-    color: #000 !important;
-  }
-  .fc-event.fc-event-holiday {
-    background: #AAA7AD !important;
-    border-color: #AAA7AD !important;
-    color: #000 !important;
-  }
+  .fc-event.fc-event-outlook { background: #4a9eff !important; border-color: #4a9eff !important; color: #000 !important; }
+  .fc-event.fc-event-holiday { background: #AAA7AD !important; border-color: #AAA7AD !important; color: #000 !important; }
   .fc-event:hover { opacity: 0.85; }
   .fc-event-title { white-space: normal !important; word-break: break-word; line-height: 1.3; }
-  .fc-event-time  { display: none !important; }
-  .fc-daygrid-event-dot  { display: none !important; }
-  .fc-daygrid-event      { white-space: normal !important; margin-bottom: 2px !important; }
+  .fc-event-time { display: none !important; }
+  .fc-daygrid-event-dot { display: none !important; }
+  .fc-daygrid-event { white-space: normal !important; margin-bottom: 2px !important; }
   .fc-daygrid-block-event .fc-event-title { padding: 0 !important; }
-
   .cal-legend {
-    display: flex; align-items: center; gap: 4px;
-    padding: 2px 10px 5px; flex-shrink: 0;
-    font-size: 10px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 4px; padding: 2px 10px 5px; flex-shrink: 0;
+    font-size: 10px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
   }
-  .cal-legend-dot {
-    display: inline-block; width: 8px; height: 8px;
-    border-radius: 2px; flex-shrink: 0;
-  }
-
+  .cal-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
   .cal-nav {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 5px 8px 4px; flex-shrink: 0;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 4px;
+    flex-shrink: 0; background: var(--panel); border-bottom: 1px solid var(--border);
   }
   .cal-nav-btn {
-    background: none; border: 1px solid var(--border);
-    color: var(--white); width: 26px; height: 26px;
-    border-radius: 4px; cursor: pointer; font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.12s; line-height: 1;
+    background: none; border: 1px solid var(--border); color: var(--white);
+    width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.12s; line-height: 1;
   }
   .cal-nav-btn:hover { border-color: var(--orange); color: var(--orange); }
   .cal-nav-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 14px;
-    letter-spacing: 1px; text-transform: uppercase;
-    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--white);
   }
   .cal-nav-today {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); padding: 2px 8px;
-    border-radius: 4px; cursor: pointer; font-size: 10px;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;
     font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-    letter-spacing: 0.5px; text-transform: uppercase;
-    transition: all 0.12s;
+    letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.12s;
   }
   .cal-nav-today:hover { border-color: var(--orange); color: var(--orange); }
-
-  /* ── Dropbox photo upload ── */
-  .photo-section {
-    border-top: 1px solid var(--border);
-    padding: 10px 16px 14px;
+  .right-panel { display: flex; flex-direction: column; overflow: hidden; background: var(--black); }
+  .jobs-header {
+    height: 40px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; background: var(--panel); border-bottom: 2px solid var(--orange); flex-shrink: 0;
   }
+  .jobs-title {
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange);
+  }
+  .jobs-tab-row {
+    display: flex; gap: 0; height: 34px; flex-shrink: 0;
+    background: var(--dark); border-bottom: 1px solid var(--border);
+  }
+  .jobs-tab {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none;
+  }
+  .jobs-tab:hover { color: var(--white); }
+  .jobs-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .jobs-tab:first-child { border-right: 1px solid var(--border); }
+  .jobs-hint { font-size: 11px; color: var(--muted); }
+  .jobs-body { flex: 1; overflow-y: auto; overflow-x: hidden; touch-action: pan-y; }
+  .alljobs-search-bar {
+    display: none; padding: 8px 14px; background: var(--dark);
+    border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 8px; align-items: center;
+  }
+  .alljobs-search-bar.visible { display: flex; }
+  .alljobs-search-input {
+    flex: 1; background: var(--panel); border: 1px solid var(--border); color: var(--white);
+    border-radius: 3px; padding: 5px 10px; font-size: 12px; font-family: 'Barlow', sans-serif;
+    outline: none; transition: border-color 0.12s;
+  }
+  .alljobs-search-input:focus { border-color: var(--orange); }
+  .alljobs-search-input::placeholder { color: var(--muted); }
+  .alljobs-search-btn {
+    background: var(--orange); border: none; color: var(--black);
+    border-radius: 3px; padding: 5px 14px; font-size: 11px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+    transition: opacity 0.12s; white-space: nowrap;
+  }
+  .alljobs-search-btn:hover { opacity: 0.85; }
+  .alljobs-load-btn {
+    background: var(--panel); border: 1px solid var(--border); color: var(--white);
+    border-radius: 3px; padding: 5px 14px; font-size: 11px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+    transition: all 0.12s; white-space: nowrap;
+  }
+  .alljobs-load-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 20px; color: var(--muted); padding-bottom: 40px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    position: sticky; top: 0; background: var(--panel); color: var(--orange);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px;
+    letter-spacing: 1px; text-transform: uppercase; padding: 8px 14px; text-align: left;
+    border-bottom: 1px solid var(--orange); white-space: nowrap; z-index: 2;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  tbody tr:hover { background: var(--row-hover); }
+  tbody td { padding: 9px 14px; vertical-align: middle; color: var(--white); }
+  .cell-job, .cell-lists { cursor: pointer; transition: color 0.12s; }
+  .cell-job:hover, .cell-lists:hover { color: var(--orange); }
+  .cell-job::after, .cell-lists::after { content: ' ↗'; font-size: 10px; opacity: 0; transition: opacity 0.12s; color: var(--orange); }
+  .cell-job:hover::after, .cell-lists:hover::after { opacity: 1; }
+  .no-date  { color: var(--red) !important; font-weight: 700 !important; }
+  .has-date { color: var(--green); font-weight: 500; }
+  .no-info  { color: var(--muted); font-style: italic; font-size: 11px; }
+  .jobs-body::-webkit-scrollbar { width: 4px; }
+  .jobs-body::-webkit-scrollbar-track { background: var(--dark); }
+  .jobs-body::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .photo-section { border-top: 1px solid var(--border); padding: 10px 16px 14px; }
   .photo-section-label {
-    font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.8px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; margin-bottom: 8px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; margin-bottom: 8px;
   }
   .photo-btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
   .photo-upload-btn, .photo-view-btn {
-    display: flex; align-items: center; gap: 6px;
-    border: none; border-radius: 3px;
-    padding: 6px 14px; font-size: 11px; font-weight: 700;
-    cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 0.5px; transition: opacity 0.12s;
+    display: flex; align-items: center; gap: 6px; border: none; border-radius: 3px;
+    padding: 6px 14px; font-size: 11px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; transition: opacity 0.12s;
   }
   .photo-upload-btn { background: var(--orange); color: var(--black); }
   .photo-view-btn   { background: var(--panel); color: var(--white); border: 1px solid var(--border); }
@@ -259,19 +227,55 @@
   .photo-upload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .photo-status { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; }
   .photo-progress { margin-top: 6px; }
-  .photo-progress-bar {
-    height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+  .photo-progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .photo-progress-fill { height: 100%; background: var(--orange); border-radius: 2px; transition: width 0.2s; width: 0%; }
+  /* Rename modal */
+  .rename-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px);
   }
-  .photo-progress-fill {
-    height: 100%; background: var(--orange);
-    border-radius: 2px; transition: width 0.2s;
-    width: 0%;
+  .rename-overlay.open { display: flex; }
+  .rename-modal {
+    background: var(--dark); border: 1px solid var(--border); border-top: 3px solid var(--orange);
+    border-radius: 6px; width: 100%; max-width: 540px; max-height: 80vh;
+    display: flex; flex-direction: column; animation: slideUp 0.18s ease;
   }
-
-  /* ── Slideshow ── */
+  .rename-header {
+    padding: 14px 18px 10px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .rename-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; color: var(--white); }
+  .rename-subtitle { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .rename-body { overflow-y: auto; padding: 14px 18px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .rename-file-row {
+    display: flex; flex-direction: column; gap: 5px; padding: 10px 12px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+  }
+  .rename-original { font-size: 10px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
+  .rename-input-row { display: flex; align-items: center; gap: 8px; }
+  .rename-input {
+    flex: 1; background: var(--black); border: 1px solid var(--border); color: var(--white);
+    border-radius: 3px; padding: 6px 10px; font-size: 12px; font-family: 'Barlow', sans-serif;
+    outline: none; transition: border-color 0.12s;
+  }
+  .rename-input:focus { border-color: var(--orange); }
+  .rename-ext { font-size: 12px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; white-space: nowrap; }
+  .rename-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  .rename-cancel-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 3px;
+    padding: 7px 18px; font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; transition: all 0.12s;
+  }
+  .rename-cancel-btn:hover { border-color: var(--red); color: var(--red); }
+  .rename-confirm-btn {
+    background: var(--orange); border: none; color: var(--black); border-radius: 3px;
+    padding: 7px 22px; font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; transition: opacity 0.12s;
+  }
+  .rename-confirm-btn:hover { opacity: 0.85; }
+  /* Slideshow */
   .slideshow-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.95); z-index: 9999;
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999;
     flex-direction: column; align-items: center; justify-content: center;
   }
   .slideshow-overlay.open { display: flex; }
@@ -283,504 +287,215 @@
   .slideshow-title { font-size: 13px; color: var(--white); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
   .slideshow-counter { font-size: 12px; color: var(--muted); }
   .slideshow-close {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); width: 28px; height: 28px;
-    border-radius: 3px; cursor: pointer; font-size: 16px;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    width: 28px; height: 28px; border-radius: 3px; cursor: pointer; font-size: 16px;
     display: flex; align-items: center; justify-content: center;
   }
   .slideshow-close:hover { border-color: var(--orange); color: var(--orange); }
-  .slideshow-img-wrap {
-    display: flex; align-items: center; justify-content: center;
-    width: 100%; height: 100%; padding: 60px 80px;
-  }
-  .slideshow-img {
-    max-width: 100%; max-height: 100%;
-    object-fit: contain; border-radius: 4px;
-  }
+  .slideshow-img-wrap { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 60px 80px; }
+  .slideshow-img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; }
   .slideshow-nav {
     position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(0,0,0,0.5); border: 1px solid var(--border);
-    color: var(--white); width: 40px; height: 40px;
-    border-radius: 4px; cursor: pointer; font-size: 20px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.12s;
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--white);
+    width: 40px; height: 40px; border-radius: 4px; cursor: pointer; font-size: 20px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.12s;
   }
   .slideshow-nav:hover { background: var(--orange); border-color: var(--orange); color: var(--black); }
   .slideshow-prev { left: 12px; }
   .slideshow-next { right: 12px; }
   .slideshow-loading { color: var(--muted); font-size: 13px; }
-  .installer-section {
-    border-top: 1px solid var(--border);
-    padding: 10px 16px 14px;
-  }
+  /* Installer section */
+  .installer-section { border-top: 1px solid var(--border); padding: 10px 16px 14px; }
   .installer-section-label {
-    font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.8px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; margin-bottom: 8px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; margin-bottom: 8px;
   }
-  .installer-tags {
-    display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
-  }
+  .installer-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
   .installer-tag {
-    display: flex; align-items: center; gap: 5px;
-    background: rgba(245,166,35,0.12);
-    border: 1px solid rgba(245,166,35,0.3);
-    color: var(--orange); border-radius: 3px;
+    display: flex; align-items: center; gap: 5px; background: rgba(245,166,35,0.12);
+    border: 1px solid rgba(245,166,35,0.3); color: var(--orange); border-radius: 3px;
     padding: 3px 8px; font-size: 11px; font-weight: 600;
     font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
   }
+  .installer-tag.readonly { background: rgba(74,158,255,0.10); border-color: rgba(74,158,255,0.3); color: var(--blue); }
   .installer-tag-remove {
-    background: none; border: none; color: var(--orange);
-    cursor: pointer; font-size: 13px; padding: 0; line-height: 1;
-    opacity: 0.6; transition: opacity 0.12s;
+    background: none; border: none; color: var(--orange); cursor: pointer;
+    font-size: 13px; padding: 0; line-height: 1; opacity: 0.6; transition: opacity 0.12s;
   }
   .installer-tag-remove:hover { opacity: 1; }
-  .installer-add-row {
-    display: flex; gap: 6px; align-items: center;
-  }
+  .installer-add-row { display: flex; gap: 6px; align-items: center; }
   .installer-select {
-    flex: 1; background: var(--panel);
-    border: 1px solid var(--border); color: var(--white);
-    border-radius: 3px; padding: 5px 8px; font-size: 12px;
-    font-family: 'Barlow', sans-serif; outline: none;
-    transition: border-color 0.12s; cursor: pointer;
+    flex: 1; background: var(--panel); border: 1px solid var(--border); color: var(--white);
+    border-radius: 3px; padding: 5px 8px; font-size: 12px; font-family: 'Barlow', sans-serif;
+    outline: none; transition: border-color 0.12s; cursor: pointer;
   }
   .installer-select:focus { border-color: var(--orange); }
   .installer-add-btn {
-    background: var(--orange); border: none; color: var(--black);
-    border-radius: 3px; padding: 5px 12px;
-    font-size: 11px; font-weight: 700; cursor: pointer;
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 0.5px; transition: opacity 0.12s; white-space: nowrap;
+    background: var(--orange); border: none; color: var(--black); border-radius: 3px;
+    padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+    transition: opacity 0.12s; white-space: nowrap;
   }
   .installer-add-btn:hover { opacity: 0.85; }
   .installer-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .installer-empty { font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 8px; }
+  /* Event popup */
   .event-popup-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75); z-index: 300;
-    align-items: center; justify-content: center;
-    padding: 20px; backdrop-filter: blur(4px);
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);
   }
   .event-popup-overlay.open { display: flex; }
   .event-popup {
-    background: var(--dark);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--orange);
-    border-radius: 6px; width: 100%;
-    max-width: 420px;
-    animation: slideUp 0.15s ease;
+    background: var(--dark); border: 1px solid var(--border); border-top: 3px solid var(--orange);
+    border-radius: 6px; width: 100%; max-width: 420px; animation: slideUp 0.15s ease;
   }
   .event-popup-header {
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 10px;
+    padding: 14px 16px 10px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
   }
-  .event-popup-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 17px; color: var(--white);
-    line-height: 1.2;
-  }
+  .event-popup-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; color: var(--white); line-height: 1.2; }
   .event-popup-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
   .event-popup-row { display: flex; gap: 8px; align-items: flex-start; }
   .event-popup-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
   .event-popup-text { font-size: 12px; color: var(--white); line-height: 1.4; }
   .event-popup-text.muted { color: var(--muted); }
-  .agenda-event { cursor: pointer; transition: background 0.12s; }
-  .agenda-event:hover { background: var(--panel); }
-
-  /* Agenda list styles */
-  .agenda-event {
-    display: flex; flex-direction: column;
-    padding: 7px 12px;
-    border-bottom: 1px solid var(--border);
-    gap: 2px;
-  }
+  .agenda-event { cursor: pointer; transition: background 0.12s; display: flex; flex-direction: column; padding: 7px 12px; border-bottom: 1px solid var(--border); gap: 2px; }
   .agenda-event:last-child { border-bottom: none; }
-  .agenda-event-time {
-    font-size: 10px; color: var(--orange);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600; letter-spacing: 0.5px;
-  }
+  .agenda-event:hover { background: var(--panel); }
+  .agenda-event-time { font-size: 10px; color: var(--orange); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
   .agenda-event-title { font-size: 12px; color: var(--white); font-weight: 500; }
   .agenda-event-loc { font-size: 10px; color: var(--muted); }
   .agenda-empty { padding: 16px 12px; color: var(--muted); font-size: 11px; font-style: italic; }
-
-  /* ══ RIGHT PANEL — JOBS TABLE ════════════════════════════════ */
-  .right-panel {
-    display: flex; flex-direction: column;
-    overflow: hidden; background: var(--black);
-  }
-
-  .jobs-header {
-    height: 40px;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px;
-    background: var(--panel);
-    border-bottom: 2px solid var(--orange);
-    flex-shrink: 0;
-  }
-
-  .jobs-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 13px;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--orange);
-  }
-
-  .jobs-hint { font-size: 11px; color: var(--muted); }
-
-  .jobs-body { flex: 1; overflow-y: auto; overflow-x: hidden; touch-action: pan-y; }
-
-  /* Loading state */
-  .loading {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    height: 100%; gap: 20px;
-    color: var(--muted); padding-bottom: 40px;
-  }
-
-  /* Table */
-  table { width: 100%; border-collapse: collapse; }
-
-  thead th {
-    position: sticky; top: 0;
-    background: var(--panel); color: var(--orange);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 12px;
-    letter-spacing: 1px; text-transform: uppercase;
-    padding: 8px 14px; text-align: left;
-    border-bottom: 1px solid var(--orange);
-    white-space: nowrap; z-index: 2;
-  }
-
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
-  tbody tr:hover { background: var(--row-hover); }
-  tbody td { padding: 9px 14px; vertical-align: middle; color: var(--white); }
-
-  .cell-job, .cell-lists { cursor: pointer; transition: color 0.12s; }
-  .cell-job:hover, .cell-lists:hover { color: var(--orange); }
-  .cell-job::after, .cell-lists::after {
-    content: ' ↗'; font-size: 10px; opacity: 0;
-    transition: opacity 0.12s; color: var(--orange);
-  }
-  .cell-job:hover::after, .cell-lists:hover::after { opacity: 1; }
-
-  .no-date  { color: var(--red) !important; font-weight: 700 !important; }
-  .has-date { color: var(--green); font-weight: 500; }
-
-  .jobs-body::-webkit-scrollbar       { width: 4px; }
-  .jobs-body::-webkit-scrollbar-track { background: var(--dark); }
-  .jobs-body::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-  /* ══ MODAL ═══════════════════════════════════════════════════ */
+  /* Modal */
   .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.82); z-index: 200;
-    align-items: center; justify-content: center;
-    padding: 20px; backdrop-filter: blur(6px);
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 200;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px);
   }
   .modal-overlay.open { display: flex; }
-
   .modal {
-    background: var(--dark);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--orange);
-    border-radius: 4px; width: 100%;
-    max-width: 1000px; max-height: 80vh;
-    display: flex; flex-direction: column;
-    animation: slideUp 0.18s ease;
+    background: var(--dark); border: 1px solid var(--border); border-top: 3px solid var(--orange);
+    border-radius: 4px; width: 100%; max-width: 1000px; max-height: 80vh;
+    display: flex; flex-direction: column; animation: slideUp 0.18s ease;
   }
-  @keyframes slideUp {
-    from { transform: translateY(16px); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
-
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .modal-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 12px; flex-shrink: 0;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-shrink: 0;
   }
-
-  .modal-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 18px;
-  }
+  .modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; }
   .modal-subtitle { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
   .modal-close {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); width: 28px; height: 28px;
-    border-radius: 3px; cursor: pointer; font-size: 16px;
-    flex-shrink: 0; transition: all 0.12s;
-    display: flex; align-items: center; justify-content: center;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    width: 28px; height: 28px; border-radius: 3px; cursor: pointer; font-size: 16px;
+    flex-shrink: 0; transition: all 0.12s; display: flex; align-items: center; justify-content: center;
   }
   .modal-close:hover { border-color: var(--orange); color: var(--orange); }
-
-  .modal-body {
-    overflow-y: auto; overflow-x: hidden;
-    padding: 14px 18px 18px; font-size: 13px; min-height: 120px;
-    touch-action: pan-y;
-  }
-
-  .modal-loading {
-    display: flex; align-items: center; justify-content: center;
-    gap: 14px; padding: 48px 32px; color: var(--muted);
-    overflow: visible; min-height: 120px;
-  }
-
+  .modal-body { overflow-y: auto; overflow-x: hidden; padding: 14px 18px 18px; font-size: 13px; min-height: 120px; touch-action: pan-y; }
+  .modal-loading { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 48px 32px; color: var(--muted); overflow: visible; min-height: 120px; }
   .modal-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .modal-table thead th { position: static; font-size: 11px; padding: 7px 10px; border-bottom-width: 1px; }
   .modal-table tbody td { padding: 8px 10px; }
   .modal-table tbody tr:last-child { border-bottom: none; }
-
-  /* Editable date cell */
-  .date-cell {
-    display: flex; align-items: center; gap: 6px; white-space: nowrap;
-  }
+  .date-cell { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
   .date-edit-btn {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); border-radius: 3px;
-    padding: 2px 6px; font-size: 10px; cursor: pointer;
-    transition: all 0.12s; white-space: nowrap;
-    font-family: 'Barlow', sans-serif;
+    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 3px;
+    padding: 2px 6px; font-size: 10px; cursor: pointer; transition: all 0.12s; white-space: nowrap; font-family: 'Barlow', sans-serif;
   }
   .date-edit-btn:hover { border-color: var(--orange); color: var(--orange); }
-  .date-input-wrap {
-    display: flex; align-items: center; gap: 4px;
-  }
-  .date-input {
-    background: var(--panel); border: 1px solid var(--orange);
-    color: var(--white); border-radius: 3px;
-    padding: 3px 6px; font-size: 11px;
-    font-family: 'Barlow', sans-serif;
-    outline: none;
-  }
-  .date-save-btn {
-    background: var(--orange); border: none;
-    color: var(--black); border-radius: 3px;
-    padding: 3px 8px; font-size: 10px; font-weight: 700;
-    cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 0.5px; transition: opacity 0.12s;
-  }
+  .date-input-wrap { display: flex; align-items: center; gap: 4px; }
+  .date-input { background: var(--panel); border: 1px solid var(--orange); color: var(--white); border-radius: 3px; padding: 3px 6px; font-size: 11px; font-family: 'Barlow', sans-serif; outline: none; }
+  .date-save-btn { background: var(--orange); border: none; color: var(--black); border-radius: 3px; padding: 3px 8px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; transition: opacity 0.12s; }
   .date-save-btn:hover { opacity: 0.85; }
-  .date-cancel-btn {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); border-radius: 3px;
-    padding: 3px 6px; font-size: 10px; cursor: pointer;
-    font-family: 'Barlow', sans-serif; transition: all 0.12s;
-  }
+  .date-cancel-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 3px; padding: 3px 6px; font-size: 10px; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.12s; }
   .date-cancel-btn:hover { border-color: var(--red); color: var(--red); }
-
   .status-yes { color: var(--green); font-size: 15px; }
   .status-no  { color: var(--red);   font-size: 15px; }
-
-  .assigned-tag {
-    background: rgba(245,166,35,0.12); color: var(--orange);
-    border: 1px solid rgba(245,166,35,0.25);
-    padding: 1px 7px; border-radius: 3px; font-size: 11px; font-weight: 600;
-  }
-
+  .assigned-tag { background: rgba(245,166,35,0.12); color: var(--orange); border: 1px solid rgba(245,166,35,0.25); padding: 1px 7px; border-radius: 3px; font-size: 11px; font-weight: 600; }
   .empty-state { text-align: center; padding: 32px; color: var(--muted); font-style: italic; }
-
-  /* ── Mobile modal cards ── */
+  /* All Jobs modal */
+  .alljob-section { margin-bottom: 16px; }
+  .alljob-section-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--orange); margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+  .alljob-list-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .alljob-list-item:last-child { border-bottom: none; }
+  .alljob-list-num { background: rgba(245,166,35,0.12); color: var(--orange); border: 1px solid rgba(245,166,35,0.25); padding: 1px 7px; border-radius: 3px; font-size: 11px; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; flex-shrink: 0; }
+  .alljob-list-name { color: var(--white); }
+  .alljob-list-file { color: var(--muted); font-size: 10px; }
+  /* Mobile cards */
   .item-cards { display: none; flex-direction: column; gap: 10px; padding: 12px; }
-  .item-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--orange);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .card-top {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 8px;
-    padding: 10px 12px 6px;
-  }
-  .card-list-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 13px;
-    color: var(--orange); letter-spacing: 1px;
-  }
-  .card-item-name {
-    font-size: 13px; color: var(--white);
-    font-weight: 500; padding: 0 12px 8px;
-    line-height: 1.3;
-  }
-  .card-status-row {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .card-status-cell {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 8px 4px; gap: 3px;
-  }
+  .item-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 6px; overflow: hidden; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 10px 12px 6px; }
+  .card-list-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; color: var(--orange); letter-spacing: 1px; }
+  .card-item-name { font-size: 13px; color: var(--white); font-weight: 500; padding: 0 12px 8px; line-height: 1.3; }
+  .card-status-row { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .card-status-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; gap: 3px; }
   .card-status-cell:not(:last-child) { border-right: 1px solid var(--border); }
-  .card-status-label {
-    font-size: 9px; text-transform: uppercase;
-    letter-spacing: 0.5px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-  }
+  .card-status-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
   .card-status-val { font-size: 16px; }
-  .card-date-row {
-    display: flex; align-items: center;
-    justify-content: space-between; gap: 8px;
-    padding: 8px 12px;
+  .card-date-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; }
+  .card-date-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; white-space: nowrap; }
+  /* Clickable list item in All Jobs modal */
+  .alljob-list-item.has-pdf {
+    cursor: pointer; transition: background 0.12s;
   }
-  .card-date-label {
-    font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.5px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
-    white-space: nowrap;
-  }
+  .alljob-list-item.has-pdf:hover { background: var(--panel); border-radius: 3px; }
+  .pdf-icon { font-size: 13px; flex-shrink: 0; opacity: 0.6; }
+  .alljob-list-item.has-pdf:hover .pdf-icon { opacity: 1; }
 
-  /* TV zoom */
-  @media (min-width: 769px) {
-    html { zoom: 75%; }
-  }
-
-  /* ══ MOBILE STYLES ═══════════════════════════════════════════ */
+  @media (min-width: 769px) { html { zoom: 75%; } }
   .mobile-views { display: none; }
   .mobile-nav   { display: none; }
   .nav-overlay  { display: none; }
-
   @media (max-width: 768px) {
-
     html, body { overflow: hidden; }
-
-    /* Scale reset for mobile */
     html { zoom: 1; }
-
-    /* Topbar adjustments */
     .topbar { height: 52px; padding: 0 14px; }
     .topbar-logo svg { height: 26px; }
     .topbar-clock { font-size: 17px; }
     .topbar-clock .date-line { font-size: 10px; }
     .hamburger { display: flex; }
-
-    /* Hide TV layout, show mobile layout */
     .dashboard { display: none; }
     .mobile-views { display: block; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; }
-
-    /* ── Mobile nav drawer ── */
-    .mobile-nav {
-      display: block;
-      position: fixed;
-      top: 52px; right: 0;
-      width: 220px;
-      background: var(--dark);
-      border-left: 2px solid var(--orange);
-      border-bottom: 2px solid var(--border);
-      z-index: 90;
-      transform: translateX(100%);
-      transition: transform 0.25s ease;
-      border-radius: 0 0 0 8px;
-    }
+    .mobile-nav { display: block; position: fixed; top: 52px; right: 0; width: 220px; background: var(--dark); border-left: 2px solid var(--orange); border-bottom: 2px solid var(--border); z-index: 90; transform: translateX(100%); transition: transform 0.25s ease; border-radius: 0 0 0 8px; }
     .mobile-nav.open { transform: translateX(0); }
-
-    .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700; font-size: 15px;
-      letter-spacing: 1px; text-transform: uppercase;
-      color: var(--white);
-      transition: all 0.15s;
-    }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 1px; text-transform: uppercase; color: var(--white); transition: all 0.15s; }
     .nav-item:last-child { border-bottom: none; }
     .nav-item:hover { background: var(--panel); color: var(--orange); }
     .nav-item.active { color: var(--orange); background: var(--panel); }
     .nav-item .nav-icon { font-size: 18px; width: 24px; text-align: center; }
-    .nav-overlay {
-      display: none; position: fixed; inset: 0; z-index: 89;
-      background: rgba(0,0,0,0.4);
-    }
+    .nav-overlay { display: none; position: fixed; inset: 0; z-index: 89; background: rgba(0,0,0,0.4); }
     .nav-overlay.open { display: block; }
-
-    /* ── Mobile views ── */
-    .mobile-views {
-      position: fixed;
-      top: 52px; left: 0; right: 0; bottom: 0;
-    }
-
-    .mobile-view {
-      display: none;
-      position: absolute; inset: 0;
-      flex-direction: column;
-    }
+    .mobile-views { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; }
+    .mobile-view { display: none; position: absolute; inset: 0; flex-direction: column; }
     .mobile-view.active { display: flex; }
-
-    /* Mobile view header strip */
-    .mobile-view-header {
-      height: 36px; flex-shrink: 0;
-      display: flex; align-items: center; padding: 0 14px;
-      background: var(--panel);
-      border-bottom: 2px solid var(--orange);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700; font-size: 13px;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--orange);
-    }
-
-    /* Jobs view */
-    .mobile-jobs-body {
-      flex: 1; overflow-y: auto; overflow-x: hidden; touch-action: pan-y;
-    }
-
-    .mobile-jobs-body::-webkit-scrollbar       { width: 3px; }
+    .mobile-view-header { height: 36px; flex-shrink: 0; display: flex; align-items: center; padding: 0 14px; background: var(--panel); border-bottom: 2px solid var(--orange); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); }
+    .mobile-jobs-body { flex: 1; overflow-y: auto; overflow-x: hidden; touch-action: pan-y; }
+    .mobile-jobs-body::-webkit-scrollbar { width: 3px; }
     .mobile-jobs-body::-webkit-scrollbar-track { background: var(--dark); }
     .mobile-jobs-body::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-    /* Mobile table tweaks */
     .mobile-jobs-body thead th { font-size: 11px; padding: 7px 10px; }
     .mobile-jobs-body tbody td { padding: 10px 10px; font-size: 12px; }
-
-    /* Calendar / agenda views */
-    .mobile-iframe-wrap {
-      flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;
-    }
-    #fc-mobile-month {
-      flex: 1; min-height: 0; overflow: hidden;
-      display: flex; flex-direction: column;
-    }
-
-    /* Mobile modal — centred */
+    .mobile-iframe-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    #fc-mobile-month { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
     .modal-overlay { padding: 16px; align-items: center; }
-    .modal {
-      max-height: 88vh; max-width: 100%;
-      border-radius: 8px;
-    }
-    /* Show cards, hide table on mobile */
+    .modal { max-height: 88vh; max-width: 100%; border-radius: 8px; }
     .modal-table { display: none; }
     .item-cards  { display: flex; }
-
-    /* Mobile modal tweaks */
     .modal-body { padding: 0 0 12px; }
     .modal-header { padding: 12px 14px; }
+    .rename-modal { max-width: 100%; }
   }
 </style>
 </head>
 <body>
-
 <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
 <header class="topbar">
   <div class="topbar-logo">
     <svg version="1.1" viewBox="0 0 1605.0933 198.42667" xmlns="http://www.w3.org/2000/svg"><g><g><path d="m 1452.43,1050.75 c -20.51,67.27 -55.46,120.36 -104.9,159.23 -48.5,38.89 -106.05,58.33 -172.65,58.33 H 370.789 L 173.848,985.945 h 926.612 c 38.12,0.614 66.51,-13.879 85.21,-43.511 19.49,-27.77 25.15,-64.801 17,-111.086 -7.83,-44.446 -26.57,-81.469 -56.18,-111.094 -28.71,-27.168 -62.21,-41.66 -100.54,-43.504 H 119.324 L 0,0 h 263.137 l 69.875,396.23 h 688.108 c 66.59,0 130.94,19.122 193.05,57.399 63.14,38.883 116.53,91.652 160.18,158.312 44.69,67.258 74.01,140.395 87.95,219.407 14.04,79.613 10.75,152.75 -9.87,219.402" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 1818.63,739.691 657.68,-0.918 c 30.96,0 57.65,11.711 80.09,35.172 23.94,24.075 38.77,53.696 44.51,88.875 6.99,37.035 2.61,66.653 -13.18,88.871 -13.93,24.676 -36.55,36.106 -67.83,34.254 h -657.86 z m 776.38,528.619 c 93.33,0 166.12,-39.51 218.33,-118.5 52.2,-79.01 68.46,-174.361 48.76,-286.06 -18.18,-103.082 -62.57,-192.559 -133.17,-268.477 -70.3,-74.062 -149.25,-117.562 -236.91,-130.535 L 2723.88,0 H 2417.81 L 2209.07,460.121 H 1769.33 L 1688.2,0 h -263.14 l 223.62,1268.31 h 946.33" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 3298.43,942.434 c -28.71,-27.157 -46.82,-62.024 -54.33,-104.606 l -71.82,-407.34 c -7.18,-40.726 -1.43,-75.918 17.27,-105.539 19.02,-27.769 45.83,-41.98 80.44,-42.59 h 598.75 c 35.51,1.852 67.38,16.352 95.61,43.512 29.17,29.629 47.27,64.488 54.35,104.617 l 71.83,407.34 c 7.51,42.582 1.74,77.762 -17.29,105.535 -18.13,30.235 -44.94,44.434 -80.44,42.582 h -598.75 c -34.6,0.614 -66.47,-13.879 -95.62,-43.511 z m 821.55,325.876 c 86.31,0 153.1,-36.1 200.44,-108.31 47.76,-72.22 62.37,-159.55 43.85,-261.996 L 4271.22,370.309 C 4253.62,267.859 4208.21,180.531 4134.97,108.32 4062.19,36.1094 3982.65,0 3896.35,0 h -753.54 c -85.84,0 -152.64,36.1094 -200.42,108.32 -47.31,72.211 -61.93,159.539 -43.86,261.989 l 93.05,527.695 c 18.06,102.446 63.47,189.776 136.25,261.996 73.24,72.21 152.78,108.31 238.61,108.31 h 753.54" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="M 5278.39,1268.31 5120.04,370.309 C 5101.98,267.859 5056.56,180.531 4983.79,108.32 4910.55,36.1094 4831.01,0 4745.17,0 h -429.19 l 49.79,282.359 h 351.8 c 34.81,0.61 66.4,14.821 94.75,42.59 29.61,29.621 48.02,64.813 55.2,105.539 l 147.72,837.822 h 263.15" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 6648.93,1268.31 -49.8,-282.365 H 5671.8 l -36.56,-207.367 h 803.5 L 6389.77,500.84 h -803.5 l -38.52,-218.481 h 927.32 L 6425.29,0 H 5234.82 l 223.63,1268.31 h 1190.48" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 7800.28,1268.31 c 86.31,0 153.11,-36.1 200.45,-108.31 47.75,-72.22 62.36,-159.55 43.84,-261.996 l -14.35,-81.465 h -263.15 l 3.76,21.289 c 7.5,42.582 1.74,77.762 -17.29,105.535 -18.13,30.235 -44.92,44.434 -80.43,42.582 h -577.65 c -33.66,0.614 -65.54,-13.879 -95.61,-43.511 -28.71,-27.157 -46.82,-62.024 -54.33,-104.606 l -71.83,-407.34 c -7.17,-40.726 -1.2,-75.918 17.98,-105.539 19.49,-27.769 46.07,-41.98 79.74,-42.59 h 577.64 c 35.51,1.852 67.37,16.352 95.61,43.512 29.16,29.629 47.27,64.488 54.35,104.617 l 3.41,19.434 h 263.15 l -14.04,-79.613 C 7933.92,267.859 7888.51,180.531 7815.28,108.32 7742.48,36.1094 7662.95,0 7576.65,0 h -732.43 c -85.84,0 -152.64,36.1094 -200.42,108.32 -47.31,72.211 -61.93,159.539 -43.86,261.989 l 93.04,527.695 c 18.07,102.446 63.73,189.776 136.97,261.996 73.23,72.21 152.54,108.31 237.9,108.31 h 732.43" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="M 9404.8,1268.31 9218.38,985.945 H 8896.94 L 8723.1,0 h -263.15 l 173.85,985.945 h -498.85 l 49.8,282.365 H 9404.8" style="fill:#ffffff;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 9562.82,469.801 c 8.66,21.137 21.1,39.554 37.5,55.133 25.92,25.945 53.7,38.925 83.28,38.925 h 476.6 c 106.9,0.704 206,45.411 297.2,134.051 91.6,90.82 148.6,200.012 171.2,327.59 22.6,128.28 4.3,237.47 -54.9,327.57 -59.7,90.1 -143.2,135.15 -250.6,135.15 h -510.2 -106.82 l -217.34,-329.11 -0.39,-0.63 -2.55,-3.67 c 19.22,0.24 296.08,0.42 298.78,0.42 h 451.12 c 31.2,0 54.4,-12.62 69.7,-37.84 17.2,-23.78 22.5,-54.43 15.9,-91.89 -6.4,-36.047 -22.2,-66.684 -47.5,-91.902 -25.3,-25.235 -53.2,-37.836 -83.9,-37.836 h -480.64 c -90.09,1.23 -174.83,-31.625 -254.29,-98.379 -13.09,-11.004 -26.06,-22.828 -38.86,-35.68 C 9326.4,672.324 9269.75,563.859 9246.16,436.281 L 9170.48,7.07031 h 294.43 984.09 l 57.5,326.49969 h -971.97 l 17.73,100.551 c 2.42,12.688 5.99,24.539 10.56,35.68" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/><path d="m 10963.1,469.801 c 8.7,21.137 21.1,39.554 37.5,55.133 25.9,25.945 53.7,38.925 83.3,38.925 h 476.5 c 107,0.704 206.1,45.411 297.3,134.051 91.6,90.82 148.6,200.012 171.1,327.59 22.6,128.28 4.4,237.47 -54.8,327.57 -59.7,90.1 -143.2,135.15 -250.6,135.15 h -510.2 -106.8 l -217.4,-329.11 -0.4,-0.63 -2.5,-3.67 c 19.2,0.24 296.1,0.42 298.8,0.42 h 451.1 c 31.2,0 54.4,-12.62 69.7,-37.84 17.1,-23.78 22.4,-54.43 15.8,-91.89 -6.3,-36.047 -22.1,-66.684 -47.4,-91.902 -25.3,-25.235 -53.2,-37.836 -83.9,-37.836 h -480.7 c -90,1.23 -174.8,-31.625 -254.3,-98.379 -13,-11.004 -26,-22.828 -38.8,-35.68 -89.7,-89.379 -146.4,-197.844 -170,-325.422 L 10570.8,7.07031 h 294.4 984.1 l 57.5,326.49969 h -972 l 17.7,100.551 c 2.5,12.688 6,24.539 10.6,35.68" style="fill:#f9a72b;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,198.42667)"/></g></g></svg>
   </div>
-
   <div class="topbar-clock" id="clock-wrap">
     <div id="clock-time">00:00:00</div>
     <div class="date-line" id="clock-date">—</div>
   </div>
-
-  <!-- Hamburger (mobile only) -->
   <button class="hamburger" id="hamburger" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
@@ -789,18 +504,11 @@
 <!-- ══ MOBILE NAV DRAWER ══════════════════════════════════════ -->
 <div class="nav-overlay" id="nav-overlay"></div>
 <nav class="mobile-nav" id="mobile-nav">
-  <div class="nav-item active" data-view="jobs" onclick="switchView('jobs')">
-    <span class="nav-icon">📋</span> Jobs
-  </div>
-  <div class="nav-item" data-view="calendar" onclick="switchView('calendar')">
-    <span class="nav-icon">📅</span> Calendar
-  </div>
-  <div class="nav-item" data-view="today" onclick="switchView('today')">
-    <span class="nav-icon">☀️</span> Today
-  </div>
-  <div class="nav-item" data-view="tomorrow" onclick="switchView('tomorrow')">
-    <span class="nav-icon">🌅</span> Tomorrow
-  </div>
+  <div class="nav-item active" data-view="jobs" onclick="switchView('jobs')"><span class="nav-icon">📋</span> Active Jobs</div>
+  <div class="nav-item" data-view="alljobs" onclick="switchView('alljobs')"><span class="nav-icon">🗂️</span> All Jobs</div>
+  <div class="nav-item" data-view="calendar" onclick="switchView('calendar')"><span class="nav-icon">📅</span> Calendar</div>
+  <div class="nav-item" data-view="today" onclick="switchView('today')"><span class="nav-icon">☀️</span> Today</div>
+  <div class="nav-item" data-view="tomorrow" onclick="switchView('tomorrow')"><span class="nav-icon">🌅</span> Tomorrow</div>
 </nav>
 
 <!-- ══ TV DASHBOARD GRID ══════════════════════════════════════ -->
@@ -836,44 +544,62 @@
 
   <div class="right-panel">
     <div class="jobs-header">
-      <div class="jobs-title">Active Jobs — Delivery Schedule</div>
-      <div class="jobs-hint">Click Job # or List # for details</div>
+      <div class="jobs-title" id="tv-jobs-title">Delivery Schedule</div>
+      <div class="jobs-hint" id="tv-jobs-hint">Click Job # or List # for details</div>
+    </div>
+    <div class="jobs-tab-row">
+      <div class="jobs-tab active" id="tab-active" onclick="setJobsTab('active')">📋 Active Jobs</div>
+      <div class="jobs-tab" id="tab-all" onclick="setJobsTab('all')">🗂️ All Jobs</div>
+    </div>
+    <div class="alljobs-search-bar" id="tv-alljobs-search">
+      <input class="alljobs-search-input" id="tv-alljobs-input" type="text" placeholder="Search job name or folder…" onkeydown="if(event.key==='Enter')searchAllJobs()">
+      <button class="alljobs-search-btn" onclick="searchAllJobs()">Search</button>
+      <button class="alljobs-load-btn" onclick="loadAllJobsList()">Browse All</button>
     </div>
     <div class="jobs-body" id="tv-jobs-body">
-      <div class="loading" id="main-loading">
-        <div class="spinner-wrap">
-          <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="56" height="56">
-            <g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;">
-              <path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
-              <path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
-            </g>
-          </svg>
+      <!-- Active jobs panel -->
+      <div id="panel-active">
+        <div class="loading" id="main-loading">
+          <div class="spinner-wrap">
+            <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="56" height="56"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>
+          </div>
+          <div>Loading jobs…</div>
         </div>
-        <div>Loading jobs…</div>
+        <table id="main-table" style="display:none">
+          <thead><tr><th>Job #</th><th>List #(s)</th><th>Delivery Date</th></tr></thead>
+          <tbody id="main-tbody"></tbody>
+        </table>
       </div>
-      <table id="main-table" style="display:none">
-        <thead><tr><th>Job #</th><th>List #(s)</th><th>Delivery Date</th></tr></thead>
-        <tbody id="main-tbody"></tbody>
-      </table>
+      <!-- All jobs panel -->
+      <div id="panel-all" style="display:none">
+        <!-- Stale index warning -->
+        <div id="alljobs-stale-banner" style="display:none;padding:7px 14px;background:rgba(245,166,35,0.10);border-bottom:1px solid rgba(245,166,35,0.25);font-size:11px;color:var(--orange);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.3px;"></div>
+        <div class="loading" id="alljobs-loading" style="display:none">
+          <div class="spinner-wrap">
+            <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="56" height="56"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>
+          </div>
+          <div id="alljobs-loading-text">Loading all jobs…</div>
+        </div>
+        <div id="alljobs-prompt" style="padding:32px;text-align:center;color:var(--muted);font-size:12px;">
+          Search for a job by name, or click <strong style="color:var(--white)">Browse All</strong> to list every job folder.
+        </div>
+        <table id="alljobs-table" style="display:none">
+          <thead><tr><th>Job</th><th>Lists</th><th>Year</th></tr></thead>
+          <tbody id="alljobs-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- ══ MOBILE VIEWS ═══════════════════════════════════════════ -->
 <div class="mobile-views">
-
-  <!-- Jobs (default) -->
   <div class="mobile-view active" id="view-jobs">
     <div class="mobile-view-header">Active Jobs — Delivery Schedule</div>
     <div class="mobile-jobs-body" id="mobile-jobs-body">
       <div class="loading" id="mobile-loading">
         <div class="spinner-wrap">
-          <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
-            <g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;">
-              <path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
-              <path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/>
-            </g>
-          </svg>
+          <svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="48" height="48"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite;"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>
         </div>
         <div>Loading jobs…</div>
       </div>
@@ -884,7 +610,20 @@
     </div>
   </div>
 
-  <!-- Calendar -->
+  <div class="mobile-view" id="view-alljobs">
+    <div class="mobile-view-header">🗂️ All Jobs</div>
+    <div style="padding:8px 12px;background:var(--dark);border-bottom:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;">
+      <input class="alljobs-search-input" id="mobile-alljobs-input" type="text" placeholder="Search job…" onkeydown="if(event.key==='Enter')searchAllJobsMobile()">
+      <button class="alljobs-search-btn" onclick="searchAllJobsMobile()">Go</button>
+    </div>
+    <div style="padding:6px 12px;background:var(--dark);border-bottom:1px solid var(--border);flex-shrink:0;">
+      <button class="alljobs-load-btn" style="width:100%;" onclick="loadAllJobsListMobile()">Browse All Folders</button>
+    </div>
+    <div class="mobile-jobs-body" id="mobile-alljobs-body">
+      <div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;">Search for a job or browse all folders.</div>
+    </div>
+  </div>
+
   <div class="mobile-view" id="view-calendar">
     <div class="mobile-view-header">
       <span>📅 Calendar</span>
@@ -900,7 +639,6 @@
     </div>
   </div>
 
-  <!-- Today -->
   <div class="mobile-view" id="view-today">
     <div class="mobile-view-header">☀️ Today's Schedule</div>
     <div class="mobile-iframe-wrap" style="overflow-y:auto;">
@@ -908,17 +646,15 @@
     </div>
   </div>
 
-  <!-- Tomorrow -->
   <div class="mobile-view" id="view-tomorrow">
     <div class="mobile-view-header">🌅 Tomorrow's Schedule</div>
     <div class="mobile-iframe-wrap" style="overflow-y:auto;">
       <div id="agenda-mobile-tomorrow" style="padding:4px 0;"></div>
     </div>
   </div>
-
 </div>
 
-<!-- ══ MODAL ═════════════════════════════════════════════════ -->
+<!-- ══ ACTIVE JOBS MODAL ══════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -933,9 +669,7 @@
       <div class="installer-section-label">👷 Installers</div>
       <div class="installer-tags" id="modal-installer-tags"></div>
       <div class="installer-add-row">
-        <select class="installer-select" id="modal-installer-select">
-          <option value="">Loading…</option>
-        </select>
+        <select class="installer-select" id="modal-installer-select"><option value="">Loading…</option></select>
         <button class="installer-add-btn" id="modal-installer-add-btn" onclick="addInstallerFromModal()">+ Add</button>
       </div>
     </div>
@@ -949,7 +683,37 @@
       <div class="photo-progress" id="modal-photo-progress" style="display:none">
         <div class="photo-progress-bar"><div class="photo-progress-fill" id="modal-progress-fill"></div></div>
       </div>
-      <input type="file" id="modal-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoUpload(event,'modal')">
+      <input type="file" id="modal-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoSelect(event,'modal')">
+    </div>
+  </div>
+</div>
+
+<!-- ══ ALL JOBS MODAL ════════════════════════════════════════ -->
+<div class="modal-overlay" id="alljob-modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="alljob-modal-title">Job Details</div>
+        <div class="modal-subtitle" id="alljob-modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeAllJobModal()">✕</button>
+    </div>
+    <div class="modal-body" id="alljob-modal-body"></div>
+    <div class="installer-section" id="alljob-installer-section" style="display:none">
+      <div class="installer-section-label">👷 Installers (Historical)</div>
+      <div class="installer-tags" id="alljob-installer-tags"></div>
+    </div>
+    <div class="photo-section" id="alljob-photo-section" style="display:none">
+      <div class="photo-section-label">📷 Job Photos</div>
+      <div class="photo-btn-row">
+        <button class="photo-upload-btn" id="alljob-upload-btn" onclick="triggerPhotoUpload('alljob')">📷 Upload Photos</button>
+        <button class="photo-view-btn" id="alljob-view-btn" onclick="openSlideshow('alljob')" style="display:none">🖼️ View All Photos</button>
+      </div>
+      <div class="photo-status" id="alljob-photo-status"></div>
+      <div class="photo-progress" id="alljob-photo-progress" style="display:none">
+        <div class="photo-progress-bar"><div class="photo-progress-fill" id="alljob-progress-fill"></div></div>
+      </div>
+      <input type="file" id="alljob-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoSelect(event,'alljob')">
     </div>
   </div>
 </div>
@@ -966,9 +730,7 @@
       <div class="installer-section-label">👷 Installers</div>
       <div class="installer-tags" id="installer-tags"></div>
       <div class="installer-add-row">
-        <select class="installer-select" id="installer-select">
-          <option value="">Loading…</option>
-        </select>
+        <select class="installer-select" id="installer-select"><option value="">Loading…</option></select>
         <button class="installer-add-btn" id="installer-add-btn" onclick="addInstaller()">+ Add</button>
       </div>
     </div>
@@ -982,7 +744,24 @@
       <div class="photo-progress" id="popup-photo-progress" style="display:none">
         <div class="photo-progress-bar"><div class="photo-progress-fill" id="popup-progress-fill"></div></div>
       </div>
-      <input type="file" id="popup-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoUpload(event,'popup')">
+      <input type="file" id="popup-file-input" multiple accept="image/*" style="display:none" onchange="handlePhotoSelect(event,'popup')">
+    </div>
+  </div>
+</div>
+
+<!-- ══ RENAME MODAL ═══════════════════════════════════════════ -->
+<div class="rename-overlay" id="rename-overlay">
+  <div class="rename-modal">
+    <div class="rename-header">
+      <div>
+        <div class="rename-title">Name Your Photos</div>
+        <div class="rename-subtitle">Rename each file before uploading — leave blank to keep the original name</div>
+      </div>
+    </div>
+    <div class="rename-body" id="rename-body"></div>
+    <div class="rename-footer">
+      <button class="rename-cancel-btn" onclick="cancelRename()">Cancel</button>
+      <button class="rename-confirm-btn" onclick="confirmRename()">Upload All</button>
     </div>
   </div>
 </div>
@@ -1001,1103 +780,1051 @@
   <button class="slideshow-nav slideshow-prev" onclick="slideshowNav(-1)">&#8249;</button>
   <button class="slideshow-nav slideshow-next" onclick="slideshowNav(1)">&#8250;</button>
 </div>
-
-  
 <script>
-// !! Replace with your Apps Script deployment URL !!
-var API_URL = 'https://script.google.com/macros/s/AKfycbzpclXmZnMLbCa8wrKg2ySUsG-Ohn3K0PPv4CphaHNqoxt7PcrcD1jjbUz_pEBm6Iit/exec';
-// !! Replace with your Dropbox base path (same as DROPBOX_BASE_PATH in Code.gs) !!
-var DROPBOX_BASE_PATH = '/Factory Shared Folders/P22 Jobs';
+// ══ CONFIGURATION ══════════════════════════════════════════════
+var API_URL = 'https://script.google.com/macros/s/AKfycbyDez3w3vKqWL1YVVDFmEFh9g01VFVYBeC07MhkorTcGCyANYPwm7H13lO3BlBR-xcx/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
-// ── Fullscreen on load (TV Bro) ──────────────────────────────
+// ══ FULLSCREEN ═════════════════════════════════════════════════
 window.addEventListener('load', function() {
   var el = document.documentElement;
-  if (el.requestFullscreen)       el.requestFullscreen();
+  if (el.requestFullscreen)            el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
   else if (el.msRequestFullscreen)     el.msRequestFullscreen();
 });
 
-// ── Clock ────────────────────────────────────────────────────
+// ══ CLOCK ══════════════════════════════════════════════════════
 function updateClock() {
-  var now  = new Date();
+  var now = new Date();
   var h = String(now.getHours()).padStart(2,'0');
   var m = String(now.getMinutes()).padStart(2,'0');
   var s = String(now.getSeconds()).padStart(2,'0');
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('clock-time').textContent = h+':'+m+':'+s;
-  document.getElementById('clock-date').textContent =
-    days[now.getDay()]+' '+now.getDate()+' '+mons[now.getMonth()]+' '+now.getFullYear();
+  document.getElementById('clock-date').textContent = days[now.getDay()]+' '+now.getDate()+' '+mons[now.getMonth()]+' '+now.getFullYear();
 }
 updateClock();
 setInterval(updateClock, 1000);
 
-// ── FullCalendar setup ───────────────────────────────────────
+// ══ JOBS TAB TOGGLE ════════════════════════════════════════════
+var _currentJobsTab = 'active';
+
+function setJobsTab(tab) {
+  _currentJobsTab = tab;
+  document.getElementById('tab-active').classList.toggle('active', tab === 'active');
+  document.getElementById('tab-all').classList.toggle('active', tab === 'all');
+  document.getElementById('panel-active').style.display = tab === 'active' ? '' : 'none';
+  document.getElementById('panel-all').style.display    = tab === 'all'    ? '' : 'none';
+  document.getElementById('tv-alljobs-search').classList.toggle('visible', tab === 'all');
+  document.getElementById('tv-jobs-hint').textContent = tab === 'active'
+    ? 'Click Job # or List # for details'
+    : 'Click a job folder to view details';
+  // Pre-load the index the first time All Jobs is opened
+  if (tab === 'all' && _allJobsCache === null && !_indexLoaded) {
+    ensureIndexLoaded(function() { renderAllJobs(_allJobsCache); });
+  }
+}
+
+// ══ FULLCALENDAR ════════════════════════════════════════════════
 var _allEvents = [];
-var _fcMonth = null;
-var _fcMobile = null;
+var _fcMonth   = null;
+var _fcMobile  = null;
 
 function updateCalTitle() {
   function rangeTitle(cal) {
     if (!cal) return '—';
     var d = cal.getDate();
-    var end = new Date(d);
-    end.setDate(end.getDate() + 27);
-    var startStr = d.toLocaleDateString('en-AU', { day:'numeric', month:'short' });
-    var endStr   = end.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
-    return startStr + ' — ' + endStr;
+    var end = new Date(d); end.setDate(end.getDate() + 27);
+    return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'}) + ' — '
+         + end.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
   }
-  var el = document.getElementById('cal-title');
-  if (el) el.textContent = rangeTitle(_fcMonth);
-  var el2 = document.getElementById('cal-mobile-title');
-  if (el2) el2.textContent = rangeTitle(_fcMobile);
+  var el  = document.getElementById('cal-title');        if (el)  el.textContent  = rangeTitle(_fcMonth);
+  var el2 = document.getElementById('cal-mobile-title'); if (el2) el2.textContent = rangeTitle(_fcMobile);
 }
-
-function calPrev(isMobile) {
-  if (!isMobile && _fcMonth)  { _fcMonth.prev();  updateCalTitle(); }
-  if (isMobile  && _fcMobile) { _fcMobile.prev(); updateCalTitle(); }
-}
-function calNext(isMobile) {
-  if (!isMobile && _fcMonth)  { _fcMonth.next();  updateCalTitle(); }
-  if (isMobile  && _fcMobile) { _fcMobile.next(); updateCalTitle(); }
-}
-function calToday(isMobile) {
-  if (!isMobile && _fcMonth)  { _fcMonth.today();  updateCalTitle(); }
-  if (isMobile  && _fcMobile) { _fcMobile.today(); updateCalTitle(); }
-}
-
-function openEventPopup(event) {
-  // FullCalendar event objects use .startStr/.endStr and extendedProps
-  // Pseudo-events from agenda use plain properties — handle both
-  var title  = event.title || '(No title)';
-  var start  = event.startStr || event.start || '';
-  var end    = event.endStr   || event.end   || '';
-  var allDay = event.allDay   || false;
-  var props  = event.extendedProps || {};
-  var loc    = props.location    || '';
-  var desc   = props.description || '';
-  var source = props.source      || '';
-  var evId   = event.id          || '';
-
-  function fmtDate(d, isAllDay) {
-    if (!d) return '';
-    var dt = new Date(d);
-    if (isAllDay) return dt.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-    return dt.toLocaleString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true });
-  }
-
-  var timeStr = fmtDate(start, allDay);
-  if (end) {
-    var endStr = fmtDate(end, allDay);
-    if (endStr && endStr !== timeStr) timeStr += ' → ' + endStr;
-  }
-
-  document.getElementById('event-popup-title').textContent = title;
-
-  var html = '';
-  if (timeStr) html += '<div class="event-popup-row"><span class="event-popup-icon">🕐</span><span class="event-popup-text">' + esc(timeStr) + '</span></div>';
-  if (loc)     html += '<div class="event-popup-row"><span class="event-popup-icon">📍</span><span class="event-popup-text">' + esc(loc) + '</span></div>';
-  if (desc)    html += '<div class="event-popup-row"><span class="event-popup-icon">📝</span><span class="event-popup-text muted">' + esc(desc).replace(/\n/g,'<br>') + '</span></div>';
-  if (!timeStr && !loc && !desc) html = '<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
-
-  document.getElementById('event-popup-body').innerHTML = html;
-  document.getElementById('event-popup-overlay').classList.add('open');
-
-  // Show installer section only for Google Calendar events
-  var instSection = document.getElementById('installer-section');
-  var popupPhotoSection = document.getElementById('popup-photo-section');
-  if (source === 'google' && evId) {
-    openEventInstallerSection(evId);
-    initPhotoSection('popup', title);
-  } else {
-    instSection.style.display = 'none';
-    popupPhotoSection.style.display = 'none';
-  }
-}
-
-function closeEventPopup() {
-  document.getElementById('event-popup-overlay').classList.remove('open');
-}
-
-document.getElementById('event-popup-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeEventPopup();
-});
+function calPrev(m)  { if (!m && _fcMonth)  { _fcMonth.prev();  updateCalTitle(); } if (m && _fcMobile) { _fcMobile.prev();  updateCalTitle(); } }
+function calNext(m)  { if (!m && _fcMonth)  { _fcMonth.next();  updateCalTitle(); } if (m && _fcMobile) { _fcMobile.next();  updateCalTitle(); } }
+function calToday(m) { if (!m && _fcMonth)  { _fcMonth.today(); updateCalTitle(); } if (m && _fcMobile) { _fcMobile.today(); updateCalTitle(); } }
 
 function initCalendars(events) {
   _allEvents = events;
-
-  var today    = new Date();
-  var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-
-  // Start from Monday of current week
+  var today = new Date(), tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
   var startOfWeek = new Date(today);
   var day = startOfWeek.getDay();
-  var diff = (day === 0) ? -6 : 1 - day;
-  startOfWeek.setDate(startOfWeek.getDate() + diff);
+  startOfWeek.setDate(startOfWeek.getDate() + ((day === 0) ? -6 : 1 - day));
 
-  var calOptions = {
+  var calOpts = {
     initialView: 'dayGridFourWeek',
     initialDate: startOfWeek,
-    views: {
-      dayGridFourWeek: { type: 'dayGrid', duration: { weeks: 4 } }
-    },
-    headerToolbar: false,
-    height: 'auto',
-    expandRows: false,
-    events: events,
-    fixedWeekCount: false,
-    showNonCurrentDates: true,
-    firstDay: 1,
-    dayMaxEvents: false,
-    displayEventTime: false,
+    views: { dayGridFourWeek: { type:'dayGrid', duration:{ weeks:4 } } },
+    headerToolbar: false, height: 'auto', expandRows: false, events: events,
+    fixedWeekCount: false, showNonCurrentDates: true, firstDay: 1,
+    dayMaxEvents: false, displayEventTime: false,
     eventDidMount: function(info) {
-      // Make title always fully visible — no truncation
-      var titleEl = info.el.querySelector('.fc-event-title');
-      if (titleEl) {
-        titleEl.style.whiteSpace = 'normal';
-        titleEl.style.overflow = 'visible';
-      }
-      info.el.style.whiteSpace = 'normal';
-      info.el.style.overflow = 'visible';
+      var t = info.el.querySelector('.fc-event-title');
+      if (t) { t.style.whiteSpace = 'normal'; t.style.overflow = 'visible'; }
+      info.el.style.whiteSpace = 'normal'; info.el.style.overflow = 'visible';
     },
     eventClick: function(info) { openEventPopup(info.event); }
   };
 
-  // ── Desktop calendar ──
-  var monthEl = document.getElementById('fc-month');
-  if (monthEl && !_fcMonth) {
-    _fcMonth = new FullCalendar.Calendar(monthEl, calOptions);
-    _fcMonth.render();
-    setTimeout(function() { _fcMonth.updateSize(); }, 50);
-    updateCalTitle();
-  } else if (_fcMonth) {
-    _fcMonth.removeAllEvents();
-    events.forEach(function(e) { _fcMonth.addEvent(e); });
-  }
+  var me = document.getElementById('fc-month');
+  if (me && !_fcMonth) { _fcMonth = new FullCalendar.Calendar(me, calOpts); _fcMonth.render(); setTimeout(function(){ _fcMonth.updateSize(); },50); updateCalTitle(); }
+  else if (_fcMonth)   { _fcMonth.removeAllEvents(); events.forEach(function(e){ _fcMonth.addEvent(e); }); }
 
-  // ── Mobile calendar ──
-  var mobileEl = document.getElementById('fc-mobile-month');
-  if (mobileEl && !_fcMobile) {
-    _fcMobile = new FullCalendar.Calendar(mobileEl, calOptions);
-    _fcMobile.render();
-    updateCalTitle();
-  } else if (_fcMobile) {
-    _fcMobile.removeAllEvents();
-    events.forEach(function(e) { _fcMobile.addEvent(e); });
-  }
+  var mob = document.getElementById('fc-mobile-month');
+  if (mob && !_fcMobile) { _fcMobile = new FullCalendar.Calendar(mob, calOpts); _fcMobile.render(); updateCalTitle(); }
+  else if (_fcMobile)    { _fcMobile.removeAllEvents(); events.forEach(function(e){ _fcMobile.addEvent(e); }); }
 
-  // ── Agenda panels ──
   renderAgenda('agenda-today',           events, today);
   renderAgenda('agenda-tomorrow',        events, tomorrow);
   renderAgenda('agenda-mobile-today',    events, today);
   renderAgenda('agenda-mobile-tomorrow', events, tomorrow);
 }
 
-function renderAgenda(containerId, events, date) {
-  var el = document.getElementById(containerId);
-  if (!el) return;
-
-  // Build local date string for the target date
-  var y  = date.getFullYear();
-  var m  = String(date.getMonth() + 1).padStart(2, '0');
-  var d  = String(date.getDate()).padStart(2, '0');
-  var dateStr = y + '-' + m + '-' + d;
-
-  // Helper: convert an event date string to local YYYY-MM-DD
-  // ICS times may come as UTC (with Z) — convert to local before comparing
-  function toLocalDateStr(s) {
+function renderAgenda(id, events, date) {
+  var el = document.getElementById(id); if (!el) return;
+  var y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+  var ds = y+'-'+m+'-'+d;
+  function toLocal(s) {
     if (!s) return '';
-    if (s.length === 10) return s; // already YYYY-MM-DD, no conversion needed
+    if (s.length === 10) return s;
     var dt = new Date(s);
-    var ly = dt.getFullYear();
-    var lm = String(dt.getMonth() + 1).padStart(2, '0');
-    var ld = String(dt.getDate()).padStart(2, '0');
-    return ly + '-' + lm + '-' + ld;
+    return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
   }
-
-  var dayEvents = events.filter(function(e) {
-    var start = toLocalDateStr(e.start);
-    var rawEnd = e.end ? toLocalDateStr(e.end) : start;
-
-    // ICS all-day events use exclusive end dates (e.g. an event "on Friday" has end = Saturday)
-    // Subtract one day from the end for all-day events before comparing
-    var end = rawEnd;
+  var dayEvts = events.filter(function(e) {
+    var start = toLocal(e.start), rawEnd = e.end ? toLocal(e.end) : start, end = rawEnd;
     if (e.allDay && rawEnd && rawEnd !== start) {
-      var d = new Date(rawEnd + 'T00:00:00');
-      d.setDate(d.getDate() - 1);
-      end = d.getFullYear() + '-'
-          + String(d.getMonth() + 1).padStart(2, '0') + '-'
-          + String(d.getDate()).padStart(2, '0');
+      var dt = new Date(rawEnd+'T00:00:00'); dt.setDate(dt.getDate()-1);
+      end = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
     }
-
-    return start <= dateStr && dateStr <= end;
+    return start <= ds && ds <= end;
   });
-
-  if (dayEvents.length === 0) {
-    el.innerHTML = '<div class="agenda-empty">No events scheduled</div>';
-    return;
-  }
-
-  dayEvents.sort(function(a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
-
-  // Store events on window for click access
+  if (!dayEvts.length) { el.innerHTML = '<div class="agenda-empty">No events scheduled</div>'; return; }
+  dayEvts.sort(function(a,b){ return (a.start||'') < (b.start||'') ? -1 : 1; });
   window._agendaEvents = window._agendaEvents || {};
-  window._agendaEvents[containerId] = dayEvents;
-
-  el.innerHTML = dayEvents.map(function(e, idx) {
-    var timeStr = '';
-    if (e.start && e.start.includes('T')) {
-      var d = new Date(e.start);
-      timeStr = d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
-    } else {
-      timeStr = 'All Day';
-    }
+  window._agendaEvents[id] = dayEvts;
+  el.innerHTML = dayEvts.map(function(e,i) {
+    var t = (e.start && e.start.includes('T'))
+      ? new Date(e.start).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:true})
+      : 'All Day';
     var loc = e.extendedProps && e.extendedProps.location ? e.extendedProps.location : '';
-    return '<div class="agenda-event" onclick="openAgendaEvent(\'' + containerId + '\',' + idx + ')">'
-      + '<span class="agenda-event-time">' + timeStr + '</span>'
-      + '<span class="agenda-event-title">' + esc(e.title) + '</span>'
-      + (loc ? '<span class="agenda-event-loc">📍 ' + esc(loc) + '</span>' : '')
-      + '</div>';
+    return '<div class="agenda-event" onclick="openAgendaEvent(\''+id+'\','+i+')">'
+      +'<span class="agenda-event-time">'+t+'</span>'
+      +'<span class="agenda-event-title">'+esc(e.title)+'</span>'
+      +(loc?'<span class="agenda-event-loc">📍 '+esc(loc)+'</span>':'')
+      +'</div>';
   }).join('');
 }
 
-function openAgendaEvent(containerId, idx) {
-  var events = window._agendaEvents && window._agendaEvents[containerId];
-  if (!events || !events[idx]) return;
-  var e = events[idx];
-  openEventPopup({
-    title:  e.title,
-    startStr: e.start,
-    endStr:   e.end,
-    allDay:   e.allDay,
-    id:       e.id || '',
-    extendedProps: {
-      location:    (e.extendedProps && e.extendedProps.location)    || '',
-      description: (e.extendedProps && e.extendedProps.description) || '',
-      source:      (e.extendedProps && e.extendedProps.source)      || ''
-    }
-  });
+function openAgendaEvent(id, idx) {
+  var evts = window._agendaEvents && window._agendaEvents[id]; if (!evts||!evts[idx]) return;
+  var e = evts[idx];
+  openEventPopup({ title:e.title, startStr:e.start, endStr:e.end, allDay:e.allDay, id:e.id||'',
+    extendedProps:{ location:(e.extendedProps&&e.extendedProps.location)||'', description:(e.extendedProps&&e.extendedProps.description)||'', source:(e.extendedProps&&e.extendedProps.source)||'' } });
 }
 
-// ── Load calendar events ─────────────────────────────────────
 function loadCalendar() {
-  var today = new Date().toISOString().slice(0, 10);
-  apiFetch({ action: 'calendar', _d: today }, function(response) {
-    // Handle debug response format when no events found
-    if (response && response._debug) {
-      console.warn('Calendar debug info:', response._debug);
-      initCalendars([]);
-      return;
-    }
-
-    var events = Array.isArray(response) ? response : [];
-    console.log('Calendar events count:', events.length);
-    if (events.length > 0) console.log('First event sample:', JSON.stringify(events[0]));
-
-    var fcEvents = events.map(function(e) {
-      var isOutlook       = e.source === 'outlook';
-      var isPublicHoliday = e.source === 'PublicHoliday';
-
-      var eventColor = isOutlook       ? '#4a9eff'
-                     : isPublicHoliday ? '#AAA7AD'
-                     : '#f5a623';
-
-      var eventClass = isOutlook       ? ['fc-event-outlook']
-                     : isPublicHoliday ? ['fc-event-holiday']
-                     : [];
-
-      return {
-        id:        e.id    || '',
-        title:     e.title || '(No title)',
-        start:     e.start || '',
-        end:       e.end   || '',
-        allDay:    e.allDay || false,
-        color:     eventColor,
-        textColor: '#000000',
-        classNames: eventClass,
-        extendedProps: {
-          location:    e.location    || '',
-          description: e.description || '',
-          source:      e.source      || ''
-        }
-      };
-    }).filter(function(e) { return e.start !== ''; });
-
-    initCalendars(fcEvents);
-  }, function(err) {
-    console.error('Calendar load failed:', err);
-  });
+  apiFetch({ action:'calendar', _d:new Date().toISOString().slice(0,10) }, function(res) {
+    if (res && res._debug) { console.warn('Cal debug:',res._debug); initCalendars([]); return; }
+    var events = Array.isArray(res) ? res : [];
+    initCalendars(events.map(function(e) {
+      var isO = e.source==='outlook', isH = e.source==='PublicHoliday';
+      return { id:e.id||'', title:e.title||'(No title)', start:e.start||'', end:e.end||'', allDay:e.allDay||false,
+        color: isO?'#4a9eff': isH?'#AAA7AD':'#f5a623', textColor:'#000000',
+        classNames: isO?['fc-event-outlook']:isH?['fc-event-holiday']:[],
+        extendedProps:{ location:e.location||'', description:e.description||'', source:e.source||'' } };
+    }).filter(function(e){ return e.start!==''; }));
+  }, function(err){ console.error('Calendar load failed:',err); });
 }
-
 loadCalendar();
 
-// ── Dropbox photos ────────────────────────────────────────────
-var _dropboxFolder = { modal: null, popup: null }; // cached folder paths per context
-var _slideshow = { photos: [], index: 0, context: null, title: '' };
+// ══ DROPBOX DIRECT — TOKEN + CLIENT-SIDE API CALLS ════════════
+//
+//  Instead of routing every Dropbox call through Apps Script we
+//  fetch the access token once per session and call Dropbox from
+//  the browser, cutting ~1-2s of Apps Script latency per operation.
+//
+//  Token cache : _dbxToken  — refreshed every 3h
+//  Photo cache : _photoCache[folderPath] = {photos, tempLinks, ts}
+//    photos    = [{name, path_display}] from list_folder
+//    tempLinks = [{name, path, link}]  (populated on first slideshow open)
+//    ts        = Date.now() when cached
+//  Cache TTL: 3 hours — matches Dropbox token lifetime
+// ────────────────────────────────────────────────────────────────
 
+var _dbxToken    = null;       // { token, expiresAt }
+var _photoCache  = {};         // keyed by folderPath
+var _CACHE_TTL   = 10800000;   // 3 hours in ms
+var _IMG_EXTS    = /\.(jpg|jpeg|png|gif|heic|webp)$/i;
+
+var _dropboxFolder = { modal:null, popup:null, alljob:null };
+var _slideshow     = { photos:[], index:0, context:null, title:'' };
+
+// ── Get token: memory cache or Apps Script ────────────────────
+function getDbxToken(callback) {
+  var now = Date.now();
+  if (_dbxToken && _dbxToken.expiresAt > now) { callback(_dbxToken.token); return; }
+  apiFetch({ action:'dropboxToken' }, function(res) {
+    if (!res.success || !res.token) { console.error('Token fetch failed:', res.error); callback(null); return; }
+    _dbxToken = { token: res.token, expiresAt: now + _CACHE_TTL };
+    callback(res.token);
+  }, function() { callback(null); });
+}
+
+// ── List a Dropbox folder directly from browser ───────────────
+function dbxListAll(token, path, recursive, callback) {
+  var allEntries = [];
+  function page(cursor) {
+    var url     = cursor ? 'https://api.dropboxapi.com/2/files/list_folder/continue'
+                         : 'https://api.dropboxapi.com/2/files/list_folder';
+    var payload = cursor ? JSON.stringify({ cursor: cursor })
+                         : JSON.stringify({ path: path, recursive: !!recursive, limit: 2000 });
+    fetch(url, { method:'POST', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' }, body: payload })
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        if (data.error_summary) { callback(null, data.error_summary); return; }
+        allEntries = allEntries.concat(data.entries || []);
+        if (data.has_more) page(data.cursor); else callback(allEntries, null);
+      })
+      .catch(function(e){ callback(null, e.message); });
+  }
+  page(null);
+}
+
+// ── Fetch temp links for an array of file objects in parallel ─
+function dbxTempLinks(token, files, callback) {
+  if (!files.length) { callback([]); return; }
+  var BATCH = 100, allLinks = [], i = 0;
+  function runBatch() {
+    if (i >= files.length) { callback(allLinks); return; }
+    var batch = files.slice(i, i + BATCH); i += BATCH;
+    Promise.all(batch.map(function(f) {
+      return fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+        method:'POST', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
+        body: JSON.stringify({ path: f.path_display })
+      }).then(function(r){ return r.json(); })
+        .then(function(d){ return d.link ? { name:f.name, path:f.path_display, link:d.link } : null; })
+        .catch(function(){ return null; });
+    })).then(function(res) { allLinks = allLinks.concat(res.filter(Boolean)); runBatch(); });
+  }
+  runBatch();
+}
+
+// ── Get/populate photo list cache (no temp links yet) ─────────
+function getPhotoCache(folderPath, recursive, callback) {
+  var now = Date.now(), entry = _photoCache[folderPath];
+  if (entry && (now - entry.ts) < _CACHE_TTL) { callback(entry); return; }
+  getDbxToken(function(token) {
+    if (!token) { callback(null); return; }
+    dbxListAll(token, folderPath, recursive, function(entries, err) {
+      if (err || !entries) { callback(null); return; }
+      var photos = entries
+        .filter(function(e){ return e['.tag']==='file' && _IMG_EXTS.test(e.name); })
+        .sort(function(a,b){
+          var aDir=a.path_display.substring(0,a.path_display.lastIndexOf('/'));
+          var bDir=b.path_display.substring(0,b.path_display.lastIndexOf('/'));
+          if (aDir!==bDir) return aDir.localeCompare(bDir);
+          var an=parseInt(a.name)||0, bn=parseInt(b.name)||0;
+          if (an&&bn) return an-bn; return a.name.localeCompare(b.name);
+        });
+      var cacheEntry = { photos:photos, tempLinks:null, ts:now };
+      _photoCache[folderPath] = cacheEntry;
+      callback(cacheEntry);
+    });
+  });
+}
+
+// ── Ensure temp links are cached (fetch if needed) ────────────
+function ensureTempLinks(folderPath, recursive, callback) {
+  var now = Date.now(), entry = _photoCache[folderPath];
+  if (entry && entry.tempLinks && (now - entry.ts) < _CACHE_TTL) { callback(entry.tempLinks); return; }
+  getPhotoCache(folderPath, recursive, function(cacheEntry) {
+    if (!cacheEntry || !cacheEntry.photos.length) { callback([]); return; }
+    getDbxToken(function(token) {
+      if (!token) { callback([]); return; }
+      dbxTempLinks(token, cacheEntry.photos, function(links) {
+        cacheEntry.tempLinks = links; cacheEntry.ts = Date.now();
+        callback(links);
+      });
+    });
+  });
+}
+
+// ── Active-jobs: Apps Script resolves folder path ────────────
 function initPhotoSection(context, jobName) {
-  var section = document.getElementById(context === 'modal' ? 'modal-photo-section' : 'popup-photo-section');
-  if (!section) return;
-  section.style.display = 'block';
-
-  var status    = document.getElementById(context + '-photo-status');
-  var viewBtn   = document.getElementById(context + '-view-btn');
-  var uploadBtn = document.getElementById(context + '-upload-btn');
-
-  status.textContent = 'Finding job folder…';
-  viewBtn.style.display = 'none';
-  uploadBtn.disabled = true;
+  var sId = context==='modal' ? 'modal-photo-section' : context==='alljob' ? 'alljob-photo-section' : 'popup-photo-section';
+  var sec = document.getElementById(sId); if (!sec) return;
+  sec.style.display = 'block';
+  var status = document.getElementById(context+'-photo-status');
+  var view   = document.getElementById(context+'-view-btn');
+  var up     = document.getElementById(context+'-upload-btn');
+  status.textContent = 'Finding job folder…'; view.style.display = 'none'; up.disabled = true;
   _dropboxFolder[context] = null;
-
-  apiFetch({ action: 'dropboxFolder', job: jobName }, function(res) {
-    if (res.error) {
-      status.textContent = '⚠️ ' + res.error;
-      return;
-    }
-
+  apiFetch({ action:'dropboxFolderProjects', job:jobName }, function(res) {
+    if (res.error) { status.textContent = '⚠️ '+res.error; return; }
     if (res.multiple) {
-      // Show a picker for multiple matches
       var html = 'Multiple folders found — select one:<br>';
       res.matches.forEach(function(m) {
         html += '<button class="photo-view-btn" style="margin:3px 0;width:100%;text-align:left;display:block;" '
-          + 'onclick="selectDropboxFolder(\'' + context + '\',\'' + escAttr(m.path) + '\',\'' + escAttr(m.name) + '\')">'
-          + esc(m.name) + '</button>';
+          +'onclick="selectDropboxFolder(\''+context+'\',\''+escAttr(m.path)+'\',\''+escAttr(m.name)+'\')">'
+          +esc(m.name)+' <span style="color:var(--muted);font-size:10px;">('+esc(m.year)+')</span></button>';
       });
-      status.innerHTML = html;
-      return;
+      status.innerHTML = html; return;
     }
-
     setDropboxFolder(context, res.folderPath, res.jobFolder);
   });
 }
 
+// ── All-jobs: folder path already known ──────────────────────
+function initPhotoSectionDirect(context, folderPath, folderName) {
+  var sId = context==='alljob' ? 'alljob-photo-section' : context+'-photo-section';
+  var sec = document.getElementById(sId); if (!sec) return;
+  sec.style.display = 'block';
+  _dropboxFolder[context] = null;
+  document.getElementById(context+'-view-btn').style.display = 'none';
+  document.getElementById(context+'-upload-btn').disabled = false;
+  setDropboxFolder(context, folderPath, folderName);
+}
+
 function selectDropboxFolder(context, folderPath, folderName) {
-  var status = document.getElementById(context + '-photo-status');
+  var status = document.getElementById(context+'-photo-status');
   status.textContent = 'Confirming folder…';
-  apiFetch({ action: 'dropboxConfirm', path: folderPath }, function(res) {
-    if (res.error) { status.textContent = '⚠️ ' + res.error; return; }
+  apiFetch({ action:'dropboxConfirm', path:folderPath }, function(res) {
+    if (res.error) { status.textContent = '⚠️ '+res.error; return; }
     setDropboxFolder(context, res.folderPath, folderName);
   });
 }
 
+// ── Set folder: list photos + pre-fetch temp links in background
 function setDropboxFolder(context, folderPath, folderName) {
   _dropboxFolder[context] = folderPath;
   _slideshow.title = folderName;
-
-  var status    = document.getElementById(context + '-photo-status');
-  var uploadBtn = document.getElementById(context + '-upload-btn');
-  var viewBtn   = document.getElementById(context + '-view-btn');
-
-  uploadBtn.disabled = false;
-  status.textContent = '📁 ' + folderName;
-
-  // Check if photos already exist
-  apiFetch({ action: 'dropboxPhotos', path: folderPath }, function(pr) {
-    if (pr.success && pr.photos && pr.photos.length > 0) {
-      viewBtn.style.display = '';
-      status.textContent = '📁 ' + folderName + ' — ' + pr.photos.length + ' photo' + (pr.photos.length !== 1 ? 's' : '');
-    }
+  var status = document.getElementById(context+'-photo-status');
+  var up     = document.getElementById(context+'-upload-btn');
+  var view   = document.getElementById(context+'-view-btn');
+  up.disabled = false;
+  status.textContent = '📁 '+folderName;
+  var recursive = (context==='alljob');
+  // Step 1: list photos (fast — shows count + View button)
+  getPhotoCache(folderPath, recursive, function(entry) {
+    if (!entry || !entry.photos.length) return;
+    view.style.display = '';
+    status.textContent = '📁 '+folderName+' — '+entry.photos.length+' photo'+(entry.photos.length!==1?'s':'');
+    // Step 2: silently pre-fetch temp links so slideshow opens instantly
+    ensureTempLinks(folderPath, recursive, function() { /* cached */ });
   });
 }
 
+// ══ RENAME BEFORE UPLOAD ═══════════════════════════════════════
+var _pendingUpload = { context:null, files:[] };
+
 function triggerPhotoUpload(context) {
-  document.getElementById(context + '-file-input').click();
+  document.getElementById(context+'-file-input').click();
 }
 
-function handlePhotoUpload(event, context) {
-  var files = Array.from(event.target.files);
-  if (!files.length) return;
+function handlePhotoSelect(event, context) {
+  var files = Array.from(event.target.files); if (!files.length) return;
+  _pendingUpload.context = context;
+  _pendingUpload.files   = files;
 
+  var body = document.getElementById('rename-body');
+  body.innerHTML = files.map(function(f, idx) {
+    var dotIdx = f.name.lastIndexOf('.');
+    var ext    = dotIdx >= 0 ? f.name.slice(dotIdx) : '';
+    var base   = f.name.slice(0, f.name.length - ext.length);
+    var isHeic = f.type==='image/heic'||f.type==='image/heif'
+              || f.name.toLowerCase().endsWith('.heic')||f.name.toLowerCase().endsWith('.heif');
+    var dispExt = isHeic ? '.jpg' : ext;
+    return '<div class="rename-file-row">'
+      +'<div class="rename-original">Original: '+esc(f.name)+'</div>'
+      +'<div class="rename-input-row">'
+      +'<input class="rename-input" id="rename-'+idx+'" type="text" value="'+esc(base)+'" placeholder="'+esc(base)+'">'
+      +'<span class="rename-ext">'+esc(dispExt)+'</span>'
+      +'</div></div>';
+  }).join('');
+
+  document.getElementById('rename-overlay').classList.add('open');
+  event.target.value = ''; // reset so same file can be chosen again
+}
+
+function cancelRename() {
+  document.getElementById('rename-overlay').classList.remove('open');
+  _pendingUpload = { context:null, files:[] };
+}
+
+function confirmRename() {
+  var files = _pendingUpload.files;
+  var renamed = files.map(function(f, idx) {
+    var inp  = document.getElementById('rename-'+idx);
+    var name = inp ? inp.value.trim() : '';
+    var dotIdx = f.name.lastIndexOf('.');
+    var ext    = dotIdx >= 0 ? f.name.slice(dotIdx) : '';
+    var isHeic = f.type==='image/heic'||f.type==='image/heif'
+              || f.name.toLowerCase().endsWith('.heic')||f.name.toLowerCase().endsWith('.heif');
+    var finalExt  = isHeic ? '.jpg' : ext;
+    var finalName = (name || f.name.slice(0, f.name.length - ext.length)) + finalExt;
+    return { file:f, name:finalName, isHeic:isHeic };
+  });
+  document.getElementById('rename-overlay').classList.remove('open');
+  doUpload(_pendingUpload.context, renamed);
+}
+
+function doUpload(context, renamedFiles) {
   var folderPath = _dropboxFolder[context];
   if (!folderPath) { alert('Folder not found yet, please wait.'); return; }
+  var up   = document.getElementById(context+'-upload-btn');
+  var stat = document.getElementById(context+'-photo-status');
+  var prog = document.getElementById(context+'-photo-progress');
+  var fill = document.getElementById(context+'-progress-fill');
+  var view = document.getElementById(context+'-view-btn');
+  up.disabled = true; prog.style.display = 'block';
+  stat.textContent = 'Uploading 0 of '+renamedFiles.length+'…';
+  var done = 0, failed = 0;
 
-  var uploadBtn  = document.getElementById(context + '-upload-btn');
-  var status     = document.getElementById(context + '-photo-status');
-  var progress   = document.getElementById(context + '-photo-progress');
-  var fill       = document.getElementById(context + '-progress-fill');
-  var viewBtn    = document.getElementById(context + '-view-btn');
-
-  uploadBtn.disabled = true;
-  progress.style.display = 'block';
-  status.textContent = 'Uploading 0 of ' + files.length + '…';
-
-  var completed = 0;
-  var failed = 0;
-
-  function uploadNext(idx) {
-    if (idx >= files.length) {
-      uploadBtn.disabled = false;
-      progress.style.display = 'none';
-      fill.style.width = '0%';
-      event.target.value = '';
-      var msg = completed + ' photo' + (completed !== 1 ? 's' : '') + ' uploaded';
-      if (failed > 0) msg += ', ' + failed + ' failed';
-      status.textContent = '✅ ' + msg;
-      viewBtn.style.display = '';
+  function next(i) {
+    if (i >= renamedFiles.length) {
+      up.disabled = false; prog.style.display = 'none'; fill.style.width = '0%';
+      stat.textContent = '✅ '+done+' photo'+(done!==1?'s':'')+' uploaded'+(failed>0?', '+failed+' failed':'');
+      view.style.display = '';
       return;
     }
+    var item = renamedFiles[i];
+    fill.style.width = Math.round((i/renamedFiles.length)*100)+'%';
+    stat.textContent = 'Uploading '+(i+1)+' of '+renamedFiles.length+': '+item.name;
 
-    var file = files[idx];
-    var pct = Math.round((idx / files.length) * 100);
-    fill.style.width = pct + '%';
-    status.textContent = 'Uploading ' + (idx + 1) + ' of ' + files.length + ': ' + file.name;
-
-    // Convert HEIC to JPEG if needed, then upload
-    function doUpload(fileToUpload, fileName) {
-      apiFetch({ action: 'dropboxUploadUrl', path: folderPath, name: fileName }, function(res) {
-        if (res.error) { failed++; uploadNext(idx + 1); return; }
-
+    function upload(blob, name) {
+      // Use cached token directly — no Apps Script round-trip needed
+      getDbxToken(function(token) {
+        if (!token) { failed++; next(i+1); return; }
         var reader = new FileReader();
         reader.onload = function(e) {
-          var arrayBuffer = e.target.result;
           fetch('https://content.dropboxapi.com/2/files/upload', {
-            method: 'POST',
-            headers: {
-              'Authorization':   'Bearer ' + res.token,
-              'Content-Type':    'application/octet-stream',
-              'Dropbox-API-Arg': JSON.stringify({
-                path: res.uploadPath,
-                mode: 'add',
-                autorename: true,
-                mute: false
-              })
+            method:'POST',
+            headers:{
+              'Authorization':'Bearer '+token,
+              'Content-Type':'application/octet-stream',
+              'Dropbox-API-Arg': JSON.stringify({ path:folderPath+'/'+name, mode:'add', autorename:true, mute:false })
             },
-            body: arrayBuffer
-          })
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            if (data.name) completed++; else failed++;
-            uploadNext(idx + 1);
-          })
-          .catch(function() { failed++; uploadNext(idx + 1); });
+            body: e.target.result
+          }).then(function(r){ return r.json(); })
+            .then(function(d){
+              if(d.name) {
+                done++;
+                // Invalidate photo cache for this folder so count updates on next open
+                if (_photoCache[folderPath]) delete _photoCache[folderPath];
+              } else failed++;
+              next(i+1);
+            })
+            .catch(function(){ failed++; next(i+1); });
         };
-        reader.readAsArrayBuffer(fileToUpload);
+        reader.readAsArrayBuffer(blob);
       });
     }
 
-    var isHeic = file.type === 'image/heic' || file.type === 'image/heif'
-              || file.name.toLowerCase().endsWith('.heic')
-              || file.name.toLowerCase().endsWith('.heif');
-
-    if (isHeic && typeof heic2any !== 'undefined') {
-      status.textContent = 'Converting ' + (idx + 1) + ' of ' + files.length + ': ' + file.name;
-      heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 })
-        .then(function(jpegBlob) {
-          var jpegName = file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg');
-          doUpload(jpegBlob, jpegName);
-        })
-        .catch(function() {
-          // Conversion failed — upload original as fallback
-          doUpload(file, file.name);
-        });
+    if (item.isHeic && typeof heic2any !== 'undefined') {
+      stat.textContent = 'Converting '+(i+1)+' of '+renamedFiles.length+': '+item.name;
+      heic2any({ blob:item.file, toType:'image/jpeg', quality:0.85 })
+        .then(function(j){ upload(j, item.name); })
+        .catch(function(){ upload(item.file, item.name); });
     } else {
-      doUpload(file, file.name);
+      upload(item.file, item.name);
     }
   }
-
-  uploadNext(0);
+  next(0);
 }
 
-// ── Slideshow ─────────────────────────────────────────────────
+// ══ SLIDESHOW ══════════════════════════════════════════════════
 function openSlideshow(context) {
-  var folderPath = _dropboxFolder[context];
-  if (!folderPath) return;
-
-  _slideshow.context = context;
-  _slideshow.photos  = [];
-  _slideshow.index   = 0;
-
-  var overlay  = document.getElementById('slideshow-overlay');
-  var loading  = document.getElementById('slideshow-loading');
-  var img      = document.getElementById('slideshow-img');
-  var counter  = document.getElementById('slideshow-counter');
-
-  overlay.classList.add('open');
-  document.getElementById('slideshow-title').textContent = _slideshow.title + ' — Photos';
-  loading.textContent = 'Loading photos…';
-  loading.style.display = 'block';
-  img.style.display = 'none';
-  counter.textContent = '';
-
-  // Fetch all temp links in one batch call
-  apiFetch({ action: 'dropboxTempLinks', path: folderPath }, function(res) {
-    if (!res.success || !res.photos || res.photos.length === 0) {
-      loading.textContent = 'No photos found.';
-      return;
-    }
-
-    _slideshow.photos = res.photos;
-
-    // Preload all images in the background
-    res.photos.forEach(function(p, i) {
-      var preload = new Image();
-      preload.src = p.link;
-      _slideshow.photos[i]._img = preload;
+  var path = _dropboxFolder[context]; if (!path) return;
+  _slideshow.context = context; _slideshow.photos = []; _slideshow.index = 0;
+  var ov   = document.getElementById('slideshow-overlay');
+  var load = document.getElementById('slideshow-loading');
+  var img  = document.getElementById('slideshow-img');
+  var ctr  = document.getElementById('slideshow-counter');
+  ov.classList.add('open');
+  document.getElementById('slideshow-title').textContent = _slideshow.title+' — Photos';
+  load.textContent = 'Loading photos…'; load.style.display = 'block'; img.style.display = 'none'; ctr.textContent = '';
+  var recursive = (context==='alljob');
+  // Use cached temp links if already pre-fetched — otherwise fetch now
+  ensureTempLinks(path, recursive, function(links) {
+    if (!links || !links.length) { load.textContent = 'No photos found.'; return; }
+    _slideshow.photos = links;
+    // Preload first 5 images immediately for instant display
+    links.slice(0, 5).forEach(function(p, i) {
+      var pre = new Image(); pre.src = p.link; _slideshow.photos[i]._img = pre;
     });
-
-    // Show first image immediately
     showSlideshowPhoto(0);
+    // Preload rest in background
+    links.slice(5).forEach(function(p, i) {
+      var pre = new Image(); pre.src = p.link; _slideshow.photos[i+5]._img = pre;
+    });
   });
 }
 
 function showSlideshowPhoto(idx) {
-  var photos = _slideshow.photos;
-  if (!photos.length) return;
-  idx = ((idx % photos.length) + photos.length) % photos.length;
-  _slideshow.index = idx;
-
-  var loading = document.getElementById('slideshow-loading');
-  var imgEl   = document.getElementById('slideshow-img');
-  var counter = document.getElementById('slideshow-counter');
-
-  counter.textContent = (idx + 1) + ' / ' + photos.length;
-
-  var photo = photos[idx];
-
-  // If already preloaded and complete, show instantly
+  var p = _slideshow.photos; if (!p.length) return;
+  idx = ((idx%p.length)+p.length)%p.length; _slideshow.index = idx;
+  var load = document.getElementById('slideshow-loading');
+  var img  = document.getElementById('slideshow-img');
+  var ctr  = document.getElementById('slideshow-counter');
+  ctr.textContent = (idx+1)+' / '+p.length;
+  var photo = p[idx];
   if (photo._img && photo._img.complete && photo._img.naturalWidth > 0) {
-    imgEl.src = photo.link;
-    loading.style.display = 'none';
-    imgEl.style.display = 'block';
+    img.src = photo.link; load.style.display='none'; img.style.display='block';
   } else {
-    // Still loading — show spinner and wait
-    loading.textContent = 'Loading…';
-    loading.style.display = 'block';
-    imgEl.style.display = 'none';
-    imgEl.onload = function() {
-      loading.style.display = 'none';
-      imgEl.style.display = 'block';
-    };
-    imgEl.src = photo.link;
+    load.textContent='Loading…'; load.style.display='block'; img.style.display='none';
+    img.onload = function(){ load.style.display='none'; img.style.display='block'; };
+    img.src = photo.link;
   }
 }
-
-function slideshowNav(dir) {
-  showSlideshowPhoto(_slideshow.index + dir);
-}
-
-function closeSlideshow() {
-  document.getElementById('slideshow-overlay').classList.remove('open');
-  document.getElementById('slideshow-img').src = '';
-}
-
-document.getElementById('slideshow-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeSlideshow();
-});
-
+function slideshowNav(d) { showSlideshowPhoto(_slideshow.index+d); }
+function closeSlideshow() { document.getElementById('slideshow-overlay').classList.remove('open'); document.getElementById('slideshow-img').src=''; }
+document.getElementById('slideshow-overlay').addEventListener('click', function(e){ if(e.target===this) closeSlideshow(); });
 document.addEventListener('keydown', function(e) {
   if (!document.getElementById('slideshow-overlay').classList.contains('open')) return;
-  if (e.key === 'ArrowLeft')  slideshowNav(-1);
-  if (e.key === 'ArrowRight') slideshowNav(1);
-  if (e.key === 'Escape')     closeSlideshow();
+  if (e.key==='ArrowLeft')  slideshowNav(-1);
+  if (e.key==='ArrowRight') slideshowNav(1);
+  if (e.key==='Escape')     closeSlideshow();
 });
-var _installers = [];
+
+// ══ INSTALLERS ═════════════════════════════════════════════════
+var _installers     = [];
 var _currentEventId = null;
 var _currentJobName = null;
 
 function loadInstallers() {
-  apiFetch({ action: 'installers' }, function(data) {
-    if (Array.isArray(data)) {
-      _installers = data;
-      populateInstallerSelects();
-    }
+  apiFetch({ action:'installers' }, function(data) {
+    if (Array.isArray(data)) { _installers = data; populateInstallerSelects(); }
   });
 }
 loadInstallers();
 
 function populateInstallerSelects() {
-  ['installer-select', 'modal-installer-select'].forEach(function(id) {
-    var sel = document.getElementById(id);
-    if (!sel) return;
+  ['installer-select','modal-installer-select'].forEach(function(id) {
+    var sel = document.getElementById(id); if (!sel) return;
     sel.innerHTML = '<option value="">Select installer…</option>'
-      + _installers.map(function(inst) {
-          return '<option value="' + esc(inst.email) + '">' + esc(inst.name) + '</option>';
-        }).join('');
+      + _installers.map(function(i){ return '<option value="'+esc(i.email)+'">'+esc(i.name)+'</option>'; }).join('');
   });
 }
 
-function escAttr(str) {
-  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-}
+function escAttr(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
-function renderInstallerTags(containerId, guests, isModal) {
-  var el = document.getElementById(containerId);
-  if (!el) return;
-  if (!guests || guests.length === 0) {
-    el.innerHTML = '<div class="installer-empty">No installers assigned yet</div>';
-    return;
+function renderInstallerTags(cid, guests, isModal, readOnly) {
+  var el = document.getElementById(cid); if (!el) return;
+  if (!guests || !guests.length) {
+    el.innerHTML = '<div class="installer-empty">'+(readOnly?'No Installer Information':'No installers assigned yet')+'</div>'; return;
   }
   el.innerHTML = guests.map(function(g) {
-    // Look up name from our loaded installers list first, fall back to g.name, then email
-    var match = _installers.filter(function(i) { return i.email.toLowerCase() === g.email.toLowerCase(); })[0];
-    var name = match ? match.name : (g.name && g.name !== g.email ? g.name : g.email.split('@')[0]);
-    var removeCall = isModal
-      ? 'removeInstallerModal(\'' + escAttr(g.email) + '\')'
-      : 'removeInstallerEvent(\'' + escAttr(g.email) + '\')';
-    return '<span class="installer-tag">' + esc(name)
-      + '<button class="installer-tag-remove" onclick="' + removeCall + '" title="Remove">✕</button>'
-      + '</span>';
+    var match = _installers.filter(function(i){ return i.email.toLowerCase()===g.email.toLowerCase(); })[0];
+    var name  = match ? match.name : (g.name && g.name!==g.email ? g.name : g.email.split('@')[0]);
+    if (readOnly) return '<span class="installer-tag readonly">'+esc(name)+'</span>';
+    var rm = isModal ? 'removeInstallerModal(\''+escAttr(g.email)+'\')' : 'removeInstallerEvent(\''+escAttr(g.email)+'\')';
+    return '<span class="installer-tag">'+esc(name)+'<button class="installer-tag-remove" onclick="'+rm+'" title="Remove">✕</button></span>';
   }).join('');
 }
 
-// Event popup installer
-function openEventInstallerSection(eventId) {
-  _currentEventId = eventId;
-  var section = document.getElementById('installer-section');
-  if (!section) return;
-  section.style.display = 'block';
-  document.getElementById('installer-tags').innerHTML = '<div class="installer-empty">Loading…</div>';
-  apiFetch({ action: 'getGuests', eventId: eventId }, function(guests) {
-    renderInstallerTags('installer-tags', guests, false);
-  });
+// Event popup
+function openEventPopup(event) {
+  var title  = event.title||'(No title)', start=event.startStr||event.start||'', end=event.endStr||event.end||'';
+  var allDay = event.allDay||false, props=event.extendedProps||{};
+  var loc=props.location||'', desc=props.description||'', source=props.source||'', evId=event.id||'';
+  function fmt(d,ad) {
+    if (!d) return ''; var dt=new Date(d);
+    return ad ? dt.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+              : dt.toLocaleString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+  }
+  var ts=fmt(start,allDay); if (end){ var es=fmt(end,allDay); if(es&&es!==ts) ts+=' → '+es; }
+  document.getElementById('event-popup-title').textContent = title;
+  var html='';
+  if(ts)   html+='<div class="event-popup-row"><span class="event-popup-icon">🕐</span><span class="event-popup-text">'+esc(ts)+'</span></div>';
+  if(loc)  html+='<div class="event-popup-row"><span class="event-popup-icon">📍</span><span class="event-popup-text">'+esc(loc)+'</span></div>';
+  if(desc) html+='<div class="event-popup-row"><span class="event-popup-icon">📝</span><span class="event-popup-text muted">'+esc(desc).replace(/\n/g,'<br>')+'</span></div>';
+  if(!ts&&!loc&&!desc) html='<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
+  document.getElementById('event-popup-body').innerHTML = html;
+  document.getElementById('event-popup-overlay').classList.add('open');
+  if (source==='google' && evId) { openEventInstallerSection(evId); initPhotoSection('popup', title); }
+  else { document.getElementById('installer-section').style.display='none'; document.getElementById('popup-photo-section').style.display='none'; }
 }
+function closeEventPopup() { document.getElementById('event-popup-overlay').classList.remove('open'); }
+document.getElementById('event-popup-overlay').addEventListener('click', function(e){ if(e.target===this) closeEventPopup(); });
 
+function openEventInstallerSection(evId) {
+  _currentEventId = evId;
+  var sec = document.getElementById('installer-section'); if(!sec) return;
+  sec.style.display='block';
+  document.getElementById('installer-tags').innerHTML='<div class="installer-empty">Loading…</div>';
+  apiFetch({ action:'getGuests', eventId:evId }, function(g){ renderInstallerTags('installer-tags',g,false,false); });
+}
 function addInstaller() {
-  var sel = document.getElementById('installer-select');
-  var email = sel.value;
-  if (!email || !_currentEventId) return;
-  var btn = document.getElementById('installer-add-btn');
-  btn.disabled = true; btn.textContent = 'Adding…';
-  apiFetch({ action: 'addInstallers', eventId: _currentEventId, emails: email }, function(res) {
-    btn.disabled = false; btn.textContent = '+ Add'; sel.value = '';
-    if (res && res.success) renderInstallerTags('installer-tags', res.guests, false);
-    else alert('Error: ' + (res && res.error ? res.error : 'Could not add installer'));
+  var sel=document.getElementById('installer-select'), email=sel.value;
+  if(!email||!_currentEventId) return;
+  var btn=document.getElementById('installer-add-btn'); btn.disabled=true; btn.textContent='Adding…';
+  apiFetch({ action:'addInstallers', eventId:_currentEventId, emails:email }, function(res) {
+    btn.disabled=false; btn.textContent='+ Add'; sel.value='';
+    if(res&&res.success) renderInstallerTags('installer-tags',res.guests,false,false);
+    else alert('Error: '+(res&&res.error?res.error:'Could not add installer'));
   });
 }
-
 function removeInstallerEvent(email) {
-  if (!_currentEventId) return;
-  apiFetch({ action: 'removeInstaller', eventId: _currentEventId, email: email }, function(res) {
-    if (res && res.success) {
-      apiFetch({ action: 'getGuests', eventId: _currentEventId }, function(guests) {
-        renderInstallerTags('installer-tags', guests, false);
-      });
-    }
+  if(!_currentEventId) return;
+  apiFetch({ action:'removeInstaller', eventId:_currentEventId, email:email }, function(res) {
+    if(res&&res.success) apiFetch({ action:'getGuests', eventId:_currentEventId }, function(g){ renderInstallerTags('installer-tags',g,false,false); });
   });
 }
 
-// Job modal installer
+// Active job modal installer
 function openModalInstallerSection(jobName) {
   _currentJobName = jobName;
-  var section = document.getElementById('modal-installer-section');
-  if (!section) return;
-  section.style.display = 'block';
-  document.getElementById('modal-installer-tags').innerHTML = '<div class="installer-empty">Loading…</div>';
-  var eventId = findEventIdForJob(jobName);
-  if (!eventId) {
-    document.getElementById('modal-installer-tags').innerHTML = '<div class="installer-empty">No calendar event found — set a delivery date first.</div>';
-    document.getElementById('modal-installer-add-btn').disabled = true;
+  var sec = document.getElementById('modal-installer-section'); if(!sec) return;
+  sec.style.display='block';
+  document.getElementById('modal-installer-tags').innerHTML='<div class="installer-empty">Loading…</div>';
+  var evId = findEventIdForJob(jobName);
+  if (!evId) {
+    document.getElementById('modal-installer-tags').innerHTML='<div class="installer-empty">No calendar event found — set a delivery date first.</div>';
+    document.getElementById('modal-installer-add-btn').disabled=true; return;
+  }
+  _currentEventId = evId;
+  document.getElementById('modal-installer-add-btn').disabled=false;
+  apiFetch({ action:'getGuests', eventId:evId }, function(g){ renderInstallerTags('modal-installer-tags',g,true,false); });
+}
+function findEventIdForJob(n) { for(var i=0;i<_allEvents.length;i++){ if(_allEvents[i].title===n&&_allEvents[i].id) return _allEvents[i].id; } return null; }
+function addInstallerFromModal() {
+  var sel=document.getElementById('modal-installer-select'), email=sel.value;
+  if(!email||!_currentEventId) return;
+  var btn=document.getElementById('modal-installer-add-btn'); btn.disabled=true; btn.textContent='Adding…';
+  apiFetch({ action:'addInstallers', eventId:_currentEventId, emails:email }, function(res) {
+    btn.disabled=false; btn.textContent='+ Add'; sel.value='';
+    if(res&&res.success) renderInstallerTags('modal-installer-tags',res.guests,true,false);
+    else alert('Error: '+(res&&res.error?res.error:'Could not add installer'));
+  });
+}
+function removeInstallerModal(email) {
+  if(!_currentEventId) return;
+  apiFetch({ action:'removeInstaller', eventId:_currentEventId, email:email }, function(res) {
+    if(res&&res.success) apiFetch({ action:'getGuests', eventId:_currentEventId }, function(g){ renderInstallerTags('modal-installer-tags',g,true,false); });
+  });
+}
+
+// ══ ALL JOBS — INDEX-BACKED INSTANT SEARCH ═════════════════════
+// The index is built nightly by Apps Script and stored in a Google
+// Sheet. We fetch it once per session, cache it in memory, then
+// all searching/filtering happens client-side — no Dropbox calls.
+
+var _allJobsCache    = null;   // full index from sheet (loaded once)
+var _allJobsFiltered = [];     // currently displayed subset
+var _indexLoaded     = false;  // have we fetched from server this session?
+
+// Pre-load the index as soon as the All Jobs tab is first activated
+// (called from setJobsTab and switchView)
+function ensureIndexLoaded(callback) {
+  if (_allJobsCache !== null) {
+    if (callback) callback();
     return;
   }
-  _currentEventId = eventId;
-  document.getElementById('modal-installer-add-btn').disabled = false;
-  apiFetch({ action: 'getGuests', eventId: eventId }, function(guests) {
-    renderInstallerTags('modal-installer-tags', guests, true);
-  });
-}
+  if (_indexLoaded) return; // already in flight
+  _indexLoaded = true;
 
-function findEventIdForJob(jobName) {
-  for (var i = 0; i < _allEvents.length; i++) {
-    if (_allEvents[i].title === jobName && _allEvents[i].id) return _allEvents[i].id;
-  }
-  return null;
-}
+  showAllJobsLoading('Loading job index…');
 
-function addInstallerFromModal() {
-  var sel = document.getElementById('modal-installer-select');
-  var email = sel.value;
-  if (!email || !_currentEventId) return;
-  var btn = document.getElementById('modal-installer-add-btn');
-  btn.disabled = true; btn.textContent = 'Adding…';
-  apiFetch({ action: 'addInstallers', eventId: _currentEventId, emails: email }, function(res) {
-    btn.disabled = false; btn.textContent = '+ Add'; sel.value = '';
-    if (res && res.success) renderInstallerTags('modal-installer-tags', res.guests, true);
-    else alert('Error: ' + (res && res.error ? res.error : 'Could not add installer'));
-  });
-}
+  apiFetch({ action:'dropboxAllJobs' }, function(res) {
+    hideAllJobsLoading();
 
-function removeInstallerModal(email) {
-  if (!_currentEventId) return;
-  apiFetch({ action: 'removeInstaller', eventId: _currentEventId, email: email }, function(res) {
-    if (res && res.success) {
-      apiFetch({ action: 'getGuests', eventId: _currentEventId }, function(guests) {
-        renderInstallerTags('modal-installer-tags', guests, true);
-      });
+    if (!res.success) {
+      // Index missing or error — show helpful message
+      var prompt = document.getElementById('alljobs-prompt');
+      prompt.innerHTML = res.needsRebuild
+        ? '⚠️ Job index not built yet. It will build automatically tonight at 2am.<br>'
+          +'<span style="color:var(--muted);font-size:11px;">To build it now, run <code>buildJobIndex()</code> in the Apps Script editor.</span>'
+        : '⚠️ ' + (res.error || 'Failed to load index.');
+      prompt.style.display = 'block';
+      _indexLoaded = false; // allow retry
+      return;
     }
+
+    _allJobsCache = res.jobs || [];
+
+    // Show stale warning banner if index is more than 25 hours old
+    if (res.stale) {
+      showStaleWarning(res.staleHours, res.lastUpdated);
+    } else {
+      hideStaleWarning();
+    }
+
+    if (callback) callback();
+    else renderAllJobs(_allJobsCache);
+
+  }, function() {
+    hideAllJobsLoading();
+    var prompt = document.getElementById('alljobs-prompt');
+    prompt.textContent = '⚠️ Network error loading index. Check your connection.';
+    prompt.style.display = 'block';
+    _indexLoaded = false;
   });
 }
 
-// Force calendar to recompute size once all fonts/layout settled
-window.addEventListener('resize', function() {
-  if (_fcMonth)  _fcMonth.updateSize();
-  if (_fcMobile) _fcMobile.updateSize();
-});
-var hamburger   = document.getElementById('hamburger');
-var mobileNav   = document.getElementById('mobile-nav');
-var navOverlay  = document.getElementById('nav-overlay');
-
-hamburger.addEventListener('click', function() {
-  hamburger.classList.toggle('open');
-  mobileNav.classList.toggle('open');
-  navOverlay.classList.toggle('open');
-});
-
-navOverlay.addEventListener('click', closeNav);
-
-function closeNav() {
-  hamburger.classList.remove('open');
-  mobileNav.classList.remove('open');
-  navOverlay.classList.remove('open');
+function showStaleWarning(hours, lastUpdated) {
+  var banner = document.getElementById('alljobs-stale-banner');
+  if (!banner) return;
+  var when = lastUpdated ? new Date(lastUpdated).toLocaleString('en-AU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'unknown';
+  banner.textContent = '⚠️ Index last updated ' + hours + ' hour' + (hours !== 1 ? 's' : '') + ' ago (' + when + '). Nightly rebuild runs at 2am.';
+  banner.style.display = 'block';
+}
+function hideStaleWarning() {
+  var banner = document.getElementById('alljobs-stale-banner');
+  if (banner) banner.style.display = 'none';
 }
 
-// ── Mobile view switching ────────────────────────────────────
-var currentView = 'jobs';
+function loadAllJobsList() {
+  ensureIndexLoaded(function() { renderAllJobs(_allJobsCache); });
+}
 
-function switchView(view) {
-  document.querySelectorAll('.nav-item').forEach(function(el) {
-    el.classList.toggle('active', el.dataset.view === view);
+function loadAllJobsListMobile() {
+  if (_allJobsCache !== null) { renderAllJobsMobile(_allJobsCache); return; }
+  var body = document.getElementById('mobile-alljobs-body');
+  body.innerHTML = '<div class="loading"><div>'+SPINNER_SVG+'</div><div>Loading index…</div></div>';
+  apiFetch({ action:'dropboxAllJobs' }, function(res) {
+    if (!res.success) {
+      body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);">'
+        + (res.error || 'Failed to load index.') + '</div>';
+      return;
+    }
+    _allJobsCache = res.jobs || [];
+    if (res.stale) showStaleWarning(res.staleHours, res.lastUpdated);
+    renderAllJobsMobile(_allJobsCache);
+  }, function() {
+    body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);">Network error.</div>';
   });
-  document.querySelectorAll('.mobile-view').forEach(function(el) {
-    el.classList.remove('active');
+}
+
+// All searching is pure client-side filtering — instant
+function searchAllJobs() {
+  var q = document.getElementById('tv-alljobs-input').value.trim().toLowerCase();
+  ensureIndexLoaded(function() {
+    var filtered = q
+      ? _allJobsCache.filter(function(j) {
+          return j.name.toLowerCase().includes(q) || (j.source && j.source.toLowerCase().includes(q));
+        })
+      : _allJobsCache;
+    renderAllJobs(filtered);
   });
-  document.getElementById('view-' + view).classList.add('active');
-  currentView = view;
-  closeNav();
-  // FullCalendar can't measure itself when hidden — force resize when shown
-  if (view === 'calendar' && _fcMobile) {
-    setTimeout(function() { _fcMobile.updateSize(); }, 50);
+}
+
+function searchAllJobsMobile() {
+  var q    = document.getElementById('mobile-alljobs-input').value.trim().toLowerCase();
+  var body = document.getElementById('mobile-alljobs-body');
+  if (_allJobsCache === null) { loadAllJobsListMobile(); return; }
+  var filtered = q
+    ? _allJobsCache.filter(function(j) {
+        return j.name.toLowerCase().includes(q) || (j.source && j.source.toLowerCase().includes(q));
+      })
+    : _allJobsCache;
+  renderAllJobsMobile(filtered);
+}
+
+function showAllJobsLoading(txt) {
+  document.getElementById('alljobs-loading').style.display = 'flex';
+  document.getElementById('alljobs-loading-text').textContent = txt || 'Loading…';
+  document.getElementById('alljobs-prompt').style.display = 'none';
+  document.getElementById('alljobs-table').style.display  = 'none';
+}
+function hideAllJobsLoading() { document.getElementById('alljobs-loading').style.display = 'none'; }
+
+function renderAllJobs(jobs) {
+  _allJobsFiltered = jobs || [];
+  hideAllJobsLoading();
+  var prompt = document.getElementById('alljobs-prompt');
+  var table  = document.getElementById('alljobs-table');
+  var tbody  = document.getElementById('alljobs-tbody');
+
+  if (!jobs || !jobs.length) {
+    prompt.textContent   = _allJobsCache && _allJobsCache.length ? 'No jobs match your search.' : 'No job folders found in index.';
+    prompt.style.display = 'block';
+    table.style.display  = 'none';
+    return;
   }
+
+  prompt.style.display = 'none';
+  tbody.innerHTML = jobs.map(function(j, i) {
+    // Strip leading # from job name
+    var name = j.name.replace(/^#+\s*/, '');
+    return '<tr>'
+      + '<td class="cell-job" onclick="openAllJobModal('+i+')">' + esc(name) + '</td>'
+      + '<td>' + fmtListText(j.lists) + '</td>'
+      + '<td><span class="has-date">' + esc(j.year) + '</span></td>'
+      + '</tr>';
+  }).join('');
+  table.style.display = 'table';
 }
 
-// ── API fetch ────────────────────────────────────────────────
-function apiFetch(params, successFn, errorFn) {
-  var url = API_URL + '?' + Object.keys(params).map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-  }).join('&');
-
-  fetch(url)
-    .then(function(res) { return res.json(); })
-    .then(successFn)
-    .catch(errorFn || function(e) { console.error(e); });
+function renderAllJobsMobile(jobs) {
+  var body = document.getElementById('mobile-alljobs-body');
+  if (!jobs || !jobs.length) {
+    body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);">'
+      + (_allJobsCache && _allJobsCache.length ? 'No jobs match your search.' : 'No folders found.') + '</div>';
+    return;
+  }
+  window._mobileAllJobs = jobs;
+  body.innerHTML = '<table><thead><tr><th>Job</th><th>Lists</th><th>Year</th></tr></thead><tbody>'
+    + jobs.map(function(j, i) {
+        var name = j.name.replace(/^#+\s*/, '');
+        return '<tr>'
+          + '<td class="cell-job" onclick="openAllJobModalMobile('+i+')">' + esc(name) + '</td>'
+          + '<td>' + fmtListText(j.lists) + '</td>'
+          + '<td><span class="has-date">' + esc(j.year) + '</span></td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table>';
 }
 
-// ── Load jobs (both TV and mobile) ───────────────────────────
-var _lastJobsHash = '';
+// Plain comma-separated list numbers — no badge boxes
+function fmtListText(lists) {
+  if (!lists || !lists.length) return '<span class="no-info">No List Info</span>';
+  return '<span style="color:var(--white);font-size:12px;">'
+    + lists.map(function(l){ return esc(String(l.listNum)); }).join(', ')
+    + '</span>';
+}
 
+// ══ ALL JOBS MODAL ═════════════════════════════════════════════
+var _currentAllJob = null;
+
+function openAllJobModal(idx) {
+  var job=_allJobsFiltered[idx]; if(!job) return;
+  _currentAllJob = job;
+  _dropboxFolder.alljob = null;
+  var displayName = job.name.replace(/^#+\s*/, '');
+  document.getElementById('alljob-modal-title').textContent   = displayName;
+  document.getElementById('alljob-modal-subtitle').textContent = job.source + ' · ' + job.year;
+  document.getElementById('alljob-installer-section').style.display='none';
+  document.getElementById('alljob-photo-section').style.display='none';
+
+  // Build list items — each PDF is clickable to open the in-app viewer.
+  // We construct the full Dropbox path using the job path + List folder name
+  // (we don't store the exact List folder path in the index, so we store
+  // the filename and job path; the click handler looks up the temp link
+  // using the path from the index list entry if available, otherwise falls
+  // back to a path search via the filename stored in l.pdfPath).
+  var html='<div class="alljob-section"><div class="alljob-section-title">📄 Lists <span style="font-size:10px;color:var(--muted);font-weight:400;letter-spacing:0;">(click to view)</span></div>';
+  if (!job.lists||!job.lists.length) {
+    html+='<div class="installer-empty">No List Information Available</div>';
+  } else {
+    html+=job.lists.map(function(l) {
+      // Build a safe attribute string for the pdf path
+      // l.pdfPath is stored in the index (added by _extractJobsFromEntries)
+      // If unavailable we use a fallback indicator
+      var pdfPathAttr = l.pdfPath ? escAttr(l.pdfPath) : '';
+      var hasPdf = !!pdfPathAttr;
+      var clickAttr = hasPdf
+        ? 'onclick="openPdfViewer(\''+ pdfPathAttr +'\',\'List '+esc(String(l.listNum))+' — '+esc(l.description||'')+'\')"'
+        : '';
+      return '<div class="alljob-list-item'+(hasPdf?' has-pdf':'')+'" '+clickAttr+'>'
+        +'<span style="color:var(--white);font-size:12px;font-weight:600;min-width:28px;flex-shrink:0;">'+esc(String(l.listNum))+'</span>'
+        +'<span class="alljob-list-name">'+esc(l.description||'')+'</span>'
+        +(hasPdf ? '<span class="pdf-icon" style="margin-left:auto;font-size:13px;" title="View PDF">📄</span>' : '')
+        +'</div>';
+    }).join('');
+  }
+  html+='</div>';
+  document.getElementById('alljob-modal-body').innerHTML = html;
+  document.getElementById('alljob-modal-overlay').classList.add('open');
+
+  loadAllJobInstallers(job.name);
+  initPhotoSectionDirect('alljob', job.path, displayName);
+}
+
+function openAllJobModalMobile(idx) {
+  var jobs=window._mobileAllJobs||[]; if(!jobs[idx]) return;
+  _allJobsFiltered=jobs; openAllJobModal(idx);
+}
+
+function loadAllJobInstallers(jobName) {
+  var sec=document.getElementById('alljob-installer-section'), tags=document.getElementById('alljob-installer-tags');
+  sec.style.display='block'; tags.innerHTML='<div class="installer-empty">Loading…</div>';
+  var evId=findEventIdForJob(jobName);
+  if (!evId) { tags.innerHTML='<div class="installer-empty">No Installer Information</div>'; return; }
+  apiFetch({ action:'getGuests', eventId:evId }, function(g){ renderInstallerTags('alljob-installer-tags',g,false,true); });
+}
+
+function closeAllJobModal() { document.getElementById('alljob-modal-overlay').classList.remove('open'); _currentAllJob=null; }
+document.getElementById('alljob-modal-overlay').addEventListener('click', function(e){ if(e.target===this) closeAllJobModal(); });
+
+window.addEventListener('resize', function(){ if(_fcMonth)_fcMonth.updateSize(); if(_fcMobile)_fcMobile.updateSize(); });
+
+// ══ HAMBURGER / MOBILE NAV ═════════════════════════════════════
+var hamburger=document.getElementById('hamburger'), mobileNav=document.getElementById('mobile-nav'), navOverlay=document.getElementById('nav-overlay');
+hamburger.addEventListener('click', function(){ hamburger.classList.toggle('open'); mobileNav.classList.toggle('open'); navOverlay.classList.toggle('open'); });
+navOverlay.addEventListener('click', closeNav);
+function closeNav(){ hamburger.classList.remove('open'); mobileNav.classList.remove('open'); navOverlay.classList.remove('open'); }
+var currentView='jobs';
+function switchView(v) {
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.toggle('active',el.dataset.view===v); });
+  document.querySelectorAll('.mobile-view').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('view-'+v).classList.add('active');
+  currentView=v; closeNav();
+  if(v==='calendar'&&_fcMobile) setTimeout(function(){ _fcMobile.updateSize(); },50);
+  // Pre-load index the first time the All Jobs mobile view is opened
+  if(v==='alljobs' && _allJobsCache === null && !_indexLoaded) loadAllJobsListMobile();
+}
+
+// ══ API FETCH ══════════════════════════════════════════════════
+function apiFetch(params, ok, fail) {
+  var url=API_URL+'?'+Object.keys(params).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(params[k]); }).join('&');
+  fetch(url).then(function(r){ return r.json(); }).then(ok).catch(fail||function(e){ console.error(e); });
+}
+
+// ══ ACTIVE JOBS ════════════════════════════════════════════════
+var _lastJobsHash='';
 loadJobs();
-setInterval(function() {
-  loadJobs();
-  loadCalendar();
-}, 30000); // live refresh every 30 seconds
+setInterval(function(){ loadJobs(); loadCalendar(); }, 30000);
 
-function loadJobs() {
-  apiFetch({ action: 'main' }, renderMain, function(e) {
-    console.error('Failed to load jobs:', e);
-  });
-}
+function loadJobs() { apiFetch({ action:'main' }, renderMain, function(e){ console.error('Jobs load failed:',e); }); }
 
 function renderMain(rows) {
-  // Skip re-render if data hasn't changed
-  var hash = JSON.stringify(rows);
-  if (hash === _lastJobsHash) return;
-  _lastJobsHash = hash;
-
-  // Hide both loaders
-  var tvLoader = document.getElementById('main-loading');
-  var mobLoader = document.getElementById('mobile-loading');
-  if (tvLoader)  tvLoader.style.display  = 'none';
-  if (mobLoader) mobLoader.style.display = 'none';
-
-  var tbody       = document.getElementById('main-tbody');
-  var table       = document.getElementById('main-table');
-  var mobileTbody = document.getElementById('mobile-tbody');
-  var mobileTable = document.getElementById('mobile-table');
-
-  tbody.innerHTML = '';
-  mobileTbody.innerHTML = '';
-
-  if (!rows || rows.length === 0) {
-    var empty = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:32px">No data found.</td></tr>';
-    tbody.innerHTML = empty;
-    mobileTbody.innerHTML = empty;
-    table.style.display = 'table';
-    mobileTable.style.display = 'table';
-    return;
+  var hash=JSON.stringify(rows); if(hash===_lastJobsHash) return; _lastJobsHash=hash;
+  var tvL=document.getElementById('main-loading'), mobL=document.getElementById('mobile-loading');
+  if(tvL)  tvL.style.display='none';
+  if(mobL) mobL.style.display='none';
+  var tbody=document.getElementById('main-tbody'), table=document.getElementById('main-table');
+  var mbody=document.getElementById('mobile-tbody'), mtable=document.getElementById('mobile-table');
+  tbody.innerHTML=''; mbody.innerHTML='';
+  if (!rows||!rows.length) {
+    var emp='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:32px">No data found.</td></tr>';
+    tbody.innerHTML=emp; mbody.innerHTML=emp; table.style.display='table'; mtable.style.display='table'; return;
   }
-
-  // Sort: dated items first (ascending by date), no-date items at bottom
-  rows.sort(function(a, b) {
-    var aHas = a.delivery && a.delivery !== '';
-    var bHas = b.delivery && b.delivery !== '';
-    if (aHas && bHas) {
-      // Both have dates — parse dd/MM/yyyy and compare
-      var ap = a.delivery.split('/');
-      var bp = b.delivery.split('/');
-      var aDate = new Date(ap[2], ap[1]-1, ap[0]);
-      var bDate = new Date(bp[2], bp[1]-1, bp[0]);
-      return aDate - bDate;
-    }
-    if (aHas && !bHas) return -1; // a first
-    if (!aHas && bHas) return  1; // b first
-    return 0; // both no date
+  rows.sort(function(a,b) {
+    var ah=a.delivery&&a.delivery!=='', bh=b.delivery&&b.delivery!=='';
+    if(ah&&bh){ var ap=a.delivery.split('/'),bp=b.delivery.split('/'); return new Date(ap[2],ap[1]-1,ap[0])-new Date(bp[2],bp[1]-1,bp[0]); }
+    return ah?-1:bh?1:0;
   });
-
-  rows.forEach(function(row) {
-    // TV row
-    var tr = buildRow(row, false);
-    tbody.appendChild(tr);
-    // Mobile row
-    var mtr = buildRow(row, true);
-    mobileTbody.appendChild(mtr);
-  });
-
-  table.style.display = 'table';
-  mobileTable.style.display = 'table';
+  rows.forEach(function(r){ tbody.appendChild(buildRow(r,false)); mbody.appendChild(buildRow(r,true)); });
+  table.style.display='table'; mtable.style.display='table';
 }
 
-function buildRow(row, isMobile) {
-  var tr = document.createElement('tr');
-
-  var tdJob = document.createElement('td');
-  tdJob.className = 'cell-job';
-  tdJob.textContent = row.job;
-  tdJob.onclick = function() { openJobModal(row.job); };
-  tr.appendChild(tdJob);
-
-  var tdList = document.createElement('td');
-  tdList.className = 'cell-lists';
-  tdList.textContent = row.lists;
-  tdList.onclick = function() { openListModal(row.job, row.lists); };
-  tr.appendChild(tdList);
-
-  var tdDate = document.createElement('td');
-  if (!row.delivery || row.delivery === '') {
-    tdDate.innerHTML = '<span class="no-date">No Date</span>';
-  } else {
-    tdDate.innerHTML = '<span class="has-date">' + row.delivery + '</span>';
-  }
-  tr.appendChild(tdDate);
-
+function buildRow(row, mob) {
+  var tr=document.createElement('tr');
+  var tj=document.createElement('td'); tj.className='cell-job'; tj.textContent=row.job; tj.onclick=function(){ openJobModal(row.job); }; tr.appendChild(tj);
+  var tl=document.createElement('td'); tl.className='cell-lists'; tl.textContent=row.lists; tl.onclick=function(){ openListModal(row.job,row.lists); }; tr.appendChild(tl);
+  var td=document.createElement('td'); td.innerHTML=(!row.delivery||row.delivery==='')?'<span class="no-date">No Date</span>':'<span class="has-date">'+row.delivery+'</span>'; tr.appendChild(td);
   return tr;
 }
 
-// ── Modals ───────────────────────────────────────────────────
+// ══ ACTIVE JOBS MODALS ═════════════════════════════════════════
 function openJobModal(jobName) {
-  document.getElementById('modal-title').textContent = jobName;
-  document.getElementById('modal-subtitle').textContent = 'All items for this job';
-  document.getElementById('modal-installer-section').style.display = 'none';
-  document.getElementById('modal-photo-section').style.display = 'none';
+  document.getElementById('modal-title').textContent=jobName;
+  document.getElementById('modal-subtitle').textContent='All items for this job';
+  document.getElementById('modal-installer-section').style.display='none';
+  document.getElementById('modal-photo-section').style.display='none';
   showModal();
-  apiFetch({ action: 'job', job: jobName }, function(rows) {
-    renderModal(rows);
-    openModalInstallerSection(jobName);
-    initPhotoSection('modal', jobName);
-  }, modalError);
+  apiFetch({ action:'job', job:jobName }, function(rows){ renderModal(rows); openModalInstallerSection(jobName); initPhotoSection('modal',jobName); }, modalError);
 }
-
 function openListModal(jobName, listsStr) {
-  document.getElementById('modal-title').textContent = jobName;
-  document.getElementById('modal-subtitle').textContent = 'List items: ' + listsStr;
-  document.getElementById('modal-installer-section').style.display = 'none';
-  document.getElementById('modal-photo-section').style.display = 'none';
+  document.getElementById('modal-title').textContent=jobName;
+  document.getElementById('modal-subtitle').textContent='List items: '+listsStr;
+  document.getElementById('modal-installer-section').style.display='none';
+  document.getElementById('modal-photo-section').style.display='none';
   showModal();
-  apiFetch({ action: 'lists', job: jobName, lists: listsStr }, function(rows) {
-    renderModal(rows);
-    openModalInstallerSection(jobName);
-    initPhotoSection('modal', jobName);
-  }, modalError);
+  apiFetch({ action:'lists', job:jobName, lists:listsStr }, function(rows){ renderModal(rows); openModalInstallerSection(jobName); initPhotoSection('modal',jobName); }, modalError);
 }
 
 function renderModal(rows) {
-  var body = document.getElementById('modal-body');
-  if (!rows || rows.length === 0) {
-    body.innerHTML = '<div class="empty-state">No matching items found.</div>';
-    return;
-  }
-
-  window._modalRows = rows;
-
-  // ── Desktop table ─────────────────────────────────────────
-  var tableHtml = '<table class="modal-table"><thead><tr>'
-    + '<th>List #</th><th>Joinery Item</th><th>Listed</th>'
-    + '<th>Machined</th><th>Assigned</th><th>Assembled</th>'
-    + '<th>Delivered</th><th>Date Required</th>'
-    + '</tr></thead><tbody>';
-
-  // ── Mobile cards ──────────────────────────────────────────
-  var cardsHtml = '<div class="item-cards">';
-
-  rows.forEach(function(r, idx) {
-    var dateDisplay = r.dateReq
-      ? '<span class="has-date">' + esc(r.dateReq) + '</span>'
-      : '<span class="no-date">No Date</span>';
-
-    var dateCellHtml =
-      '<div class="date-cell" id="date-cell-' + idx + '">'
-      + '<span id="date-display-' + idx + '">' + dateDisplay + '</span>'
-      + '<button class="date-edit-btn" onclick="editDate(' + idx + ')">✎ Edit</button>'
-      + '</div>';
-
-    // Desktop table row
-    tableHtml += '<tr>'
-      + '<td>' + esc(r.list) + '</td>'
-      + '<td>' + esc(r.item) + '</td>'
-      + '<td>' + icon(r.listed)       + '</td>'
-      + '<td>' + icon(r.machined)     + '</td>'
-      + '<td>' + assigned(r.assigned) + '</td>'
-      + '<td>' + icon(r.assembled)    + '</td>'
-      + '<td>' + icon(r.delivered)    + '</td>'
-      + '<td>' + dateCellHtml + '</td>'
-      + '</tr>';
-
-    // Mobile card
-    cardsHtml +=
-      '<div class="item-card">'
-      +   '<div class="card-top">'
-      +     '<div class="card-list-num">List #' + esc(r.list) + '</div>'
-      +     (r.assigned ? '<span class="assigned-tag">' + esc(r.assigned) + '</span>' : '')
-      +   '</div>'
-      +   '<div class="card-item-name">' + esc(r.item) + '</div>'
-      +   '<div class="card-status-row">'
-      +     '<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'    + icon(r.listed)    + '</span></div>'
-      +     '<div class="card-status-cell"><span class="card-status-label">Machined</span><span class="card-status-val">'  + icon(r.machined)  + '</span></div>'
-      +     '<div class="card-status-cell"><span class="card-status-label">Assembled</span><span class="card-status-val">' + icon(r.assembled) + '</span></div>'
-      +     '<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">' + icon(r.delivered) + '</span></div>'
-      +   '</div>'
-      +   '<div class="card-date-row">'
-      +     '<span class="card-date-label">📅 Date Required</span>'
-      +     '<div class="date-cell" id="date-cell-m-' + idx + '">'
-      +       '<span id="date-display-m-' + idx + '">' + dateDisplay + '</span>'
-      +       '<button class="date-edit-btn" onclick="editDate(' + idx + ', true)">✎ Edit</button>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>';
+  var body=document.getElementById('modal-body');
+  if (!rows||!rows.length) { body.innerHTML='<div class="empty-state">No matching items found.</div>'; return; }
+  window._modalRows=rows;
+  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th></tr></thead><tbody>';
+  var tc='<div class="item-cards">';
+  rows.forEach(function(r,idx) {
+    var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
+    var dc='<div class="date-cell" id="date-cell-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+')">✎ Edit</button></div>';
+    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+icon(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td></tr>';
+    tc+='<div class="item-card"><div class="card-top"><div class="card-list-num">List #'+esc(r.list)+'</div>'+(r.assigned?'<span class="assigned-tag">'+esc(r.assigned)+'</span>':'')+'</div>'
+      +'<div class="card-item-name">'+esc(r.item)+'</div>'
+      +'<div class="card-status-row">'
+      +'<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'+icon(r.listed)+'</span></div>'
+      +'<div class="card-status-cell"><span class="card-status-label">Machined</span><span class="card-status-val">'+icon(r.machined)+'</span></div>'
+      +'<div class="card-status-cell"><span class="card-status-label">Assembled</span><span class="card-status-val">'+icon(r.assembled)+'</span></div>'
+      +'<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">'+icon(r.delivered)+'</span></div>'
+      +'</div><div class="card-date-row"><span class="card-date-label">📅 Date Required</span>'
+      +'<div class="date-cell" id="date-cell-m-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+',true)">✎ Edit</button></div>'
+      +'</div></div>';
   });
-
-  tableHtml += '</tbody></table>';
-  cardsHtml += '</div>';
-
-  body.innerHTML = tableHtml + cardsHtml;
+  th+='</tbody></table>'; tc+='</div>';
+  body.innerHTML=th+tc;
 }
 
-function editDate(idx, isMobile) {
-  var r = window._modalRows[idx];
-  var prefix = isMobile ? 'date-cell-m-' : 'date-cell-';
-  var inputVal = '';
-  if (r.dateReq) {
-    var parts = r.dateReq.split('/');
-    if (parts.length === 3) inputVal = parts[2] + '-' + parts[1] + '-' + parts[0];
-  }
-
-  var cell = document.getElementById(prefix + idx);
-  cell.innerHTML =
-    '<div class="date-input-wrap">'
-    + '<input class="date-input" type="date" id="date-input-' + idx + (isMobile?'-m':'') + '" value="' + inputVal + '">'
-    + '<button class="date-save-btn" onclick="saveDate(' + idx + ',' + (isMobile?'true':'false') + ')">Save</button>'
-    + '<button class="date-cancel-btn" onclick="cancelEdit(' + idx + ',' + (isMobile?'true':'false') + ')">✕</button>'
-    + '</div>';
+function editDate(idx, mob) {
+  var r=window._modalRows[idx], pre=mob?'date-cell-m-':'date-cell-', iv='';
+  if(r.dateReq){ var p=r.dateReq.split('/'); if(p.length===3) iv=p[2]+'-'+p[1]+'-'+p[0]; }
+  document.getElementById(pre+idx).innerHTML='<div class="date-input-wrap"><input class="date-input" type="date" id="di-'+idx+(mob?'-m':'')+'" value="'+iv+'"><button class="date-save-btn" onclick="saveDate('+idx+','+(mob?'true':'false')+')">Save</button><button class="date-cancel-btn" onclick="cancelEdit('+idx+','+(mob?'true':'false')+')">✕</button></div>';
 }
-
-function cancelEdit(idx, isMobile) {
-  var r = window._modalRows[idx];
-  var prefix = isMobile ? 'date-cell-m-' : 'date-cell-';
-  var dateDisplay = r.dateReq
-    ? '<span class="has-date">' + esc(r.dateReq) + '</span>'
-    : '<span class="no-date">No Date</span>';
-
-  var cell = document.getElementById(prefix + idx);
-  cell.innerHTML =
-    '<span>' + dateDisplay + '</span>'
-    + '<button class="date-edit-btn" onclick="editDate(' + idx + ',' + (isMobile?'true':'false') + ')">✎ Edit</button>';
+function cancelEdit(idx, mob) {
+  var r=window._modalRows[idx], pre=mob?'date-cell-m-':'date-cell-';
+  var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
+  document.getElementById(pre+idx).innerHTML='<span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+','+(mob?'true':'false')+')">✎ Edit</button>';
 }
-
-function saveDate(idx, isMobile) {
-  var r = window._modalRows[idx];
-  var inputId = 'date-input-' + idx + (isMobile ? '-m' : '');
-  var prefix  = isMobile ? 'date-cell-m-' : 'date-cell-';
-  var input = document.getElementById(inputId);
-  var val   = input.value;
-
-  var btn = document.querySelector('#' + prefix + idx + ' .date-save-btn');
-  btn.textContent = 'Saving…';
-  btn.disabled = true;
-
-  var displayDate = '';
-  if (val) {
-    var p = val.split('-');
-    displayDate = p[2] + '/' + p[1] + '/' + p[0];
-  }
-
-  fetch(API_URL + '?action=saveDate'
-    + '&job='  + encodeURIComponent(r.job)
-    + '&list=' + encodeURIComponent(r.list)
-    + '&date=' + encodeURIComponent(displayDate))
-    .then(function(res) { return res.json(); })
-    .then(function(result) {
-      if (result.success) {
-        window._modalRows[idx].dateReq = displayDate;
-        // Update both desktop and mobile cells
-        cancelEdit(idx, false);
-        cancelEdit(idx, true);
-        loadJobs();
-        loadCalendar();
-      } else {
-        alert('Error saving: ' + (result.error || 'Unknown error'));
-        btn.textContent = 'Save';
-        btn.disabled = false;
-      }
-    })
-    .catch(function() {
-      alert('Failed to save date. Check your connection.');
-      btn.textContent = 'Save';
-      btn.disabled = false;
-    });
+function saveDate(idx, mob) {
+  var r=window._modalRows[idx], pre=mob?'date-cell-m-':'date-cell-';
+  var inp=document.getElementById('di-'+idx+(mob?'-m':'')), val=inp.value;
+  var btn=document.querySelector('#'+pre+idx+' .date-save-btn'); btn.textContent='Saving…'; btn.disabled=true;
+  var disp=''; if(val){ var p=val.split('-'); disp=p[2]+'/'+p[1]+'/'+p[0]; }
+  fetch(API_URL+'?action=saveDate&job='+encodeURIComponent(r.job)+'&list='+encodeURIComponent(r.list)+'&date='+encodeURIComponent(disp))
+    .then(function(res){ return res.json(); })
+    .then(function(res) {
+      if(res.success){ window._modalRows[idx].dateReq=disp; cancelEdit(idx,false); cancelEdit(idx,true); loadJobs(); loadCalendar(); }
+      else { alert('Error saving: '+(res.error||'Unknown error')); btn.textContent='Save'; btn.disabled=false; }
+    }).catch(function(){ alert('Failed to save date.'); btn.textContent='Save'; btn.disabled=false; });
 }
 
 function showModal() {
-  document.getElementById('modal-body').innerHTML =
-    '<div class="modal-loading">' + SPINNER_SVG + ' Loading…</div>';
+  document.getElementById('modal-body').innerHTML='<div class="modal-loading">'+SPINNER_SVG+' Loading…</div>';
   document.getElementById('modal-overlay').classList.add('open');
 }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function modalError() { document.getElementById('modal-body').innerHTML='<div class="empty-state" style="color:var(--red)">Error loading data.</div>'; }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
+document.getElementById('modal-overlay').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ closeModal(); closeAllJobModal(); closeEventPopup(); }
+});
+
+// ══ PDF VIEWER ════════════════════════════════════════════════
+// Fetches a Dropbox temporary link then opens it in a new tab.
+// The modal stays open so you can open multiple PDFs in sequence.
+
+function openPdfViewer(dropboxPath, displayName) {
+  getDbxToken(function(token) {
+    if (!token) { alert('Could not get Dropbox token.'); return; }
+    fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer '+token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: dropboxPath })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d.link) { alert('Could not load PDF: ' + (d.error_summary || 'Unknown error')); return; }
+      window.open(d.link, '_blank');
+    })
+    .catch(function(){ alert('Network error fetching PDF link.'); });
+  });
 }
 
-function modalError() {
-  document.getElementById('modal-body').innerHTML =
-    '<div class="empty-state" style="color:var(--red)">Error loading data.</div>';
-}
 
-function icon(val) {
-  if (val === true)  return '<span class="status-yes">✓</span>';
-  if (val === false) return '<span class="status-no">✗</span>';
-  var s = String(val).trim().toLowerCase();
-  if (s === 'true'  || s === '✓' || s === 'yes' || s === '1') return '<span class="status-yes">✓</span>';
-  if (s === 'false' || s === '✗' || s === 'no'  || s === '0' || s === '') return '<span class="status-no">✗</span>';
+// ══ HELPERS ════════════════════════════════════════════════════
+function icon(v) {
+  if(v===true)  return '<span class="status-yes">✓</span>';
+  if(v===false) return '<span class="status-no">✗</span>';
+  var s=String(v).trim().toLowerCase();
+  if(s==='true'||s==='✓'||s==='yes'||s==='1') return '<span class="status-yes">✓</span>';
+  if(s==='false'||s==='✗'||s==='no'||s==='0'||s==='') return '<span class="status-no">✗</span>';
   return '<span style="color:var(--muted)">—</span>';
 }
-
-function assigned(val) {
-  if (!val || String(val).trim() === '') return '<span style="color:var(--muted)">—</span>';
-  return '<span class="assigned-tag">' + esc(val) + '</span>';
+function assigned(v) {
+  if(!v||String(v).trim()==='') return '<span style="color:var(--muted)">—</span>';
+  return '<span class="assigned-tag">'+esc(v)+'</span>';
 }
-
-function esc(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
-});
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 </script>
 </body>
 </html>
