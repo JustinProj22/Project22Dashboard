@@ -782,7 +782,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbw6ElAv7fJO-gbaVgKBDfnSfoylIFblJDzlKcnPHs-Hk1T_63wl6JR5bo5wgUO2VFEV/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbyDez3w3vKqWL1YVVDFmEFh9g01VFVYBeC07MhkorTcGCyANYPwm7H13lO3BlBR-xcx/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -942,12 +942,119 @@ function loadCalendar() {
 }
 loadCalendar();
 
-// ══ PHOTO FOLDER — Projects/{year}/{folder} ════════════════════
-// _dropboxFolder stores the resolved Dropbox path per context (modal / popup / alljob)
+// ══ DROPBOX DIRECT — TOKEN + CLIENT-SIDE API CALLS ════════════
+//
+//  Instead of routing every Dropbox call through Apps Script we
+//  fetch the access token once per session and call Dropbox from
+//  the browser, cutting ~1-2s of Apps Script latency per operation.
+//
+//  Token cache : _dbxToken  — refreshed every 3h
+//  Photo cache : _photoCache[folderPath] = {photos, tempLinks, ts}
+//    photos    = [{name, path_display}] from list_folder
+//    tempLinks = [{name, path, link}]  (populated on first slideshow open)
+//    ts        = Date.now() when cached
+//  Cache TTL: 3 hours — matches Dropbox token lifetime
+// ────────────────────────────────────────────────────────────────
+
+var _dbxToken    = null;       // { token, expiresAt }
+var _photoCache  = {};         // keyed by folderPath
+var _CACHE_TTL   = 10800000;   // 3 hours in ms
+var _IMG_EXTS    = /\.(jpg|jpeg|png|gif|heic|webp)$/i;
+
 var _dropboxFolder = { modal:null, popup:null, alljob:null };
 var _slideshow     = { photos:[], index:0, context:null, title:'' };
 
-// Active-jobs: look up via Apps Script which searches Projects/{year}/{name}
+// ── Get token: memory cache or Apps Script ────────────────────
+function getDbxToken(callback) {
+  var now = Date.now();
+  if (_dbxToken && _dbxToken.expiresAt > now) { callback(_dbxToken.token); return; }
+  apiFetch({ action:'dropboxToken' }, function(res) {
+    if (!res.success || !res.token) { console.error('Token fetch failed:', res.error); callback(null); return; }
+    _dbxToken = { token: res.token, expiresAt: now + _CACHE_TTL };
+    callback(res.token);
+  }, function() { callback(null); });
+}
+
+// ── List a Dropbox folder directly from browser ───────────────
+function dbxListAll(token, path, recursive, callback) {
+  var allEntries = [];
+  function page(cursor) {
+    var url     = cursor ? 'https://api.dropboxapi.com/2/files/list_folder/continue'
+                         : 'https://api.dropboxapi.com/2/files/list_folder';
+    var payload = cursor ? JSON.stringify({ cursor: cursor })
+                         : JSON.stringify({ path: path, recursive: !!recursive, limit: 2000 });
+    fetch(url, { method:'POST', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' }, body: payload })
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        if (data.error_summary) { callback(null, data.error_summary); return; }
+        allEntries = allEntries.concat(data.entries || []);
+        if (data.has_more) page(data.cursor); else callback(allEntries, null);
+      })
+      .catch(function(e){ callback(null, e.message); });
+  }
+  page(null);
+}
+
+// ── Fetch temp links for an array of file objects in parallel ─
+function dbxTempLinks(token, files, callback) {
+  if (!files.length) { callback([]); return; }
+  var BATCH = 100, allLinks = [], i = 0;
+  function runBatch() {
+    if (i >= files.length) { callback(allLinks); return; }
+    var batch = files.slice(i, i + BATCH); i += BATCH;
+    Promise.all(batch.map(function(f) {
+      return fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+        method:'POST', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
+        body: JSON.stringify({ path: f.path_display })
+      }).then(function(r){ return r.json(); })
+        .then(function(d){ return d.link ? { name:f.name, path:f.path_display, link:d.link } : null; })
+        .catch(function(){ return null; });
+    })).then(function(res) { allLinks = allLinks.concat(res.filter(Boolean)); runBatch(); });
+  }
+  runBatch();
+}
+
+// ── Get/populate photo list cache (no temp links yet) ─────────
+function getPhotoCache(folderPath, recursive, callback) {
+  var now = Date.now(), entry = _photoCache[folderPath];
+  if (entry && (now - entry.ts) < _CACHE_TTL) { callback(entry); return; }
+  getDbxToken(function(token) {
+    if (!token) { callback(null); return; }
+    dbxListAll(token, folderPath, recursive, function(entries, err) {
+      if (err || !entries) { callback(null); return; }
+      var photos = entries
+        .filter(function(e){ return e['.tag']==='file' && _IMG_EXTS.test(e.name); })
+        .sort(function(a,b){
+          var aDir=a.path_display.substring(0,a.path_display.lastIndexOf('/'));
+          var bDir=b.path_display.substring(0,b.path_display.lastIndexOf('/'));
+          if (aDir!==bDir) return aDir.localeCompare(bDir);
+          var an=parseInt(a.name)||0, bn=parseInt(b.name)||0;
+          if (an&&bn) return an-bn; return a.name.localeCompare(b.name);
+        });
+      var cacheEntry = { photos:photos, tempLinks:null, ts:now };
+      _photoCache[folderPath] = cacheEntry;
+      callback(cacheEntry);
+    });
+  });
+}
+
+// ── Ensure temp links are cached (fetch if needed) ────────────
+function ensureTempLinks(folderPath, recursive, callback) {
+  var now = Date.now(), entry = _photoCache[folderPath];
+  if (entry && entry.tempLinks && (now - entry.ts) < _CACHE_TTL) { callback(entry.tempLinks); return; }
+  getPhotoCache(folderPath, recursive, function(cacheEntry) {
+    if (!cacheEntry || !cacheEntry.photos.length) { callback([]); return; }
+    getDbxToken(function(token) {
+      if (!token) { callback([]); return; }
+      dbxTempLinks(token, cacheEntry.photos, function(links) {
+        cacheEntry.tempLinks = links; cacheEntry.ts = Date.now();
+        callback(links);
+      });
+    });
+  });
+}
+
+// ── Active-jobs: Apps Script resolves folder path ────────────
 function initPhotoSection(context, jobName) {
   var sId = context==='modal' ? 'modal-photo-section' : context==='alljob' ? 'alljob-photo-section' : 'popup-photo-section';
   var sec = document.getElementById(sId); if (!sec) return;
@@ -957,8 +1064,6 @@ function initPhotoSection(context, jobName) {
   var up     = document.getElementById(context+'-upload-btn');
   status.textContent = 'Finding job folder…'; view.style.display = 'none'; up.disabled = true;
   _dropboxFolder[context] = null;
-
-  // NEW: use dropboxFolderProjects action — Apps Script scans Projects/{year}/{folder}
   apiFetch({ action:'dropboxFolderProjects', job:jobName }, function(res) {
     if (res.error) { status.textContent = '⚠️ '+res.error; return; }
     if (res.multiple) {
@@ -974,7 +1079,7 @@ function initPhotoSection(context, jobName) {
   });
 }
 
-// All-jobs: folder path is already known, pass it directly
+// ── All-jobs: folder path already known ──────────────────────
 function initPhotoSectionDirect(context, folderPath, folderName) {
   var sId = context==='alljob' ? 'alljob-photo-section' : context+'-photo-section';
   var sec = document.getElementById(sId); if (!sec) return;
@@ -994,6 +1099,7 @@ function selectDropboxFolder(context, folderPath, folderName) {
   });
 }
 
+// ── Set folder: list photos + pre-fetch temp links in background
 function setDropboxFolder(context, folderPath, folderName) {
   _dropboxFolder[context] = folderPath;
   _slideshow.title = folderName;
@@ -1002,13 +1108,14 @@ function setDropboxFolder(context, folderPath, folderName) {
   var view   = document.getElementById(context+'-view-btn');
   up.disabled = false;
   status.textContent = '📁 '+folderName;
-  // For All Jobs use recursive photo check; active jobs use flat check
-  var action = (context==='alljob') ? 'dropboxPhotosRecursive' : 'dropboxPhotos';
-  apiFetch({ action:action, path:folderPath }, function(pr) {
-    if (pr.success && pr.photos && pr.photos.length > 0) {
-      view.style.display = '';
-      status.textContent = '📁 '+folderName+' — '+pr.photos.length+' photo'+(pr.photos.length!==1?'s':'');
-    }
+  var recursive = (context==='alljob');
+  // Step 1: list photos (fast — shows count + View button)
+  getPhotoCache(folderPath, recursive, function(entry) {
+    if (!entry || !entry.photos.length) return;
+    view.style.display = '';
+    status.textContent = '📁 '+folderName+' — '+entry.photos.length+' photo'+(entry.photos.length!==1?'s':'');
+    // Step 2: silently pre-fetch temp links so slideshow opens instantly
+    ensureTempLinks(folderPath, recursive, function() { /* cached */ });
   });
 }
 
@@ -1090,20 +1197,28 @@ function doUpload(context, renamedFiles) {
     stat.textContent = 'Uploading '+(i+1)+' of '+renamedFiles.length+': '+item.name;
 
     function upload(blob, name) {
-      apiFetch({ action:'dropboxUploadUrl', path:folderPath, name:name }, function(res) {
-        if (res.error) { failed++; next(i+1); return; }
+      // Use cached token directly — no Apps Script round-trip needed
+      getDbxToken(function(token) {
+        if (!token) { failed++; next(i+1); return; }
         var reader = new FileReader();
         reader.onload = function(e) {
           fetch('https://content.dropboxapi.com/2/files/upload', {
             method:'POST',
             headers:{
-              'Authorization':'Bearer '+res.token,
+              'Authorization':'Bearer '+token,
               'Content-Type':'application/octet-stream',
-              'Dropbox-API-Arg': JSON.stringify({ path:res.uploadPath, mode:'add', autorename:true, mute:false })
+              'Dropbox-API-Arg': JSON.stringify({ path:folderPath+'/'+name, mode:'add', autorename:true, mute:false })
             },
             body: e.target.result
           }).then(function(r){ return r.json(); })
-            .then(function(d){ if(d.name) done++; else failed++; next(i+1); })
+            .then(function(d){
+              if(d.name) {
+                done++;
+                // Invalidate photo cache for this folder so count updates on next open
+                if (_photoCache[folderPath]) delete _photoCache[folderPath];
+              } else failed++;
+              next(i+1);
+            })
             .catch(function(){ failed++; next(i+1); });
         };
         reader.readAsArrayBuffer(blob);
@@ -1133,13 +1248,20 @@ function openSlideshow(context) {
   ov.classList.add('open');
   document.getElementById('slideshow-title').textContent = _slideshow.title+' — Photos';
   load.textContent = 'Loading photos…'; load.style.display = 'block'; img.style.display = 'none'; ctr.textContent = '';
-  // All Jobs: recurse entire job folder tree; Active Jobs: flat folder only
-  var action = (context==='alljob') ? 'dropboxTempLinksRecursive' : 'dropboxTempLinks';
-  apiFetch({ action:action, path:path }, function(res) {
-    if (!res.success || !res.photos || !res.photos.length) { load.textContent = 'No photos found.'; return; }
-    _slideshow.photos = res.photos;
-    res.photos.forEach(function(p,i) { var pre=new Image(); pre.src=p.link; _slideshow.photos[i]._img=pre; });
+  var recursive = (context==='alljob');
+  // Use cached temp links if already pre-fetched — otherwise fetch now
+  ensureTempLinks(path, recursive, function(links) {
+    if (!links || !links.length) { load.textContent = 'No photos found.'; return; }
+    _slideshow.photos = links;
+    // Preload first 5 images immediately for instant display
+    links.slice(0, 5).forEach(function(p, i) {
+      var pre = new Image(); pre.src = p.link; _slideshow.photos[i]._img = pre;
+    });
     showSlideshowPhoto(0);
+    // Preload rest in background
+    links.slice(5).forEach(function(p, i) {
+      var pre = new Image(); pre.src = p.link; _slideshow.photos[i+5]._img = pre;
+    });
   });
 }
 
@@ -1672,14 +1794,19 @@ document.addEventListener('keydown', function(e){
 // The modal stays open so you can open multiple PDFs in sequence.
 
 function openPdfViewer(dropboxPath, displayName) {
-  apiFetch({ action: 'dropboxPdfLink', path: dropboxPath }, function(res) {
-    if (!res.success || !res.link) {
-      alert('Could not load PDF: ' + (res.error || 'Unknown error'));
-      return;
-    }
-    window.open(res.link, '_blank');
-  }, function() {
-    alert('Network error fetching PDF link.');
+  getDbxToken(function(token) {
+    if (!token) { alert('Could not get Dropbox token.'); return; }
+    fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer '+token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: dropboxPath })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d.link) { alert('Could not load PDF: ' + (d.error_summary || 'Unknown error')); return; }
+      window.open(d.link, '_blank');
+    })
+    .catch(function(){ alert('Network error fetching PDF link.'); });
   });
 }
 
