@@ -433,6 +433,54 @@
   .card-status-val { font-size: 16px; }
   .card-date-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; }
   .card-date-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; white-space: nowrap; }
+  /* PDF viewer overlay */
+  .pdf-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.95); z-index: 8000;
+    flex-direction: column;
+  }
+  .pdf-overlay.open { display: flex; }
+  .pdf-toolbar {
+    height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; background: var(--dark);
+    border-bottom: 2px solid var(--orange);
+    gap: 12px;
+  }
+  .pdf-toolbar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 14px;
+    letter-spacing: 0.5px; color: var(--white);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1; min-width: 0;
+  }
+  .pdf-toolbar-close {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); width: 30px; height: 30px;
+    border-radius: 3px; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.12s;
+  }
+  .pdf-toolbar-close:hover { border-color: var(--orange); color: var(--orange); }
+  .pdf-frame-wrap { flex: 1; min-height: 0; position: relative; }
+  .pdf-frame {
+    width: 100%; height: 100%; border: none; display: block;
+    background: #fff;
+  }
+  .pdf-loading {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 13px;
+    background: var(--black);
+  }
+  /* Clickable list item in All Jobs modal */
+  .alljob-list-item.has-pdf {
+    cursor: pointer; transition: background 0.12s;
+  }
+  .alljob-list-item.has-pdf:hover { background: var(--panel); border-radius: 3px; }
+  .pdf-icon { font-size: 13px; flex-shrink: 0; opacity: 0.6; }
+  .alljob-list-item.has-pdf:hover .pdf-icon { opacity: 1; }
+
   @media (min-width: 769px) { html { zoom: 75%; } }
   .mobile-views { display: none; }
   .mobile-nav   { display: none; }
@@ -758,6 +806,18 @@
   </div>
 </div>
 
+<!-- ══ PDF VIEWER ═══════════════════════════════════════════ -->
+<div class="pdf-overlay" id="pdf-overlay">
+  <div class="pdf-toolbar">
+    <div class="pdf-toolbar-title" id="pdf-title">Loading…</div>
+    <button class="pdf-toolbar-close" onclick="closePdfViewer()" title="Close">✕</button>
+  </div>
+  <div class="pdf-frame-wrap">
+    <div class="pdf-loading" id="pdf-loading">Loading PDF…</div>
+    <iframe class="pdf-frame" id="pdf-frame" src="about:blank"></iframe>
+  </div>
+</div>
+
 <!-- ══ SLIDESHOW ══════════════════════════════════════════════ -->
 <div class="slideshow-overlay" id="slideshow-overlay">
   <div class="slideshow-header">
@@ -774,7 +834,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbwfhRVKINZ2uuSRLlJukx1n5n3yJ6wQ0gHEF3ImXbEkpDSgCOV75ox7ZAJwPlQlT7yJ/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbw6ElAv7fJO-gbaVgKBDfnSfoylIFblJDzlKcnPHs-Hk1T_63wl6JR5bo5wgUO2VFEV/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -1471,15 +1531,29 @@ function openAllJobModal(idx) {
   document.getElementById('alljob-installer-section').style.display='none';
   document.getElementById('alljob-photo-section').style.display='none';
 
-  var html='<div class="alljob-section"><div class="alljob-section-title">📄 Lists</div>';
+  // Build list items — each PDF is clickable to open the in-app viewer.
+  // We construct the full Dropbox path using the job path + List folder name
+  // (we don't store the exact List folder path in the index, so we store
+  // the filename and job path; the click handler looks up the temp link
+  // using the path from the index list entry if available, otherwise falls
+  // back to a path search via the filename stored in l.pdfPath).
+  var html='<div class="alljob-section"><div class="alljob-section-title">📄 Lists <span style="font-size:10px;color:var(--muted);font-weight:400;letter-spacing:0;">(click to view)</span></div>';
   if (!job.lists||!job.lists.length) {
     html+='<div class="installer-empty">No List Information Available</div>';
   } else {
     html+=job.lists.map(function(l) {
-      return '<div class="alljob-list-item">'
+      // Build a safe attribute string for the pdf path
+      // l.pdfPath is stored in the index (added by _extractJobsFromEntries)
+      // If unavailable we use a fallback indicator
+      var pdfPathAttr = l.pdfPath ? escAttr(l.pdfPath) : '';
+      var hasPdf = !!pdfPathAttr;
+      var clickAttr = hasPdf
+        ? 'onclick="openPdfViewer(\''+ pdfPathAttr +'\',\'List '+esc(String(l.listNum))+' — '+esc(l.description||'')+'\')"'
+        : '';
+      return '<div class="alljob-list-item'+(hasPdf?' has-pdf':'')+'" '+clickAttr+'>'
         +'<span style="color:var(--white);font-size:12px;font-weight:600;min-width:28px;flex-shrink:0;">'+esc(String(l.listNum))+'</span>'
         +'<span class="alljob-list-name">'+esc(l.description||'')+'</span>'
-        +'<span class="alljob-list-file" style="margin-left:auto;">'+esc(l.filename)+'</span>'
+        +(hasPdf ? '<span class="pdf-icon" style="margin-left:auto;font-size:13px;" title="View PDF">📄</span>' : '')
         +'</div>';
     }).join('');
   }
@@ -1644,6 +1718,50 @@ document.getElementById('modal-overlay').addEventListener('click', function(e){ 
 document.addEventListener('keydown', function(e){
   if(e.key==='Escape'){ closeModal(); closeAllJobModal(); closeEventPopup(); }
 });
+
+// ══ PDF VIEWER ════════════════════════════════════════════════
+// Opens a PDF from Dropbox in a full-screen iframe overlay.
+// We fetch a temp link via the Apps Script (which handles auth),
+// then load it directly into an iframe — no pop-up needed.
+
+function openPdfViewer(dropboxPath, displayName) {
+  var overlay = document.getElementById('pdf-overlay');
+  var frame   = document.getElementById('pdf-frame');
+  var loading = document.getElementById('pdf-loading');
+  var title   = document.getElementById('pdf-title');
+
+  // Reset state
+  frame.src = 'about:blank';
+  loading.style.display = 'flex';
+  title.textContent = displayName || 'Loading…';
+  overlay.classList.add('open');
+
+  apiFetch({ action: 'dropboxPdfLink', path: dropboxPath }, function(res) {
+    if (!res.success || !res.link) {
+      loading.textContent = '⚠️ Could not load PDF: ' + (res.error || 'Unknown error');
+      return;
+    }
+    // Hide loading indicator once iframe begins loading
+    frame.onload = function() { loading.style.display = 'none'; };
+    frame.src = res.link;
+    title.textContent = displayName || 'PDF';
+  }, function() {
+    loading.textContent = '⚠️ Network error fetching PDF link.';
+  });
+}
+
+function closePdfViewer() {
+  document.getElementById('pdf-overlay').classList.remove('open');
+  // Clear src so browser stops loading / frees memory
+  setTimeout(function(){ document.getElementById('pdf-frame').src = 'about:blank'; }, 200);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('pdf-overlay').classList.contains('open')) {
+    closePdfViewer();
+  }
+});
+
 
 // ══ HELPERS ════════════════════════════════════════════════════
 function icon(v) {
