@@ -1175,28 +1175,37 @@ function confirmRename() {
 
 function doUpload(context, renamedFiles) {
   var folderPath = _dropboxFolder[context];
-  if (!folderPath) { alert('Folder not found yet, please wait.'); return; }
-  var up   = document.getElementById(context+'-upload-btn');
+  if (!folderPath) {
+    alert('Folder not found yet, please wait.');
+    return;
+  }
+  var up = document.getElementById(context+'-upload-btn');
   var stat = document.getElementById(context+'-photo-status');
   var prog = document.getElementById(context+'-photo-progress');
   var fill = document.getElementById(context+'-progress-fill');
   var view = document.getElementById(context+'-view-btn');
-  up.disabled = true; prog.style.display = 'block';
+
+  up.disabled = true;
+  prog.style.display = 'block';
   stat.textContent = 'Uploading 0 of '+renamedFiles.length+'…';
   var done = 0, failed = 0;
 
   function next(i) {
+    // 1. ALL UPLOADS COMPLETED HOOK
     if (i >= renamedFiles.length) {
-      up.disabled = false; prog.style.display = 'none'; fill.style.width = '0%';
+      up.disabled = false;
+      prog.style.display = 'none';
+      fill.style.width = '0%';
       stat.textContent = '✅ '+done+' photo'+(done!==1?'s':'')+' uploaded'+(failed>0?', '+failed+' failed':'');
       view.style.display = '';
-if (done > 0) {
+      
+      // TRIGGER THE NOTIFICATION IF AT LEAST ONE UPLOAD WAS SUCCESSFUL
+      if (done > 0) {
         sendPhotoNotification(context);
       }
       return;
     }
-      return;
-    }
+
     var item = renamedFiles[i];
     fill.style.width = Math.round((i/renamedFiles.length)*100)+'%';
     stat.textContent = 'Uploading '+(i+1)+' of '+renamedFiles.length+': '+item.name;
