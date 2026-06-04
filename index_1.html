@@ -1802,11 +1802,11 @@ function renderModal(rows) {
   rows.forEach(function(r,idx) {
     var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
     var dc='<div class="date-cell" id="date-cell-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+')">✎ Edit</button></div>';
-    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+icon(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td></tr>';
+    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td></tr>';
     tc+='<div class="item-card"><div class="card-top"><div class="card-list-num">List #'+esc(r.list)+'</div>'+(r.assigned?'<span class="assigned-tag">'+esc(r.assigned)+'</span>':'')+'</div>'
       +'<div class="card-item-name">'+esc(r.item)+'</div>'
       +'<div class="card-status-row">'
-      +'<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'+icon(r.listed)+'</span></div>'
+      +'<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'+esc(r.listed)+'</span></div>'
       +'<div class="card-status-cell"><span class="card-status-label">Machined</span><span class="card-status-val">'+icon(r.machined)+'</span></div>'
       +'<div class="card-status-cell"><span class="card-status-label">Assembled</span><span class="card-status-val">'+icon(r.assembled)+'</span></div>'
       +'<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">'+icon(r.delivered)+'</span></div>'
@@ -1880,8 +1880,8 @@ function icon(v) {
   if(v===true)  return '<span class="status-yes">✓</span>';
   if(v===false) return '<span class="status-no">✗</span>';
   var s=String(v).trim().toLowerCase();
-  if(s==='true'||s==='✓'||s==='yes'||s==='1') return '<span class="status-yes">✓</span>';
-  if(s==='false'||s==='✗'||s==='no'||s==='0'||s==='') return '<span class="status-no">✗</span>';
+  if(s==='true'||s==='✓'||s==='yes'||s==='1'||s==='✅') return '<span class="status-yes">✓</span>';
+  if(s==='false'||s==='✗'||s==='no'||s==='0'||s===''||s==='❌') return '<span class="status-no">✗</span>';
   return '<span style="color:var(--muted)">—</span>';
 }
 function assigned(v) {
