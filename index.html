@@ -782,7 +782,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbyDez3w3vKqWL1YVVDFmEFh9g01VFVYBeC07MhkorTcGCyANYPwm7H13lO3BlBR-xcx/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwy8-83zqV1QwCdvdYJPHoP9J9ETbl0XSyCkr7sXmBXcV1Mx50V9i8jS-XEO-j3nAIN/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -1175,23 +1175,37 @@ function confirmRename() {
 
 function doUpload(context, renamedFiles) {
   var folderPath = _dropboxFolder[context];
-  if (!folderPath) { alert('Folder not found yet, please wait.'); return; }
-  var up   = document.getElementById(context+'-upload-btn');
+  if (!folderPath) {
+    alert('Folder not found yet, please wait.');
+    return;
+  }
+  var up = document.getElementById(context+'-upload-btn');
   var stat = document.getElementById(context+'-photo-status');
   var prog = document.getElementById(context+'-photo-progress');
   var fill = document.getElementById(context+'-progress-fill');
   var view = document.getElementById(context+'-view-btn');
-  up.disabled = true; prog.style.display = 'block';
+
+  up.disabled = true;
+  prog.style.display = 'block';
   stat.textContent = 'Uploading 0 of '+renamedFiles.length+'…';
   var done = 0, failed = 0;
 
   function next(i) {
+    // 1. ALL UPLOADS COMPLETED HOOK
     if (i >= renamedFiles.length) {
-      up.disabled = false; prog.style.display = 'none'; fill.style.width = '0%';
+      up.disabled = false;
+      prog.style.display = 'none';
+      fill.style.width = '0%';
       stat.textContent = '✅ '+done+' photo'+(done!==1?'s':'')+' uploaded'+(failed>0?', '+failed+' failed':'');
       view.style.display = '';
+      
+      // TRIGGER THE NOTIFICATION IF AT LEAST ONE UPLOAD WAS SUCCESSFUL
+      if (done > 0) {
+        sendPhotoNotification(context);
+      }
       return;
     }
+
     var item = renamedFiles[i];
     fill.style.width = Math.round((i/renamedFiles.length)*100)+'%';
     stat.textContent = 'Uploading '+(i+1)+' of '+renamedFiles.length+': '+item.name;
@@ -1236,7 +1250,57 @@ function doUpload(context, renamedFiles) {
   }
   next(0);
 }
+function sendPhotoNotification(context) {
+  var jobName = "";
+  var userId = "";
 
+  // 1. Inspect local page memory caches for row context
+  if (context === 'modal' && window._modalRows && window._modalRows.length > 0) {
+    var activeRow = window._modalRows[0];
+    
+    // Column A is index [0] (Job Name), Column D is index [3] (User ID mapping)
+    jobName = activeRow.jobName || activeRow[0] || document.getElementById('modal-title').textContent;
+    userId = activeRow.listed || activeRow[3] || "";
+  } else if (context === 'alljob' && window._allJobsFiltered && window._currentAllJob !== null) {
+    var historicalJob = window._allJobsFiltered[window._currentAllJob];
+    jobName = historicalJob.name || "";
+    userId = historicalJob.userId || historicalJob[3] || ""; 
+  }
+
+  // Clean trailing structural strings
+  jobName = jobName.replace(/^#+\s*/, '');
+
+  if (!userId) {
+    console.warn("Notification skipped: Column D (User ID) was blank or unreachable for this job layout.");
+    return;
+  }
+
+  var messageText = "Hey " + userId + " New photos for " + jobName + " have been uploaded to Dropbox!";
+
+  // 2. PASTE YOUR DISTINCT MESSAGING SCRIPT WEB APP URL HERE
+  var MESSAGING_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfyzF-sPPqtYQuv0_rMqcTA6etYtQaBAvJK1EpRn5rQQ4VQRKBdXy4FZ8AVUPOmdx_/exec";
+
+  // Use a direct client-side cross-origin fetch to communicate outside the main dashboard deployment
+  fetch(MESSAGING_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors', // Tells the browser to send it without strict header checks since Apps Script handles it
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      action: 'sendSystemMessage',
+      fromUser: 'FC',
+      toUser: userId,
+      message: messageText
+    })
+  })
+  .then(function() {
+    console.log("Cross-origin photo notice successfully posted to messaging app database for " + userId);
+  })
+  .catch(function(err) {
+    console.error("Failed to forward alert package:", err);
+  });
+}
 // ══ SLIDESHOW ══════════════════════════════════════════════════
 function openSlideshow(context) {
   var path = _dropboxFolder[context]; if (!path) return;
@@ -1738,11 +1802,11 @@ function renderModal(rows) {
   rows.forEach(function(r,idx) {
     var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
     var dc='<div class="date-cell" id="date-cell-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+')">✎ Edit</button></div>';
-    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+icon(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td></tr>';
+    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td></tr>';
     tc+='<div class="item-card"><div class="card-top"><div class="card-list-num">List #'+esc(r.list)+'</div>'+(r.assigned?'<span class="assigned-tag">'+esc(r.assigned)+'</span>':'')+'</div>'
       +'<div class="card-item-name">'+esc(r.item)+'</div>'
       +'<div class="card-status-row">'
-      +'<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'+icon(r.listed)+'</span></div>'
+      +'<div class="card-status-cell"><span class="card-status-label">Listed</span><span class="card-status-val">'+esc(r.listed)+'</span></div>'
       +'<div class="card-status-cell"><span class="card-status-label">Machined</span><span class="card-status-val">'+icon(r.machined)+'</span></div>'
       +'<div class="card-status-cell"><span class="card-status-label">Assembled</span><span class="card-status-val">'+icon(r.assembled)+'</span></div>'
       +'<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">'+icon(r.delivered)+'</span></div>'
@@ -1816,8 +1880,8 @@ function icon(v) {
   if(v===true)  return '<span class="status-yes">✓</span>';
   if(v===false) return '<span class="status-no">✗</span>';
   var s=String(v).trim().toLowerCase();
-  if(s==='true'||s==='✓'||s==='yes'||s==='1') return '<span class="status-yes">✓</span>';
-  if(s==='false'||s==='✗'||s==='no'||s==='0'||s==='') return '<span class="status-no">✗</span>';
+  if(s==='true'||s==='✓'||s==='yes'||s==='1'||s==='✅') return '<span class="status-yes">✓</span>';
+  if(s==='false'||s==='✗'||s==='no'||s==='0'||s===''||s==='❌') return '<span class="status-no">✗</span>';
   return '<span style="color:var(--muted)">—</span>';
 }
 function assigned(v) {
