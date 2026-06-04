@@ -1260,7 +1260,7 @@ function sendPhotoNotification(context) {
     
     // Column A is index [0] (Job Name), Column D is index [3] (User ID mapping)
     jobName = activeRow.jobName || activeRow[0] || document.getElementById('modal-title').textContent;
-    userId = activeRow.userId || activeRow[3] || "";
+    userId = activeRow.listed || activeRow[3] || "";
   } else if (context === 'alljob' && window._allJobsFiltered && window._currentAllJob !== null) {
     var historicalJob = window._allJobsFiltered[window._currentAllJob];
     jobName = historicalJob.name || "";
