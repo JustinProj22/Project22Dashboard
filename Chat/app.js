@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG — fill these in once you have your new deployment + Vercel function
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwElWIxEx9IbCseRdhMJkiYm51NLyA5sNPB2uCCX0D_HDTSdXJa9panGAdgG5f-jq2W/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM9ngtS93wq3goHTvXcfNECQKW4bGFnbzXgEF40lMlSG2y5DnFeHAdhsyDOkvv17XW/exec';
 const VAPID_PUBLIC_KEY = 'BPgI6fOwbKkvNXU_UG_SO3xYlhGsB1QMfFHNPf6yhPFF3P_ck7zNypzb_iwL8HPYeEzwfAHUuVrw39WCN3Y-ZU8'; // not secret, safe in frontend code
 
 // ============================================================
