@@ -3,45 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Workshop Manager Messages</title>
+<title>P22 Messages</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#fb8700">
 <style>
   :root {
     --orange: #fb8700;
     --orange-light: #ffe8cc;
+    --orange-dark: #e07800;
     --green: #388e3c;
-    --bg: #f5f5f5;
+    --bg: #f0f0f0;
+    --white: #ffffff;
+    --border: #e0e0e0;
+    --text: #222222;
+    --subtext: #666666;
+    --radius: 12px;
+    --header-height: 60px;
+    --input-bar-height: 64px;
   }
 
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  body {
-    margin: 0;
+  html, body {
+    height: 100%;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
   }
 
-  /* ---------- Login screen ---------- */
+  /* ── SCREENS ── */
+  .screen { display: none; height: 100%; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── LOGIN ── */
   #loginScreen {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 32px 24px;
+    background: var(--bg);
+  }
+
+  .login-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 20px;
   }
 
   #loginScreen h1 {
-    color: var(--orange);
-    font-size: 1.4rem;
-    margin-bottom: 24px;
-    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  #loginScreen p {
+    font-size: 0.9rem;
+    color: var(--subtext);
+    margin-bottom: 32px;
   }
 
   #loginForm {
@@ -52,163 +74,693 @@
     gap: 12px;
   }
 
-  input {
-    font-size: 1rem;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+  .field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--subtext);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
   }
 
-  button {
+  input[type="text"] {
+    width: 100%;
     font-size: 1rem;
-    padding: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--white);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus { border-color: var(--orange); }
+
+  .btn-primary {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius);
     background: var(--orange);
     color: white;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+
+  .btn-primary:active { background: var(--orange-dark); }
+
+  /* ── APP SCREEN ── */
+  #appScreen { background: var(--bg); }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--orange);
+    color: white;
+    height: var(--header-height);
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top);
+    height: calc(var(--header-height) + env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 10;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .header-logo {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: brightness(0) invert(1); /* make it white to sit on orange */
+  }
+
+  .header-chat-name {
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: rgba(255,255,255,0.18);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 7px 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .icon-btn:active { background: rgba(255,255,255,0.32); }
+
+  /* ── HAMBURGER DRAWER ── */
+  #drawerOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+  }
+
+  #drawerOverlay.open { display: block; }
+
+  #drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 340px;
+    background: var(--white);
+    z-index: 101;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+  }
+
+  #drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    background: var(--orange);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .drawer-header img {
+    height: 28px;
+    width: 28px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .drawer-header-text { color: white; }
+  .drawer-header-text .title { font-weight: 700; font-size: 1rem; }
+  .drawer-header-text .subtitle { font-size: 0.78rem; opacity: 0.85; }
+
+  .drawer-search {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .drawer-search input {
+    background: var(--bg);
+    border-color: transparent;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .drawer-search input:focus { border-color: var(--orange); background: white; }
+
+  #convoList {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .convo-item {
+    display: flex;
+    align-items: center;
+    padding: 13px 16px;
+    gap: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .convo-item:active { background: var(--bg); }
+  .convo-item.active { background: var(--orange-light); }
+
+  .convo-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--orange-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .convo-avatar.group { background: #e8f0fe; }
+
+  .convo-info { flex: 1; min-width: 0; }
+
+  .convo-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .convo-preview {
+    font-size: 0.8rem;
+    color: var(--subtext);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+
+  .convo-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .unread-badge {
+    background: var(--orange);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 2px 7px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .drawer-footer {
+    border-top: 1px solid var(--border);
+    padding: 14px 16px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    flex-shrink: 0;
+  }
+
+  .logout-btn {
+    width: 100%;
+    background: #f5f5f5;
+    color: var(--subtext);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+
+  .logout-btn:active { background: #e8e8e8; }
+
+  /* ── MESSAGE LIST ── */
+  #messageList {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 8px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .no-messages {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--subtext);
+    font-size: 0.95rem;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .message-container {
+    max-width: 82%;
+    margin-bottom: 10px;
+    align-self: flex-start;
+  }
+
+  .message-container.current-user { align-self: flex-end; }
+
+  .message-bubble {
+    padding: 9px 13px;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    background: var(--white);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .message-container.current-user .message-bubble {
+    background: var(--orange-light);
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message-meta {
+    font-size: 0.68rem;
+    color: var(--subtext);
+    margin-top: 3px;
+    padding: 0 4px;
+  }
+
+  .message-container.current-user .message-meta { text-align: right; }
+
+  .sender-name-inline {
+    font-weight: 600;
+    font-size: 0.75rem;
+    margin-bottom: 3px;
+    padding: 0 4px;
+    color: var(--green);
+  }
+
+  .message-container.current-user .sender-name-inline { color: var(--orange); text-align: right; }
+
+  .message-gif {
+    max-width: 240px;
+    max-height: 200px;
+    border-radius: 12px;
+    display: block;
+  }
+
+  /* ── INPUT BAR ── */
+  #inputBar {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  #messageInput {
+    flex: 1;
+    font-size: 0.95rem;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 22px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    resize: none;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+    font-family: inherit;
+  }
+
+  #messageInput:focus { border-color: var(--orange); background: white; }
+
+  .input-action-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: background 0.1s;
+    line-height: 1;
+  }
+
+  .input-action-btn:active { background: var(--bg); }
+
+  #sendBtn {
+    background: var(--orange);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  #sendBtn:active { background: var(--orange-dark); }
+
+  #sendBtn svg { width: 18px; height: 18px; fill: white; }
+
+  /* ── EMOJI PICKER OVERLAY ── */
+  #emojiOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+  }
+
+  #emojiOverlay.open { display: block; }
+
+  #emojiPicker {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    max-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .picker-handle {
+    width: 36px;
+    height: 4px;
+    background: #ccc;
+    border-radius: 2px;
+    margin: 12px auto 8px;
+    flex-shrink: 0;
+  }
+
+  .emoji-categories {
+    display: flex;
+    gap: 4px;
+    padding: 0 12px 8px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    scrollbar-width: none;
+  }
+
+  .emoji-categories::-webkit-scrollbar { display: none; }
+
+  .cat-btn {
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.1s, background 0.1s;
+  }
+
+  .cat-btn.active { border-color: var(--orange); background: var(--orange-light); }
+
+  .emoji-grid-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 12px 12px;
+  }
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+  }
+
+  .emoji-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .emoji-cell:active { background: var(--orange-light); }
+
+  /* ── GIF PICKER OVERLAY ── */
+  #gifOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+  }
+
+  #gifOverlay.open { display: block; }
+
+  #gifPicker {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .gif-search-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    flex-shrink: 0;
+  }
+
+  .gif-search-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 22px;
+    background: var(--bg);
+    border-color: transparent;
+    font-size: 0.95rem;
+  }
+
+  .gif-search-row input:focus { border-color: var(--orange); background: white; }
+
+  .gif-search-row button {
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
   }
 
-  button:active { opacity: 0.85; }
-
-  /* ---------- App screen ---------- */
-  #appScreen {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  header {
-    background: var(--orange);
-    color: white;
-    padding: 14px 16px;
-    padding-top: max(14px, env(safe-area-inset-top));
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-  }
-
-  header button {
-    background: rgba(255,255,255,0.2);
-    padding: 6px 12px;
-    font-size: 0.85rem;
-  }
-
-  #openConvoForm {
-    padding: 10px;
-    background: white;
-    border-bottom: 1px solid #ddd;
-  }
-
-  #convoSelect {
-    width: 100%;
-    font-size: 1rem;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background: white;
-    color: #222;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  #messageList {
+  #gifGrid {
     flex: 1;
     overflow-y: auto;
-    padding: 12px;
-  }
-
-  .no-messages {
-    text-align: center;
-    color: #999;
-    padding: 50px 20px;
-  }
-
-  .message-container {
-    margin-bottom: 12px;
-    padding: 10px 12px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-  }
-
-  .message-container.current-user {
-    background: var(--orange-light);
-  }
-
-  .message-header {
-    margin-bottom: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-
-  .sender-name {
-    font-weight: bold;
-    font-size: 0.8rem;
-  }
-
-  .sender-name.current-user { color: var(--orange); }
-  .sender-name.other-user { color: var(--green); }
-
-  .timestamp {
-    color: #888;
-    font-size: 0.7rem;
-  }
-
-  .message-text {
-    font-size: 0.95rem;
-    line-height: 1.4;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-
-  #messageForm {
-    display: flex;
+    padding: 0 12px 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
-    padding: 10px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    background: white;
-    border-top: 1px solid #ddd;
+    align-content: start;
   }
 
-  #messageInput { flex: 1; }
-  #messageForm button { padding: 12px 18px; }
+  .gif-thumb {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--bg);
+    transition: opacity 0.1s;
+  }
+
+  .gif-thumb:active { opacity: 0.75; }
+
+  .gif-status {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--subtext);
+    font-size: 0.9rem;
+    padding: 20px;
+  }
+
+  /* ── LOADING SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<div id="loginScreen">
-  <h1>Workshop Manager Messages</h1>
+<!-- ════════════════════════════════
+     LOGIN SCREEN
+═════════════════════════════════ -->
+<div id="loginScreen" class="screen">
+  <img src="icon-192.png" class="login-logo" alt="P22">
+  <h1>P22 Workshop</h1>
+  <p>Sign in to access messages</p>
   <form id="loginForm">
-    <input type="text" id="userIdInput" placeholder="Your User ID" autocomplete="off" required>
-    <button type="submit">Log in</button>
+    <div>
+      <div class="field-label">Your User ID</div>
+      <input type="text" id="userIdInput" placeholder="e.g. JSmith" autocomplete="off" required>
+    </div>
+    <button type="submit" class="btn-primary">Sign In</button>
   </form>
 </div>
 
-<div id="appScreen">
+<!-- ════════════════════════════════
+     APP SCREEN
+═════════════════════════════════ -->
+<div id="appScreen" class="screen">
+
+  <!-- Header -->
   <header>
-    <span>Logged in: <span id="currentUserLabel"></span></span>
-    <button id="logoutBtn" type="button">Log out</button>
+    <div class="header-left">
+      <img src="icon-192.png" class="header-logo" alt="P22">
+      <span class="header-chat-name" id="headerChatName">Select a chat</span>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="hamburgerBtn" aria-label="Open chats">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
+          <rect y="3" width="20" height="2.5" rx="1.25"/>
+          <rect y="9" width="20" height="2.5" rx="1.25"/>
+          <rect y="15" width="20" height="2.5" rx="1.25"/>
+        </svg>
+      </button>
+    </div>
   </header>
 
-  <form id="openConvoForm">
-    <select id="convoSelect">
-      <option value="">Loading conversations...</option>
-    </select>
-  </form>
-
+  <!-- Message list -->
   <div id="messageList">
-    <div class="no-messages">Open a conversation to view messages</div>
+    <div class="no-messages">Select a conversation to start chatting</div>
   </div>
 
-  <form id="messageForm">
-    <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
-    <button type="submit">Send</button>
-  </form>
+  <!-- Input bar -->
+  <div id="inputBar">
+    <button class="input-action-btn" id="emojiBtn" type="button" title="Emoji">😊</button>
+    <button class="input-action-btn" id="gifBtn" type="button" title="GIF">
+      <span style="font-size:0.75rem;font-weight:700;color:var(--orange);font-family:inherit">GIF</span>
+    </button>
+    <textarea id="messageInput" placeholder="Type a message..." rows="1" autocomplete="off"></textarea>
+    <button id="sendBtn" type="button" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════
+     HAMBURGER DRAWER
+═════════════════════════════════ -->
+<div id="drawerOverlay">
+  <div id="drawer">
+    <div class="drawer-header">
+      <img src="icon-192.png" alt="P22">
+      <div class="drawer-header-text">
+        <div class="title">P22 Messages</div>
+        <div class="subtitle" id="drawerUserLabel">—</div>
+      </div>
+    </div>
+    <div class="drawer-search">
+      <input type="text" id="drawerSearch" placeholder="Search conversations..." autocomplete="off">
+    </div>
+    <div id="convoList"></div>
+    <div class="drawer-footer">
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     EMOJI PICKER
+═════════════════════════════════ -->
+<div id="emojiOverlay">
+  <div id="emojiPicker">
+    <div class="picker-handle"></div>
+    <div class="emoji-categories" id="emojiCats"></div>
+    <div class="emoji-grid-wrap">
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     GIF PICKER
+═════════════════════════════════ -->
+<div id="gifOverlay">
+  <div id="gifPicker">
+    <div class="picker-handle"></div>
+    <div class="gif-search-row">
+      <input type="text" id="gifSearchInput" placeholder="Search GIFs...">
+      <button id="gifSearchBtn">Search</button>
+    </div>
+    <div id="gifGrid"><div class="gif-status">Loading trending GIFs…</div></div>
+  </div>
 </div>
 
 <script src="app.js"></script>
