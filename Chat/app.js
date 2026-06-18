@@ -220,25 +220,85 @@ async function sendMessage() {
   const text  = pendingGifUrl || input.value.trim();
   if (!text || !currentConversationId) return;
 
-  input.value   = '';
+  // Clear input immediately — feels instant
+  input.value        = '';
   input.style.height = 'auto';
-  pendingGifUrl = null;
+  pendingGifUrl      = null;
 
-  const result = await callAppsScript('sendMessage', {
+  // ── OPTIMISTIC UI: show the bubble right now, before the server responds ──
+  const now       = new Date();
+  const pad       = n => n.toString().padStart(2, '0');
+  const timeStr   = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const container = document.getElementById('messageList');
+
+  const placeholder = container.querySelector('.no-messages');
+  if (placeholder) placeholder.remove();
+
+  const optimisticBubble = buildMessageBubble({ senderId: currentUserId, text, timestamp: timeStr }, true);
+  optimisticBubble.style.opacity = '0.7'; // slightly dim until confirmed
+  container.appendChild(optimisticBubble);
+  container.scrollTop = container.scrollHeight;
+
+  // ── NETWORK: fire and forget, confirm in background ──
+  callAppsScript('sendMessage', {
     conversationId: currentConversationId,
     senderId:       currentUserId,
-    text:           text
+    text
+  }).then(result => {
+    if (result.success) {
+      // Replace optimistic bubble with server-confirmed messages
+      loadMessages(false);
+    } else {
+      console.error('Send failed', result.error);
+      optimisticBubble.style.opacity = '1';
+      optimisticBubble.style.border  = '1px solid red';
+      optimisticBubble.title         = 'Failed to send — tap to retry';
+    }
+  }).catch(err => {
+    console.error('Send error', err);
+    optimisticBubble.style.opacity = '1';
+    optimisticBubble.style.border  = '1px solid red';
+    optimisticBubble.title         = 'Failed to send';
   });
+}
 
-  if (result.success) {
-    loadMessages(true);
-  } else {
-    console.error('Send failed', result.error);
+// Shared bubble builder — used by both optimistic send and renderMessages
+function buildMessageBubble(msg, isMine) {
+  const wrap       = document.createElement('div');
+  wrap.className   = 'message-container' + (isMine ? ' current-user' : '');
+
+  if (!isMine) {
+    const nameEl       = document.createElement('div');
+    nameEl.className   = 'sender-name-inline';
+    nameEl.textContent = msg.senderId;
+    wrap.appendChild(nameEl);
   }
+
+  const bubble     = document.createElement('div');
+  bubble.className = 'message-bubble';
+
+  if (isGifUrl(msg.text)) {
+    const img     = document.createElement('img');
+    img.src       = msg.text;
+    img.className = 'message-gif';
+    img.alt       = 'GIF';
+    bubble.appendChild(img);
+  } else {
+    bubble.textContent = msg.text;
+  }
+
+  wrap.appendChild(bubble);
+
+  const meta       = document.createElement('div');
+  meta.className   = 'message-meta';
+  meta.textContent = msg.timestamp;
+  wrap.appendChild(meta);
+
+  return wrap;
 }
 
 function renderMessages(messages, scrollToBottom) {
-  const container   = document.getElementById('messageList');
+  const container        = document.getElementById('messageList');
   const prevScrollTop    = container.scrollTop;
   const prevScrollHeight = container.scrollHeight;
   const wasNearBottom    = (prevScrollHeight - prevScrollTop - container.clientHeight) < 80;
@@ -252,46 +312,8 @@ function renderMessages(messages, scrollToBottom) {
 
   messages
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-    .forEach(msg => {
-      const isMine = msg.senderId === currentUserId;
-      const wrap   = document.createElement('div');
-      wrap.className = 'message-container' + (isMine ? ' current-user' : '');
+    .forEach(msg => container.appendChild(buildMessageBubble(msg, msg.senderId === currentUserId)));
 
-      // Sender name (only for others in group chats)
-      if (!isMine) {
-        const nameEl = document.createElement('div');
-        nameEl.className = 'sender-name-inline';
-        nameEl.textContent = msg.senderId;
-        wrap.appendChild(nameEl);
-      }
-
-      // Bubble
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-
-      if (isGifUrl(msg.text)) {
-        const img = document.createElement('img');
-        img.src       = msg.text;
-        img.className = 'message-gif';
-        img.alt       = 'GIF';
-        bubble.appendChild(img);
-      } else {
-        bubble.textContent = msg.text;
-      }
-
-      wrap.appendChild(bubble);
-
-      // Timestamp
-      const meta = document.createElement('div');
-      meta.className   = 'message-meta';
-      meta.textContent = msg.timestamp;
-      wrap.appendChild(meta);
-
-      container.appendChild(wrap);
-    });
-
-  // Scroll: always go to bottom on explicit open/send,
-  // otherwise only auto-scroll if user was already near the bottom
   if (scrollToBottom || wasNearBottom) {
     container.scrollTop = container.scrollHeight;
   }
