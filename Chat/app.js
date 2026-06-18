@@ -98,6 +98,16 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 // ============================================================
+// HELPERS
+// ============================================================
+
+// Mirrors CreateConversationID() in your C# app and createConversationId()
+// in Apps Script — sorted join so the ID is identical regardless of who initiates.
+function createConversationId(user1, user2) {
+  return [user1, user2].sort().join('-');
+}
+
+// ============================================================
 // CONVERSATIONS (dropdown)
 // ============================================================
 let conversationsCache = [];
