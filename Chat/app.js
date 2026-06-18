@@ -1,8 +1,8 @@
 // ============================================================
 // CONFIG — fill these in once you have your new deployment + Vercel function
 // ============================================================
-const APPS_SCRIPT_URL = 'PASTE_YOUR_NEW_DEPLOYMENT_EXEC_URL_HERE';
-const VAPID_PUBLIC_KEY = 'PASTE_YOUR_VAPID_PUBLIC_KEY_HERE'; // not secret, safe in frontend code
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwElWIxEx9IbCseRdhMJkiYm51NLyA5sNPB2uCCX0D_HDTSdXJa9panGAdgG5f-jq2W/exec';
+const VAPID_PUBLIC_KEY = 'BPgI6fOwbKkvNXU_UG_SO3xYlhGsB1QMfFHNPf6yhPFF3P_ck7zNypzb_iwL8HPYeEzwfAHUuVrw39WCN3Y-ZU8'; // not secret, safe in frontend code
 
 // ============================================================
 // STATE
@@ -98,6 +98,61 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 // ============================================================
+// CONVERSATIONS (dropdown)
+// ============================================================
+let conversationsCache = [];
+let conversationsPollTimer = null;
+
+async function loadConversations() {
+  const result = await callAppsScript('getConversations', {
+    userId: currentUserId
+  });
+
+  if (result.success) {
+    conversationsCache = result.conversations;
+    renderConversationOptions();
+  } else {
+    console.error('Failed to load conversations', result.error);
+  }
+}
+
+function renderConversationOptions() {
+  const select = document.getElementById('convoSelect');
+  const previouslySelected = select.value;
+
+  select.innerHTML = '';
+
+  if (conversationsCache.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'No conversations yet';
+    select.appendChild(opt);
+    return;
+  }
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'Select a conversation...';
+  select.appendChild(placeholder);
+
+  conversationsCache.forEach((convo) => {
+    const opt = document.createElement('option');
+    opt.value = convo.conversationId;
+
+    const icon = convo.type === 'group' ? '\u{1F465}' : '\u{1F464}'; // 👥 / 👤
+    const unreadTag = convo.unreadCount > 0 ? ` (${convo.unreadCount} new)` : '';
+    opt.textContent = `${icon} ${convo.displayName}${unreadTag}`;
+
+    select.appendChild(opt);
+  });
+
+  // Keep the same chat selected across a background refresh, if it still exists
+  if (previouslySelected && conversationsCache.some(c => c.conversationId === previouslySelected)) {
+    select.value = previouslySelected;
+  }
+}
+
+// ============================================================
 // MESSAGES
 // ============================================================
 function openConversation(conversationId) {
@@ -190,6 +245,14 @@ function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
   document.getElementById('currentUserLabel').textContent = currentUserId;
+
+  loadConversations();
+
+  if (conversationsPollTimer) clearInterval(conversationsPollTimer);
+  // Refresh the dropdown periodically so new contacts/unread counts
+  // show up without requiring a manual reload — mirrors the desktop
+  // app's background refresh of its sidebar.
+  conversationsPollTimer = setInterval(loadConversations, 30000);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -217,11 +280,8 @@ window.addEventListener('DOMContentLoaded', () => {
     input.value = '';
   });
 
-  // TEMPORARY: for testing before a real conversation list is built.
-  // Replace with your sidebar/contact list once the core flow is verified.
-  document.getElementById('openConvoForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const convoId = document.getElementById('convoIdInput').value;
+  document.getElementById('convoSelect').addEventListener('change', (e) => {
+    const convoId = e.target.value;
     if (convoId) openConversation(convoId);
   });
 });
