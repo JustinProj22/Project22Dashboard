@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -765,5 +765,19 @@
 </div>
 
 <script src="app.js"></script>
+  
+//Delete after
+  <button onclick="showSub()">Show Push Subscription</button>
+
+<script>
+async function showSub() {
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+
+  document.body.innerHTML = `
+    <pre>${JSON.stringify(sub, null, 2)}</pre>
+  `;
+}
+</script>
 </body>
 </html>
