@@ -1,3 +1,7 @@
+console.log("VAPID_PUBLIC_KEY exists:", !!process.env.VAPID_PUBLIC_KEY);
+console.log("VAPID_PRIVATE_KEY exists:", !!process.env.VAPID_PRIVATE_KEY);
+console.log("RELAY_SECRET exists:", !!process.env.RELAY_SECRET);
+
 const webpush = require('web-push');
 
 // These come from Vercel's Environment Variables (set in the dashboard, not in code)
