@@ -46,15 +46,12 @@ if (!subscription || !subscription.endpoint) {
     await webpush.sendNotification(subscription, payload);
     return res.status(200).json({ success: true });
   } catch (err) {
-    // err.statusCode 410/404 typically means the subscription is dead/expired
     console.error('push send failed', err.statusCode, err.body);
+
     return res.status(err.statusCode || 500).json({
       success: false,
       error: err.message,
       statusCode: err.statusCode
-      
     });
-
-});
   }
 };
