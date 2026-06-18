@@ -1,20 +1,74 @@
 // ============================================================
-// CONFIG — fill these in once you have your new deployment + Vercel function
+// CONFIG — fill these in
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM9ngtS93wq3goHTvXcfNECQKW4bGFnbzXgEF40lMlSG2y5DnFeHAdhsyDOkvv17XW/exec';
-const VAPID_PUBLIC_KEY = 'BPgI6fOwbKkvNXU_UG_SO3xYlhGsB1QMfFHNPf6yhPFF3P_ck7zNypzb_iwL8HPYeEzwfAHUuVrw39WCN3Y-ZU8'; // not secret, safe in frontend code
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBbGj8sxG-Io3_w56aYsVdVI2aukIyepIyPrjsqhJrdFyRQAq4s_hD87RClBjR1wAe/exec';
+const VAPID_PUBLIC_KEY = 'BPgI6fOwbKkvNXU_UG_SO3xYlhGsB1QMfFHNPf6yhPFF3P_ck7zNypzb_iwL8HPYeEzwfAHUuVrw39WCN3Y-ZU8';
+const GIPHY_API_KEY    = 'X6uHs1HdNBeFDtnk8dHJWlXUk108UFbj';
 
 // ============================================================
 // STATE
 // ============================================================
-let currentUserId = localStorage.getItem('wm_userId') || null;
+let currentUserId         = localStorage.getItem('wm_userId') || null;
 let currentConversationId = null;
-let pollTimer = null;
+let currentChatName       = '';
+let conversationsCache    = [];
+let messagePollTimer      = null;
+let conversationPollTimer = null;
+let pendingGifUrl         = null;   // set when user picks a GIF before sending
 
 // ============================================================
-// LOGIN — minimal: just stores a UserID locally.
-// (Matches your desktop app's model: UserID is the identity,
-// no separate auth/password layer exists yet in your sheet schema.)
+// EMOJI DATA
+// ============================================================
+const EMOJI_CATEGORIES = [
+  { icon: '😊', label: 'Smileys', emojis: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','😵','🤯','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱'] },
+  { icon: '👍', label: 'Gestures', emojis: ['👍','👎','👌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐️','🖖','👋','🤝','🙏','💪','🦾','✍️','🤳','💅','🤲','👐','🙌','👏','🤜','🤛','🤌'] },
+  { icon: '❤️', label: 'Hearts',   emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝','💟'] },
+  { icon: '🐶', label: 'Animals',  emojis: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🦋','🐌','🐞','🐜','🐢','🐍','🐙','🦑','🐡','🐠','🐟','🐬','🐳','🦈','🐊','🐘','🦒','🦘'] },
+  { icon: '🍕', label: 'Food',     emojis: ['🍎','🍏','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥒','🌽','🥕','🍞','🥐','🧀','🥚','🍳','🥞','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🌮','🌯','🍝','🍜','🍣','🍱','🍦','🧁','🍰','🎂','🍩','🍪','☕','🍵','🍺','🍻','🥂','🥃'] }
+];
+
+// ============================================================
+// HELPERS
+// ============================================================
+function createConversationId(u1, u2) {
+  return [u1, u2].sort().join('-');
+}
+
+function isGifUrl(text) {
+  if (!text) return false;
+  const t = text.trim();
+  return (t.startsWith('http://') || t.startsWith('https://')) &&
+    (t.endsWith('.gif') || t.includes('giphy.com') || t.includes('tenor.com'));
+}
+
+function urlBase64ToUint8Array(b64) {
+  const padding = '='.repeat((4 - (b64.length % 4)) % 4);
+  const base64  = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+
+// Auto-grow textarea as user types
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ============================================================
+// APPS SCRIPT FETCH
+// ============================================================
+async function callAppsScript(action, params) {
+  const body = JSON.stringify(Object.assign({ action }, params));
+  const res  = await fetch(APPS_SCRIPT_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body
+  });
+  return res.json();
+}
+
+// ============================================================
+// LOGIN / LOGOUT
 // ============================================================
 function login(userId) {
   currentUserId = userId.trim();
@@ -30,268 +84,462 @@ function logout() {
 }
 
 // ============================================================
-// CORS-SAFE FETCH HELPER
-// Apps Script doesn't handle preflight OPTIONS requests, so we avoid
-// triggering one: use text/plain as the content type instead of
-// application/json. The body is still JSON text — Apps Script's
-// e.postData.contents reads the raw text either way, so doPost's
-// JSON.parse(e.postData.contents) keeps working unchanged.
-// ============================================================
-async function callAppsScript(action, params) {
-  const body = JSON.stringify(Object.assign({ action: action }, params));
-
-  const response = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: body
-  });
-
-  return response.json();
-}
-
-// ============================================================
 // PUSH SUBSCRIPTION
 // ============================================================
 async function subscribeToPush() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('Push not supported in this browser');
-    return;
-  }
-
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try {
-    const registration = await navigator.serviceWorker.ready;
-
+    const reg        = await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.warn('Notification permission not granted');
-      return;
-    }
+    if (permission !== 'granted') return;
 
-    let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly:      true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
     }
-
-    await callAppsScript('registerPush', {
-      userId: currentUserId,
-      subscription: subscription.toJSON()
-    });
+    await callAppsScript('registerPush', { userId: currentUserId, subscription: sub.toJSON() });
   } catch (err) {
     console.error('Push subscription failed', err);
   }
 }
 
-// Converts the VAPID public key from base64url (the format it's
-// generated in) to the Uint8Array the Push API expects.
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
 // ============================================================
-// HELPERS
+// CONVERSATIONS — DRAWER
 // ============================================================
-
-// Mirrors CreateConversationID() in your C# app and createConversationId()
-// in Apps Script — sorted join so the ID is identical regardless of who initiates.
-function createConversationId(user1, user2) {
-  return [user1, user2].sort().join('-');
-}
-
-// ============================================================
-// CONVERSATIONS (dropdown)
-// ============================================================
-let conversationsCache = [];
-let conversationsPollTimer = null;
-
 async function loadConversations() {
-  const result = await callAppsScript('getConversations', {
-    userId: currentUserId
-  });
-
+  const result = await callAppsScript('getConversations', { userId: currentUserId });
   if (result.success) {
     conversationsCache = result.conversations;
-    renderConversationOptions();
+    renderConvoList(document.getElementById('drawerSearch').value);
   } else {
     console.error('Failed to load conversations', result.error);
   }
 }
 
-function renderConversationOptions() {
-  const select = document.getElementById('convoSelect');
-  const previouslySelected = select.value;
+function renderConvoList(filter) {
+  const list    = document.getElementById('convoList');
+  const term    = (filter || '').toLowerCase();
+  const items   = conversationsCache.filter(c =>
+    !term || c.displayName.toLowerCase().includes(term)
+  );
 
-  select.innerHTML = '';
+  list.innerHTML = '';
 
-  if (conversationsCache.length === 0) {
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = 'No conversations yet';
-    select.appendChild(opt);
+  if (items.length === 0) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:#999;font-size:0.9rem">No conversations found</div>';
     return;
   }
 
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = 'Select a conversation...';
-  select.appendChild(placeholder);
+  items.forEach(convo => {
+    const div = document.createElement('div');
+    div.className = 'convo-item' + (convo.conversationId === currentConversationId ? ' active' : '');
+    div.dataset.id = convo.conversationId;
 
-  conversationsCache.forEach((convo) => {
-    const opt = document.createElement('option');
-    opt.value = convo.conversationId;
+    const isGroup = convo.type === 'group';
+    const icon    = isGroup ? '👥' : '👤';
 
-    const icon = convo.type === 'group' ? '\u{1F465}' : '\u{1F464}'; // 👥 / 👤
-    const unreadTag = convo.unreadCount > 0 ? ` (${convo.unreadCount} new)` : '';
-    opt.textContent = `${icon} ${convo.displayName}${unreadTag}`;
+    div.innerHTML = `
+      <div class="convo-avatar ${isGroup ? 'group' : ''}">${icon}</div>
+      <div class="convo-info">
+        <div class="convo-name">${escapeHtml(convo.displayName)}</div>
+        <div class="convo-preview">${escapeHtml(convo.lastMessage || 'No messages yet')}</div>
+      </div>
+      <div class="convo-meta">
+        ${convo.unreadCount > 0 ? `<span class="unread-badge">${convo.unreadCount}</span>` : ''}
+      </div>
+    `;
 
-    select.appendChild(opt);
+    div.addEventListener('click', () => {
+      openConversation(convo.conversationId, convo.displayName);
+      closeDrawer();
+    });
+
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text || '';
+  return d.innerHTML;
+}
+
+// ============================================================
+// DRAWER OPEN/CLOSE
+// ============================================================
+function openDrawer() {
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  loadConversations(); // refresh on each open so counts are current
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+// ============================================================
+// OPEN CONVERSATION (also called from push notification tap)
+// ============================================================
+function openConversation(conversationId, displayName) {
+  currentConversationId = conversationId;
+  currentChatName       = displayName || conversationId;
+
+  document.getElementById('headerChatName').textContent = currentChatName;
+
+  // Highlight active item in drawer if it's open
+  document.querySelectorAll('.convo-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === conversationId);
   });
 
-  // Keep the same chat selected across a background refresh, if it still exists
-  if (previouslySelected && conversationsCache.some(c => c.conversationId === previouslySelected)) {
-    select.value = previouslySelected;
-  }
+  loadMessages(true); // true = scroll to bottom
+
+  if (messagePollTimer) clearInterval(messagePollTimer);
+  messagePollTimer = setInterval(() => loadMessages(false), 10000);
 }
 
 // ============================================================
 // MESSAGES
 // ============================================================
-function openConversation(conversationId) {
-  currentConversationId = conversationId;
-  loadMessages();
-
-  if (pollTimer) clearInterval(pollTimer);
-  // Simple fallback polling while the conversation is open, in case
-  // a push didn't arrive (matches your desktop app's 10s refresh idea,
-  // but only while actively viewing a chat, to save requests).
-  pollTimer = setInterval(loadMessages, 10000);
-}
-
-async function loadMessages() {
+async function loadMessages(scrollToBottom) {
   if (!currentConversationId) return;
 
-  const result = await callAppsScript('getMessages', {
-    conversationId: currentConversationId
-  });
-
+  const result = await callAppsScript('getMessages', { conversationId: currentConversationId });
   if (result.success) {
-    renderMessages(result.messages);
+    renderMessages(result.messages, scrollToBottom);
   } else {
     console.error('Failed to load messages', result.error);
   }
 }
 
-async function sendMessage(text) {
-  if (!text.trim() || !currentConversationId) return;
+async function sendMessage() {
+  const input = document.getElementById('messageInput');
+  const text  = pendingGifUrl || input.value.trim();
+  if (!text || !currentConversationId) return;
+
+  input.value   = '';
+  input.style.height = 'auto';
+  pendingGifUrl = null;
 
   const result = await callAppsScript('sendMessage', {
     conversationId: currentConversationId,
-    senderId: currentUserId,
-    text: text.trim()
+    senderId:       currentUserId,
+    text:           text
   });
 
   if (result.success) {
-    loadMessages();
+    loadMessages(true);
   } else {
     console.error('Send failed', result.error);
   }
 }
 
-function renderMessages(messages) {
-  const container = document.getElementById('messageList');
+function renderMessages(messages, scrollToBottom) {
+  const container   = document.getElementById('messageList');
+  const prevScrollTop    = container.scrollTop;
+  const prevScrollHeight = container.scrollHeight;
+  const wasNearBottom    = (prevScrollHeight - prevScrollTop - container.clientHeight) < 80;
+
   container.innerHTML = '';
 
   if (!messages || messages.length === 0) {
-    container.innerHTML = '<div class="no-messages">No messages yet. Start the conversation!</div>';
+    container.innerHTML = '<div class="no-messages">No messages yet. Say hello! 👋</div>';
     return;
   }
 
   messages
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-    .forEach((msg) => {
-      const isCurrentUser = msg.senderId === currentUserId;
-      const div = document.createElement('div');
-      div.className = 'message-container' + (isCurrentUser ? ' current-user' : '');
+    .forEach(msg => {
+      const isMine = msg.senderId === currentUserId;
+      const wrap   = document.createElement('div');
+      wrap.className = 'message-container' + (isMine ? ' current-user' : '');
 
-      const header = document.createElement('div');
-      header.className = 'message-header';
+      // Sender name (only for others in group chats)
+      if (!isMine) {
+        const nameEl = document.createElement('div');
+        nameEl.className = 'sender-name-inline';
+        nameEl.textContent = msg.senderId;
+        wrap.appendChild(nameEl);
+      }
 
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'sender-name ' + (isCurrentUser ? 'current-user' : 'other-user');
-      nameSpan.textContent = isCurrentUser ? 'You' : msg.senderId;
+      // Bubble
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
 
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'timestamp';
-      timeSpan.textContent = msg.timestamp;
+      if (isGifUrl(msg.text)) {
+        const img = document.createElement('img');
+        img.src       = msg.text;
+        img.className = 'message-gif';
+        img.alt       = 'GIF';
+        bubble.appendChild(img);
+      } else {
+        bubble.textContent = msg.text;
+      }
 
-      header.appendChild(nameSpan);
-      header.appendChild(timeSpan);
+      wrap.appendChild(bubble);
 
-      const textDiv = document.createElement('div');
-      textDiv.className = 'message-text';
-      textDiv.textContent = msg.text; // textContent, not innerHTML — avoids needing manual HTML-escaping
+      // Timestamp
+      const meta = document.createElement('div');
+      meta.className   = 'message-meta';
+      meta.textContent = msg.timestamp;
+      wrap.appendChild(meta);
 
-      div.appendChild(header);
-      div.appendChild(textDiv);
-      container.appendChild(div);
+      container.appendChild(wrap);
     });
 
-  container.scrollTop = container.scrollHeight;
+  // Scroll: always go to bottom on explicit open/send,
+  // otherwise only auto-scroll if user was already near the bottom
+  if (scrollToBottom || wasNearBottom) {
+    container.scrollTop = container.scrollHeight;
+  }
 }
 
 // ============================================================
-// UI WIRING
+// EMOJI PICKER
+// ============================================================
+let currentEmojiCat = 0;
+
+function openEmojiPicker() {
+  const overlay = document.getElementById('emojiOverlay');
+  overlay.classList.add('open');
+  if (document.getElementById('emojiGrid').children.length === 0) {
+    buildEmojiPicker();
+  }
+}
+
+function closeEmojiPicker() {
+  document.getElementById('emojiOverlay').classList.remove('open');
+}
+
+function buildEmojiPicker() {
+  const catsEl = document.getElementById('emojiCats');
+  const gridEl = document.getElementById('emojiGrid');
+  catsEl.innerHTML = '';
+
+  EMOJI_CATEGORIES.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (i === currentEmojiCat ? ' active' : '');
+    btn.textContent = cat.icon;
+    btn.title = cat.label;
+    btn.addEventListener('click', () => {
+      currentEmojiCat = i;
+      document.querySelectorAll('.cat-btn').forEach((b, j) =>
+        b.classList.toggle('active', j === i)
+      );
+      renderEmojiGrid(i);
+    });
+    catsEl.appendChild(btn);
+  });
+
+  renderEmojiGrid(currentEmojiCat);
+}
+
+function renderEmojiGrid(catIndex) {
+  const gridEl = document.getElementById('emojiGrid');
+  gridEl.innerHTML = '';
+  EMOJI_CATEGORIES[catIndex].emojis.forEach(emoji => {
+    const cell = document.createElement('div');
+    cell.className   = 'emoji-cell';
+    cell.textContent = emoji;
+    cell.addEventListener('click', () => {
+      const input = document.getElementById('messageInput');
+      input.value += emoji;
+      autoGrow(input);
+      closeEmojiPicker();
+      input.focus();
+    });
+    gridEl.appendChild(cell);
+  });
+}
+
+// ============================================================
+// GIF PICKER
+// ============================================================
+function openGifPicker() {
+  document.getElementById('gifOverlay').classList.add('open');
+  loadTrendingGifs();
+}
+
+function closeGifPicker() {
+  document.getElementById('gifOverlay').classList.remove('open');
+}
+
+async function loadTrendingGifs() {
+  const grid = document.getElementById('gifGrid');
+  grid.innerHTML = '<div class="gif-status">Loading trending GIFs…</div>';
+  try {
+    const url = `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=20&rating=g`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    renderGifs(data.data);
+  } catch (e) {
+    grid.innerHTML = '<div class="gif-status">Could not load GIFs. Check your API key.</div>';
+  }
+}
+
+async function searchGifs(query) {
+  const grid = document.getElementById('gifGrid');
+  grid.innerHTML = '<div class="gif-status">Searching…</div>';
+  try {
+    const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=20&rating=g`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    renderGifs(data.data);
+  } catch (e) {
+    grid.innerHTML = '<div class="gif-status">Search failed.</div>';
+  }
+}
+
+function renderGifs(gifs) {
+  const grid = document.getElementById('gifGrid');
+  grid.innerHTML = '';
+
+  if (!gifs || gifs.length === 0) {
+    grid.innerHTML = '<div class="gif-status">No GIFs found.</div>';
+    return;
+  }
+
+  gifs.forEach(gif => {
+    const preview  = gif.images?.fixed_height_small?.url;
+    const fullUrl  = gif.images?.original?.url;
+    if (!preview || !fullUrl) return;
+
+    const img      = document.createElement('img');
+    img.src        = preview;
+    img.className  = 'gif-thumb';
+    img.alt        = 'GIF';
+    img.loading    = 'lazy';
+    img.addEventListener('click', () => {
+      pendingGifUrl = fullUrl;
+      closeGifPicker();
+      sendMessage(); // send immediately on tap, same behaviour as desktop
+    });
+    grid.appendChild(img);
+  });
+}
+
+// ============================================================
+// SHOW APP
 // ============================================================
 function showApp() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  document.getElementById('currentUserLabel').textContent = currentUserId;
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+  document.getElementById('drawerUserLabel').textContent = currentUserId;
 
   loadConversations();
-
-  if (conversationsPollTimer) clearInterval(conversationsPollTimer);
-  // Refresh the dropdown periodically so new contacts/unread counts
-  // show up without requiring a manual reload — mirrors the desktop
-  // app's background refresh of its sidebar.
-  conversationsPollTimer = setInterval(loadConversations, 30000);
+  if (conversationPollTimer) clearInterval(conversationPollTimer);
+  conversationPollTimer = setInterval(loadConversations, 30000);
 }
 
+// ============================================================
+// OPEN-FROM-PUSH-NOTIFICATION
+// When the service worker opens the app from a notification tap,
+// it appends ?conversationId=XXX to the URL. We read that here.
+// ============================================================
+function checkPushOpenIntent() {
+  const params = new URLSearchParams(window.location.search);
+  const convoId = params.get('conversationId');
+  if (convoId && currentUserId) {
+    // Wait for conversations to load so we have the display name
+    const tryOpen = () => {
+      const found = conversationsCache.find(c => c.conversationId === convoId);
+      if (found) {
+        openConversation(found.conversationId, found.displayName);
+      } else {
+        // Fallback: open with raw ID if cache not ready yet
+        openConversation(convoId, convoId);
+      }
+    };
+    // Give the first loadConversations call a moment to finish
+    setTimeout(tryOpen, 1500);
+
+    // Clean up the URL so refreshing doesn't re-open the same chat
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
 window.addEventListener('DOMContentLoaded', () => {
+
+  // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
   }
 
+  // Already logged in?
   if (currentUserId) {
     showApp();
     subscribeToPush();
+    checkPushOpenIntent();
+  } else {
+    document.getElementById('loginScreen').classList.add('active');
   }
 
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
+  // ── Login form ──
+  document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
-    const userId = document.getElementById('userIdInput').value;
-    if (userId) login(userId);
+    const val = document.getElementById('userIdInput').value;
+    if (val) login(val);
   });
 
+  // ── Logout ──
   document.getElementById('logoutBtn').addEventListener('click', logout);
 
-  document.getElementById('messageForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input = document.getElementById('messageInput');
-    sendMessage(input.value);
-    input.value = '';
+  // ── Hamburger ──
+  document.getElementById('hamburgerBtn').addEventListener('click', openDrawer);
+
+  // Close drawer by tapping the overlay behind it
+  document.getElementById('drawerOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('drawerOverlay')) closeDrawer();
   });
 
-  document.getElementById('convoSelect').addEventListener('change', (e) => {
-    const convoId = e.target.value;
-    if (convoId) openConversation(convoId);
+  // ── Drawer search ──
+  document.getElementById('drawerSearch').addEventListener('input', e => {
+    renderConvoList(e.target.value);
+  });
+
+  // ── Send button ──
+  document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+  // ── Enter to send (Shift+Enter for newline) ──
+  document.getElementById('messageInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // ── Auto-grow textarea ──
+  document.getElementById('messageInput').addEventListener('input', e => {
+    autoGrow(e.target);
+  });
+
+  // ── Emoji ──
+  document.getElementById('emojiBtn').addEventListener('click', openEmojiPicker);
+  document.getElementById('emojiOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('emojiOverlay')) closeEmojiPicker();
+  });
+
+  // ── GIF ──
+  document.getElementById('gifBtn').addEventListener('click', openGifPicker);
+  document.getElementById('gifOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('gifOverlay')) closeGifPicker();
+  });
+
+  document.getElementById('gifSearchBtn').addEventListener('click', () => {
+    const q = document.getElementById('gifSearchInput').value.trim();
+    if (q) searchGifs(q); else loadTrendingGifs();
+  });
+
+  document.getElementById('gifSearchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const q = e.target.value.trim();
+      if (q) searchGifs(q); else loadTrendingGifs();
+    }
   });
 });
