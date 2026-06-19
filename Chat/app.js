@@ -533,14 +533,16 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Login form ──
-  document.getElementById('loginForm').addEventListener('submit', e => {
-    e.preventDefault();
-        const userId = document.getElementById("userIdInput").value;
-    const val = document.getElementById('userIdInput').value;
-    if (val) login(val);
-// after login success UI switch:
-await registerPush(userId);
-  });
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const userId = document.getElementById("userIdInput").value;
+
+  if (userId) login(userId);
+
+  // after login success UI switch:
+  await registerPush(userId);
+});
 
   // ── Logout ──
   document.getElementById('logoutBtn').addEventListener('click', logout);
