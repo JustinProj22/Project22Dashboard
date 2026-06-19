@@ -486,6 +486,33 @@ function checkPushOpenIntent() {
   }
 }
 
+async function registerPush(userId) {
+  if (!('serviceWorker' in navigator)) return;
+
+  const reg = await navigator.serviceWorker.ready;
+
+  let sub = await reg.pushManager.getSubscription();
+
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+  }
+
+  await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      action: "registerPush",
+      userId: userId,
+      subscription: sub
+    })
+  });
+}
+
 // ============================================================
 // BOOT
 // ============================================================
