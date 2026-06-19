@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG — fill these in
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBbGj8sxG-Io3_w56aYsVdVI2aukIyepIyPrjsqhJrdFyRQAq4s_hD87RClBjR1wAe/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbhNtY-Yp6a0y4ZNatlenp8-i_bpuZWKZTiMIW3LksjWqdtWkeXQefk71gHfUEWq4Y/exec';
 const VAPID_PUBLIC_KEY = 'BPgI6fOwbKkvNXU_UG_SO3xYlhGsB1QMfFHNPf6yhPFF3P_ck7zNypzb_iwL8HPYeEzwfAHUuVrw39WCN3Y-ZU8';
 const GIPHY_API_KEY    = 'X6uHs1HdNBeFDtnk8dHJWlXUk108UFbj';
 
@@ -535,8 +535,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // ── Login form ──
   document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
+        const userId = document.getElementById("userIdInput").value;
     const val = document.getElementById('userIdInput').value;
     if (val) login(val);
+// after login success UI switch:
+await registerPush(userId);
   });
 
   // ── Logout ──
