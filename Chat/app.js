@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG — fill these in
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbhNtY-Yp6a0y4ZNatlenp8-i_bpuZWKZTiMIW3LksjWqdtWkeXQefk71gHfUEWq4Y/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSVyJB8EhdqpCbLXv2YqZudenHBtol3Bqpa7zG-cwldlWIxXbzJwvw19MDRQIugRpp/exec';
 const VAPID_PUBLIC_KEY = 'BPgI6fOwbKkvNXU_UG_SO3xYlhGsB1QMfFHNPf6yhPFF3P_ck7zNypzb_iwL8HPYeEzwfAHUuVrw39WCN3Y-ZU8';
 const GIPHY_API_KEY    = 'X6uHs1HdNBeFDtnk8dHJWlXUk108UFbj';
 
