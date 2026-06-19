@@ -500,7 +500,7 @@ async function registerPush(userId) {
     });
   }
 
-  await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+  await fetch(APPS_SCRIPT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
