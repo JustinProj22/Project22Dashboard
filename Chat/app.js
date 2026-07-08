@@ -15,7 +15,7 @@ let conversationsCache    = [];
 let messagePollTimer      = null;
 let conversationPollTimer = null;
 let pendingGifUrl         = null;   // set when user picks a GIF before sending
-
+ 
 // ============================================================
 // EMOJI DATA
 // ============================================================
@@ -26,34 +26,34 @@ const EMOJI_CATEGORIES = [
   { icon: '🐶', label: 'Animals',  emojis: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🦋','🐌','🐞','🐜','🐢','🐍','🐙','🦑','🐡','🐠','🐟','🐬','🐳','🦈','🐊','🐘','🦒','🦘'] },
   { icon: '🍕', label: 'Food',     emojis: ['🍎','🍏','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥒','🌽','🥕','🍞','🥐','🧀','🥚','🍳','🥞','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🌮','🌯','🍝','🍜','🍣','🍱','🍦','🧁','🍰','🎂','🍩','🍪','☕','🍵','🍺','🍻','🥂','🥃'] }
 ];
-
+ 
 // ============================================================
 // HELPERS
 // ============================================================
 function createConversationId(u1, u2) {
   return [u1, u2].sort().join('-');
 }
-
+ 
 function isGifUrl(text) {
   if (!text) return false;
-  const t = text.trim();
+  const t = String(text).trim();
   return (t.startsWith('http://') || t.startsWith('https://')) &&
     (t.endsWith('.gif') || t.includes('giphy.com') || t.includes('tenor.com'));
 }
-
+ 
 function urlBase64ToUint8Array(b64) {
   const padding = '='.repeat((4 - (b64.length % 4)) % 4);
   const base64  = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw     = atob(base64);
   return Uint8Array.from(raw, c => c.charCodeAt(0));
 }
-
+ 
 // Auto-grow textarea as user types
 function autoGrow(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
-
+ 
 // Parses timestamps in dd/MM/yyyy HH:mm:ss format (what the desktop app writes)
 // JavaScript's Date constructor expects MM/dd/yyyy so we reorder the parts.
 function parseTimestamp(ts) {
@@ -69,7 +69,7 @@ function parseTimestamp(ts) {
   var d = new Date(s);
   return isNaN(d.getTime()) ? new Date(0) : d;
 }
-
+ 
 // ============================================================
 // APPS SCRIPT FETCH
 // ============================================================
@@ -82,7 +82,7 @@ async function callAppsScript(action, params) {
   });
   return res.json();
 }
-
+ 
 // ============================================================
 // LOGIN / LOGOUT
 // ============================================================
@@ -92,13 +92,13 @@ function login(userId) {
   showApp();
   subscribeToPush();
 }
-
+ 
 function logout() {
   localStorage.removeItem('wm_userId');
   currentUserId = null;
   location.reload();
 }
-
+ 
 // ============================================================
 // PUSH SUBSCRIPTION
 // ============================================================
@@ -108,7 +108,7 @@ async function subscribeToPush() {
     const reg        = await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
-
+ 
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
       sub = await reg.pushManager.subscribe({
@@ -121,7 +121,7 @@ async function subscribeToPush() {
     console.error('Push subscription failed', err);
   }
 }
-
+ 
 // ============================================================
 // CONVERSATIONS — DRAWER
 // ============================================================
@@ -134,29 +134,29 @@ async function loadConversations() {
     console.error('Failed to load conversations', result.error);
   }
 }
-
+ 
 function renderConvoList(filter) {
   const list    = document.getElementById('convoList');
   const term    = (filter || '').toLowerCase();
   const items   = conversationsCache.filter(c =>
     !term || c.displayName.toLowerCase().includes(term)
   );
-
+ 
   list.innerHTML = '';
-
+ 
   if (items.length === 0) {
     list.innerHTML = '<div style="padding:24px;text-align:center;color:#999;font-size:0.9rem">No conversations found</div>';
     return;
   }
-
+ 
   items.forEach(convo => {
     const div = document.createElement('div');
     div.className = 'convo-item' + (convo.conversationId === currentConversationId ? ' active' : '');
     div.dataset.id = convo.conversationId;
-
+ 
     const isGroup = convo.type === 'group';
     const icon    = isGroup ? '👥' : '👤';
-
+ 
     div.innerHTML = `
       <div class="convo-avatar ${isGroup ? 'group' : ''}">${icon}</div>
       <div class="convo-info">
@@ -167,22 +167,22 @@ function renderConvoList(filter) {
         ${convo.unreadCount > 0 ? `<span class="unread-badge">${convo.unreadCount}</span>` : ''}
       </div>
     `;
-
+ 
     div.addEventListener('click', () => {
       openConversation(convo.conversationId, convo.displayName);
       closeDrawer();
     });
-
+ 
     list.appendChild(div);
   });
 }
-
+ 
 function escapeHtml(text) {
   const d = document.createElement('div');
   d.textContent = text || '';
   return d.innerHTML;
 }
-
+ 
 // ============================================================
 // DRAWER OPEN/CLOSE
 // ============================================================
@@ -191,38 +191,38 @@ function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   loadConversations(); // refresh on each open so counts are current
 }
-
+ 
 function closeDrawer() {
   document.getElementById('drawerOverlay').classList.remove('open');
   document.getElementById('drawer').classList.remove('open');
 }
-
+ 
 // ============================================================
 // OPEN CONVERSATION (also called from push notification tap)
 // ============================================================
 function openConversation(conversationId, displayName) {
   currentConversationId = conversationId;
   currentChatName       = displayName || conversationId;
-
+ 
   document.getElementById('headerChatName').textContent = currentChatName;
-
+ 
   // Highlight active item in drawer if it's open
   document.querySelectorAll('.convo-item').forEach(el => {
     el.classList.toggle('active', el.dataset.id === conversationId);
   });
-
+ 
   loadMessages(true); // true = scroll to bottom
-
+ 
   if (messagePollTimer) clearInterval(messagePollTimer);
   messagePollTimer = setInterval(() => loadMessages(false), 10000);
 }
-
+ 
 // ============================================================
 // MESSAGES
 // ============================================================
 async function loadMessages(scrollToBottom) {
   if (!currentConversationId) return;
-
+ 
   const result = await callAppsScript('getMessages', { conversationId: currentConversationId });
   if (result.success) {
     renderMessages(result.messages, scrollToBottom);
@@ -230,31 +230,31 @@ async function loadMessages(scrollToBottom) {
     console.error('Failed to load messages', result.error);
   }
 }
-
+ 
 async function sendMessage() {
   const input = document.getElementById('messageInput');
   const text  = pendingGifUrl || input.value.trim();
   if (!text || !currentConversationId) return;
-
+ 
   // Clear input immediately — feels instant
   input.value        = '';
   input.style.height = 'auto';
   pendingGifUrl      = null;
-
+ 
   // ── OPTIMISTIC UI: show the bubble right now, before the server responds ──
   const now       = new Date();
   const pad       = n => n.toString().padStart(2, '0');
   const timeStr   = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const container = document.getElementById('messageList');
-
+ 
   const placeholder = container.querySelector('.no-messages');
   if (placeholder) placeholder.remove();
-
+ 
   const optimisticBubble = buildMessageBubble({ senderId: currentUserId, text, timestamp: timeStr }, true);
   optimisticBubble.style.opacity = '0.7'; // slightly dim until confirmed
   container.appendChild(optimisticBubble);
   container.scrollTop = container.scrollHeight;
-
+ 
   // ── NETWORK: fire and forget, confirm in background ──
   callAppsScript('sendMessage', {
     conversationId: currentConversationId,
@@ -277,69 +277,70 @@ async function sendMessage() {
     optimisticBubble.title         = 'Failed to send';
   });
 }
-
+ 
 // Shared bubble builder — used by both optimistic send and renderMessages
 function buildMessageBubble(msg, isMine) {
   const wrap       = document.createElement('div');
   wrap.className   = 'message-container' + (isMine ? ' current-user' : '');
-
+ 
   if (!isMine) {
     const nameEl       = document.createElement('div');
     nameEl.className   = 'sender-name-inline';
     nameEl.textContent = msg.senderId;
     wrap.appendChild(nameEl);
   }
-
+ 
   const bubble     = document.createElement('div');
   bubble.className = 'message-bubble';
-
-  if (isGifUrl(msg.text)) {
+ 
+  const msgText = String(msg.text || '');
+  if (isGifUrl(msgText)) {
     const img     = document.createElement('img');
-    img.src       = msg.text;
+    img.src       = msgText;
     img.className = 'message-gif';
     img.alt       = 'GIF';
     bubble.appendChild(img);
   } else {
-    bubble.textContent = msg.text;
+    bubble.textContent = msgText;
   }
-
+ 
   wrap.appendChild(bubble);
-
+ 
   const meta       = document.createElement('div');
   meta.className   = 'message-meta';
   meta.textContent = msg.timestamp;
   wrap.appendChild(meta);
-
+ 
   return wrap;
 }
-
+ 
 function renderMessages(messages, scrollToBottom) {
   const container        = document.getElementById('messageList');
   const prevScrollTop    = container.scrollTop;
   const prevScrollHeight = container.scrollHeight;
   const wasNearBottom    = (prevScrollHeight - prevScrollTop - container.clientHeight) < 80;
-
+ 
   container.innerHTML = '';
-
+ 
   if (!messages || messages.length === 0) {
     container.innerHTML = '<div class="no-messages">No messages yet. Say hello! 👋</div>';
     return;
   }
-
+ 
   messages
     .sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp))
     .forEach(msg => container.appendChild(buildMessageBubble(msg, msg.senderId === currentUserId)));
-
+ 
   if (scrollToBottom || wasNearBottom) {
     container.scrollTop = container.scrollHeight;
   }
 }
-
+ 
 // ============================================================
 // EMOJI PICKER
 // ============================================================
 let currentEmojiCat = 0;
-
+ 
 function openEmojiPicker() {
   const overlay = document.getElementById('emojiOverlay');
   overlay.classList.add('open');
@@ -347,16 +348,16 @@ function openEmojiPicker() {
     buildEmojiPicker();
   }
 }
-
+ 
 function closeEmojiPicker() {
   document.getElementById('emojiOverlay').classList.remove('open');
 }
-
+ 
 function buildEmojiPicker() {
   const catsEl = document.getElementById('emojiCats');
   const gridEl = document.getElementById('emojiGrid');
   catsEl.innerHTML = '';
-
+ 
   EMOJI_CATEGORIES.forEach((cat, i) => {
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (i === currentEmojiCat ? ' active' : '');
@@ -371,10 +372,10 @@ function buildEmojiPicker() {
     });
     catsEl.appendChild(btn);
   });
-
+ 
   renderEmojiGrid(currentEmojiCat);
 }
-
+ 
 function renderEmojiGrid(catIndex) {
   const gridEl = document.getElementById('emojiGrid');
   gridEl.innerHTML = '';
@@ -392,7 +393,7 @@ function renderEmojiGrid(catIndex) {
     gridEl.appendChild(cell);
   });
 }
-
+ 
 // ============================================================
 // GIF PICKER
 // ============================================================
@@ -400,11 +401,11 @@ function openGifPicker() {
   document.getElementById('gifOverlay').classList.add('open');
   loadTrendingGifs();
 }
-
+ 
 function closeGifPicker() {
   document.getElementById('gifOverlay').classList.remove('open');
 }
-
+ 
 async function loadTrendingGifs() {
   const grid = document.getElementById('gifGrid');
   grid.innerHTML = '<div class="gif-status">Loading trending GIFs…</div>';
@@ -417,7 +418,7 @@ async function loadTrendingGifs() {
     grid.innerHTML = '<div class="gif-status">Could not load GIFs. Check your API key.</div>';
   }
 }
-
+ 
 async function searchGifs(query) {
   const grid = document.getElementById('gifGrid');
   grid.innerHTML = '<div class="gif-status">Searching…</div>';
@@ -430,21 +431,21 @@ async function searchGifs(query) {
     grid.innerHTML = '<div class="gif-status">Search failed.</div>';
   }
 }
-
+ 
 function renderGifs(gifs) {
   const grid = document.getElementById('gifGrid');
   grid.innerHTML = '';
-
+ 
   if (!gifs || gifs.length === 0) {
     grid.innerHTML = '<div class="gif-status">No GIFs found.</div>';
     return;
   }
-
+ 
   gifs.forEach(gif => {
     const preview  = gif.images?.fixed_height_small?.url;
     const fullUrl  = gif.images?.original?.url;
     if (!preview || !fullUrl) return;
-
+ 
     const img      = document.createElement('img');
     img.src        = preview;
     img.className  = 'gif-thumb';
@@ -458,7 +459,7 @@ function renderGifs(gifs) {
     grid.appendChild(img);
   });
 }
-
+ 
 // ============================================================
 // SHOW APP
 // ============================================================
@@ -466,12 +467,12 @@ function showApp() {
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
   document.getElementById('drawerUserLabel').textContent = currentUserId;
-
+ 
   loadConversations();
   if (conversationPollTimer) clearInterval(conversationPollTimer);
   conversationPollTimer = setInterval(loadConversations, 30000);
 }
-
+ 
 // ============================================================
 // OPEN-FROM-PUSH-NOTIFICATION
 // When the service worker opens the app from a notification tap,
@@ -493,22 +494,22 @@ function checkPushOpenIntent() {
     };
     // Give the first loadConversations call a moment to finish
     setTimeout(tryOpen, 1500);
-
+ 
     // Clean up the URL so refreshing doesn't re-open the same chat
     window.history.replaceState({}, '', window.location.pathname);
   }
 }
-
+ 
 // ============================================================
 // BOOT
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
-
+ 
   // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
   }
-
+ 
   // Already logged in?
   if (currentUserId) {
     showApp();
@@ -517,33 +518,33 @@ window.addEventListener('DOMContentLoaded', () => {
   } else {
     document.getElementById('loginScreen').classList.add('active');
   }
-
+ 
   // ── Login form ──
   document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
     const val = document.getElementById('userIdInput').value;
     if (val) login(val);
   });
-
+ 
   // ── Logout ──
   document.getElementById('logoutBtn').addEventListener('click', logout);
-
+ 
   // ── Hamburger ──
   document.getElementById('hamburgerBtn').addEventListener('click', openDrawer);
-
+ 
   // Close drawer by tapping the overlay behind it
   document.getElementById('drawerOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('drawerOverlay')) closeDrawer();
   });
-
+ 
   // ── Drawer search ──
   document.getElementById('drawerSearch').addEventListener('input', e => {
     renderConvoList(e.target.value);
   });
-
+ 
   // ── Send button ──
   document.getElementById('sendBtn').addEventListener('click', sendMessage);
-
+ 
   // ── Enter to send (Shift+Enter for newline) ──
   document.getElementById('messageInput').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -551,29 +552,29 @@ window.addEventListener('DOMContentLoaded', () => {
       sendMessage();
     }
   });
-
+ 
   // ── Auto-grow textarea ──
   document.getElementById('messageInput').addEventListener('input', e => {
     autoGrow(e.target);
   });
-
+ 
   // ── Emoji ──
   document.getElementById('emojiBtn').addEventListener('click', openEmojiPicker);
   document.getElementById('emojiOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('emojiOverlay')) closeEmojiPicker();
   });
-
+ 
   // ── GIF ──
   document.getElementById('gifBtn').addEventListener('click', openGifPicker);
   document.getElementById('gifOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('gifOverlay')) closeGifPicker();
   });
-
+ 
   document.getElementById('gifSearchBtn').addEventListener('click', () => {
     const q = document.getElementById('gifSearchInput').value.trim();
     if (q) searchGifs(q); else loadTrendingGifs();
   });
-
+ 
   document.getElementById('gifSearchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const q = e.target.value.trim();
@@ -581,3 +582,4 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+ 
