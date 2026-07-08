@@ -41,20 +41,33 @@ function isGifUrl(text) {
     (t.endsWith('.gif') || t.includes('giphy.com') || t.includes('tenor.com'));
 }
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+function urlBase64ToUint8Array(b64) {
+  const padding = '='.repeat((4 - (b64.length % 4)) % 4);
+  const base64  = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
 }
 
 // Auto-grow textarea as user types
 function autoGrow(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// Parses timestamps in dd/MM/yyyy HH:mm:ss format (what the desktop app writes)
+// JavaScript's Date constructor expects MM/dd/yyyy so we reorder the parts.
+function parseTimestamp(ts) {
+  if (!ts) return new Date(0);
+  var s = String(ts).trim();
+  // Match dd/MM/yyyy HH:mm:ss
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (m) {
+    // Reorder to yyyy-MM-dd HH:mm:ss which Date parses reliably
+    return new Date(m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0') + 'T' + m[4].padStart(2,'0') + ':' + m[5] + ':' + m[6]);
+  }
+  // Fallback for ISO or other formats
+  var d = new Date(s);
+  return isNaN(d.getTime()) ? new Date(0) : d;
 }
 
 // ============================================================
@@ -314,7 +327,7 @@ function renderMessages(messages, scrollToBottom) {
   }
 
   messages
-    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+    .sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp))
     .forEach(msg => container.appendChild(buildMessageBubble(msg, msg.senderId === currentUserId)));
 
   if (scrollToBottom || wasNearBottom) {
@@ -486,33 +499,6 @@ function checkPushOpenIntent() {
   }
 }
 
-async function registerPush(userId) {
-  if (!('serviceWorker' in navigator)) return;
-
-  const reg = await navigator.serviceWorker.ready;
-
-  let sub = await reg.pushManager.getSubscription();
-
-  if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-  }
-
-  await fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      action: "registerPush",
-      userId: userId,
-      subscription: sub
-    })
-  });
-}
-
 // ============================================================
 // BOOT
 // ============================================================
@@ -533,16 +519,11 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Login form ──
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const userId = document.getElementById("userIdInput").value;
-
-  if (userId) login(userId);
-
-  // after login success UI switch:
-  await registerPush(userId);
-});
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const val = document.getElementById('userIdInput').value;
+    if (val) login(val);
+  });
 
   // ── Logout ──
   document.getElementById('logoutBtn').addEventListener('click', logout);
