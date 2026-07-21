@@ -203,6 +203,7 @@
   }
   #main-table tbody td, #alljobs-table tbody td {
     font-size: 8.25px;
+    padding: 3px 14px;
   }
   #main-table th:nth-child(1), #main-table td:nth-child(1) { width: 40%; }
   #main-table th:nth-child(2), #main-table td:nth-child(2) { width: 35%; }
@@ -857,7 +858,7 @@ function updateCalTitle() {
   function rangeTitle(cal) {
     if (!cal) return '—';
     var d = cal.getDate();
-    var end = new Date(d); end.setDate(end.getDate() + 27);
+    var end = new Date(d); end.setDate(end.getDate() + 20);
     return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'}) + ' — '
          + end.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
   }
@@ -879,7 +880,7 @@ function initCalendars(events) {
   var calOpts = {
     initialView: 'dayGridFourWeek',
     initialDate: startOfWeek,
-    views: { dayGridFourWeek: { type:'dayGrid', duration:{ weeks:4 } } },
+    views: { dayGridFourWeek: { type:'dayGrid', duration:{ weeks:3 } } },
     headerToolbar: false, height: 'auto', expandRows: false, events: events,
     fixedWeekCount: false, showNonCurrentDates: true, firstDay: 1,
     dayMaxEvents: false, displayEventTime: false,
