@@ -60,7 +60,7 @@
   .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .hamburger.open span:nth-child(2) { opacity: 0; }
   .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-  .dashboard { position: fixed; top: var(--header-h); left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 42% 58%; }
+  .dashboard { position: fixed; top: var(--header-h); left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 71% 29%; }
   .left-panel { display: flex; flex-direction: column; border-right: 2px solid var(--border); overflow: hidden; }
   .cal-month { border-bottom: 2px solid var(--border); padding: 0; flex-shrink: 0; }
   #fc-month { width: 100%; }
@@ -191,6 +191,23 @@
     height: 100%; gap: 20px; color: var(--muted); padding-bottom: 40px;
   }
   table { width: 100%; border-collapse: collapse; }
+  /* Force delivery-schedule tables to a single row per item with ellipsis truncation */
+  #main-table, #alljobs-table {
+    table-layout: fixed;
+  }
+  #main-table th, #main-table td,
+  #alljobs-table th, #alljobs-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #main-table th:nth-child(1), #main-table td:nth-child(1) { width: 40%; }
+  #main-table th:nth-child(2), #main-table td:nth-child(2) { width: 35%; }
+  #main-table th:nth-child(3), #main-table td:nth-child(3) { width: 25%; }
+
+  #alljobs-table th:nth-child(1), #alljobs-table td:nth-child(1) { width: 45%; }
+  #alljobs-table th:nth-child(2), #alljobs-table td:nth-child(2) { width: 35%; }
+  #alljobs-table th:nth-child(3), #alljobs-table td:nth-child(3) { width: 20%; }
   thead th {
     position: sticky; top: 0; background: var(--panel); color: var(--orange);
     font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px;
@@ -782,7 +799,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbyLfhEjJf-5-9-u_PPYdWDvuHkF2aJjVPqBJqWXEzq6UaJTrwCKgA7NfFxg1t9dbe0p/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwy8-83zqV1QwCdvdYJPHoP9J9ETbl0XSyCkr7sXmBXcV1Mx50V9i8jS-XEO-j3nAIN/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -1616,8 +1633,8 @@ function renderAllJobs(jobs) {
     // Strip leading # from job name
     var name = j.name.replace(/^#+\s*/, '');
     return '<tr>'
-      + '<td class="cell-job" onclick="openAllJobModal('+i+')">' + esc(name) + '</td>'
-      + '<td>' + fmtListText(j.lists) + '</td>'
+      + '<td class="cell-job" title="' + esc(name) + '" onclick="openAllJobModal('+i+')">' + esc(name) + '</td>'
+      + '<td title="' + esc(fmtListPlain(j.lists)) + '">' + fmtListText(j.lists) + '</td>'
       + '<td><span class="has-date">' + esc(j.year) + '</span></td>'
       + '</tr>';
   }).join('');
@@ -1650,6 +1667,11 @@ function fmtListText(lists) {
   return '<span style="color:var(--white);font-size:12px;">'
     + lists.map(function(l){ return esc(String(l.listNum)); }).join(', ')
     + '</span>';
+}
+// Plain-text version (no HTML) used for the title="" tooltip attribute
+function fmtListPlain(lists) {
+  if (!lists || !lists.length) return 'No List Info';
+  return lists.map(function(l){ return String(l.listNum); }).join(', ');
 }
 
 // ══ ALL JOBS MODAL ═════════════════════════════════════════════
@@ -1769,8 +1791,8 @@ function renderMain(rows) {
 
 function buildRow(row, mob) {
   var tr=document.createElement('tr');
-  var tj=document.createElement('td'); tj.className='cell-job'; tj.textContent=row.job; tj.onclick=function(){ openJobModal(row.job); }; tr.appendChild(tj);
-  var tl=document.createElement('td'); tl.className='cell-lists'; tl.textContent=row.lists; tl.onclick=function(){ openListModal(row.job,row.lists); }; tr.appendChild(tl);
+  var tj=document.createElement('td'); tj.className='cell-job'; tj.textContent=row.job; tj.title=row.job; tj.onclick=function(){ openJobModal(row.job); }; tr.appendChild(tj);
+  var tl=document.createElement('td'); tl.className='cell-lists'; tl.textContent=row.lists; tl.title=row.lists; tl.onclick=function(){ openListModal(row.job,row.lists); }; tr.appendChild(tl);
   var td=document.createElement('td'); td.innerHTML=(!row.delivery||row.delivery==='')?'<span class="no-date">No Date</span>':'<span class="has-date">'+row.delivery+'</span>'; tr.appendChild(td);
   return tr;
 }
