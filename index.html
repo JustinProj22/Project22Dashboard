@@ -408,6 +408,14 @@
   .date-save-btn:hover { opacity: 0.85; }
   .date-cancel-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 3px; padding: 3px 6px; font-size: 10px; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.12s; }
   .date-cancel-btn:hover { border-color: var(--red); color: var(--red); }
+  .pdf-view-btn {
+    display: inline-flex; align-items: center; gap: 4px; background: var(--panel); border: 1px solid var(--border);
+    color: var(--white); border-radius: 3px; padding: 3px 9px; font-size: 10px; font-weight: 700; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; transition: all 0.12s; white-space: nowrap;
+  }
+  .pdf-view-btn:hover:not(:disabled) { border-color: var(--orange); color: var(--orange); }
+  .pdf-view-btn:disabled { opacity: 0.35; cursor: not-allowed; color: var(--muted); }
+  .card-pdf-row { display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid var(--border); }
   .status-yes { color: var(--green); font-size: 15px; }
   .status-no  { color: var(--red);   font-size: 15px; }
   .assigned-tag { background: rgba(245,166,35,0.12); color: var(--orange); border: 1px solid rgba(245,166,35,0.25); padding: 1px 7px; border-radius: 3px; font-size: 11px; font-weight: 600; }
@@ -1481,15 +1489,19 @@ function removeInstallerModal(email) {
 var _allJobsCache    = null;   // full index from sheet (loaded once)
 var _allJobsFiltered = [];     // currently displayed subset
 var _indexLoaded     = false;  // have we fetched from server this session?
+var _indexCallbacks  = [];     // callbacks waiting on an in-flight fetch
 
-// Pre-load the index as soon as the All Jobs tab is first activated
-// (called from setJobsTab and switchView)
+// Pre-load the index as soon as it's needed — called eagerly on page
+// load (so Active Jobs has it ready too), and from setJobsTab/switchView/
+// Active Jobs modals. Safe to call from multiple places concurrently:
+// callers are queued and all notified once the in-flight fetch resolves.
 function ensureIndexLoaded(callback) {
   if (_allJobsCache !== null) {
     if (callback) callback();
     return;
   }
-  if (_indexLoaded) return; // already in flight
+  if (callback) _indexCallbacks.push(callback);
+  if (_indexLoaded) return; // fetch already in flight — queued callback fires when it resolves
   _indexLoaded = true;
 
   showAllJobsLoading('Loading job index…');
@@ -1518,7 +1530,8 @@ function ensureIndexLoaded(callback) {
       hideStaleWarning();
     }
 
-    if (callback) callback();
+    var callbacks = _indexCallbacks; _indexCallbacks = [];
+    if (callbacks.length) callbacks.forEach(function(cb){ cb(); });
     else renderAllJobs(_allJobsCache);
 
   }, function() {
@@ -1743,6 +1756,10 @@ function apiFetch(params, ok, fail) {
 var _lastJobsHash='';
 loadJobs();
 setInterval(function(){ loadJobs(); loadCalendar(); }, 30000);
+// Preload the shared job index in the background so Active Jobs
+// (PDF buttons + photo folders) can use it immediately, without
+// waiting for the user to open the All Jobs tab first.
+ensureIndexLoaded(function(){});
 
 function loadJobs() { apiFetch({ action:'main' }, renderMain, function(e){ console.error('Jobs load failed:',e); }); }
 
@@ -1776,13 +1793,67 @@ function buildRow(row, mob) {
 }
 
 // ══ ACTIVE JOBS MODALS ═════════════════════════════════════════
+// Active Jobs shares the same nightly-built job index as All Jobs
+// (see "ALL JOBS — INDEX-BACKED INSTANT SEARCH" above). We use it
+// here to (a) resolve the Dropbox photo folder instantly instead of
+// an Apps Script folder search, and (b) show a View PDF button per
+// list, greyed out until a PDF actually exists in the index.
+
+// Find this job's entry in the shared index (name match, ignoring
+// a leading "#" and case/whitespace differences).
+function findIndexedJob(jobName) {
+  if (!_allJobsCache || !jobName) return null;
+  var target = String(jobName).replace(/^#+\s*/, '').trim().toLowerCase();
+  for (var i=0; i<_allJobsCache.length; i++) {
+    var nm = String(_allJobsCache[i].name||'').replace(/^#+\s*/, '').trim().toLowerCase();
+    if (nm === target) return _allJobsCache[i];
+  }
+  return null;
+}
+// Find the indexed PDF path for a given list number within a job.
+function findPdfForList(indexedJob, listNum) {
+  if (!indexedJob || !indexedJob.lists) return null;
+  var target = String(listNum).trim();
+  for (var i=0; i<indexedJob.lists.length; i++) {
+    if (String(indexedJob.lists[i].listNum).trim() === target) return indexedJob.lists[i].pdfPath || null;
+  }
+  return null;
+}
+// Build a View PDF button — active if a path exists, greyed out/disabled if not.
+function pdfButtonHtml(pdfPath, label) {
+  if (pdfPath) return '<button class="pdf-view-btn" onclick="openPdfViewer(\''+escAttr(pdfPath)+'\',\''+esc(label)+'\')">📄 View PDF</button>';
+  return '<button class="pdf-view-btn" disabled title="PDF not available yet">📄 View PDF</button>';
+}
+
+// Use the indexed Dropbox folder path when we have it (instant); only
+// fall back to the live Apps Script folder search for jobs the index
+// doesn't know about yet (e.g. brand new jobs before the nightly rebuild).
+function initModalPhotoSection(jobName) {
+  var indexedJob = findIndexedJob(jobName);
+  if (indexedJob && indexedJob.path) {
+    initPhotoSectionDirect('modal', indexedJob.path, jobName.replace(/^#+\s*/, ''));
+  } else {
+    initPhotoSection('modal', jobName);
+  }
+}
+
 function openJobModal(jobName) {
   document.getElementById('modal-title').textContent=jobName;
   document.getElementById('modal-subtitle').textContent='All items for this job';
   document.getElementById('modal-installer-section').style.display='none';
   document.getElementById('modal-photo-section').style.display='none';
   showModal();
-  apiFetch({ action:'job', job:jobName }, function(rows){ renderModal(rows); openModalInstallerSection(jobName); initPhotoSection('modal',jobName); }, modalError);
+  apiFetch({ action:'job', job:jobName }, function(rows){ renderModal(rows,jobName); openModalInstallerSection(jobName); initModalPhotoSection(jobName); }, modalError);
+  // If the shared index hasn't loaded yet (e.g. very first load), refresh
+  // the PDF buttons + photo folder once it arrives.
+  if (_allJobsCache === null) {
+    ensureIndexLoaded(function() {
+      if (window._modalJobName===jobName && document.getElementById('modal-overlay').classList.contains('open')) {
+        renderModal(window._modalRows, jobName);
+        initModalPhotoSection(jobName);
+      }
+    });
+  }
 }
 function openListModal(jobName, listsStr) {
   document.getElementById('modal-title').textContent=jobName;
@@ -1790,19 +1861,32 @@ function openListModal(jobName, listsStr) {
   document.getElementById('modal-installer-section').style.display='none';
   document.getElementById('modal-photo-section').style.display='none';
   showModal();
-  apiFetch({ action:'lists', job:jobName, lists:listsStr }, function(rows){ renderModal(rows); openModalInstallerSection(jobName); initPhotoSection('modal',jobName); }, modalError);
+  apiFetch({ action:'lists', job:jobName, lists:listsStr }, function(rows){ renderModal(rows,jobName); openModalInstallerSection(jobName); initModalPhotoSection(jobName); }, modalError);
+  if (_allJobsCache === null) {
+    ensureIndexLoaded(function() {
+      if (window._modalJobName===jobName && document.getElementById('modal-overlay').classList.contains('open')) {
+        renderModal(window._modalRows, jobName);
+        initModalPhotoSection(jobName);
+      }
+    });
+  }
 }
 
-function renderModal(rows) {
+function renderModal(rows, jobName) {
   var body=document.getElementById('modal-body');
   if (!rows||!rows.length) { body.innerHTML='<div class="empty-state">No matching items found.</div>'; return; }
   window._modalRows=rows;
-  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th></tr></thead><tbody>';
+  window._modalJobName=jobName;
+  var indexedJob = findIndexedJob(jobName);
+  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th><th>PDF</th></tr></thead><tbody>';
   var tc='<div class="item-cards">';
   rows.forEach(function(r,idx) {
     var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
     var dc='<div class="date-cell" id="date-cell-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+')">✎ Edit</button></div>';
-    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td></tr>';
+    var pdfPath=findPdfForList(indexedJob, r.list);
+    var pdfLabel='List '+String(r.list)+' — '+(r.item||'');
+    var pdfBtn=pdfButtonHtml(pdfPath, pdfLabel);
+    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td><td>'+pdfBtn+'</td></tr>';
     tc+='<div class="item-card"><div class="card-top"><div class="card-list-num">List #'+esc(r.list)+'</div>'+(r.assigned?'<span class="assigned-tag">'+esc(r.assigned)+'</span>':'')+'</div>'
       +'<div class="card-item-name">'+esc(r.item)+'</div>'
       +'<div class="card-status-row">'
@@ -1812,7 +1896,7 @@ function renderModal(rows) {
       +'<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">'+icon(r.delivered)+'</span></div>'
       +'</div><div class="card-date-row"><span class="card-date-label">📅 Date Required</span>'
       +'<div class="date-cell" id="date-cell-m-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+',true)">✎ Edit</button></div>'
-      +'</div></div>';
+      +'</div><div class="card-pdf-row">'+pdfBtn+'</div></div>';
   });
   th+='</tbody></table>'; tc+='</div>';
   body.innerHTML=th+tc;
