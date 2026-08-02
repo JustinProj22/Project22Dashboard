@@ -1798,24 +1798,70 @@ function buildRow(row, mob) {
 // here to (a) resolve the Dropbox photo folder instantly instead of
 // an Apps Script folder search, and (b) show a View PDF button per
 // list, greyed out until a PDF actually exists in the index.
+//
+// The Active Jobs sheet and the Dropbox-folder-derived index don't
+// necessarily spell a job name identically (leading "#", punctuation,
+// abbreviations, etc.), so matching is tiered: exact normalized match,
+// then substring match, then match on a bare job number extracted from
+// both sides. If nothing matches, we log both sides to the console so
+// a mismatch can be diagnosed instead of silently failing.
 
-// Find this job's entry in the shared index (name match, ignoring
-// a leading "#" and case/whitespace differences).
+function normalizeJobKey(s) {
+  return String(s||'')
+    .replace(/^#+\s*/, '')        // strip leading #
+    .replace(/[_\-\/]+/g, ' ')    // treat underscores/hyphens/slashes as spaces
+    .replace(/\s+/g, ' ')         // collapse whitespace
+    .trim()
+    .toLowerCase();
+}
+// Pull a bare job number out of a string, stripping leading zeros so
+// "007" and "7" are treated the same.
+function extractJobNumber(s) {
+  var m = String(s||'').match(/\d+/);
+  if (!m) return null;
+  var n = m[0].replace(/^0+(?=\d)/, '');
+  return n || null;
+}
+
 function findIndexedJob(jobName) {
   if (!_allJobsCache || !jobName) return null;
-  var target = String(jobName).replace(/^#+\s*/, '').trim().toLowerCase();
+  var target    = normalizeJobKey(jobName);
+  var targetNum = extractJobNumber(jobName);
+  var exactHit=null, containsHit=null, numberHit=null;
   for (var i=0; i<_allJobsCache.length; i++) {
-    var nm = String(_allJobsCache[i].name||'').replace(/^#+\s*/, '').trim().toLowerCase();
-    if (nm === target) return _allJobsCache[i];
+    var raw = _allJobsCache[i].name || '';
+    var nm  = normalizeJobKey(raw);
+    if (nm === target) { exactHit = _allJobsCache[i]; break; }
+    if (!containsHit && target && (nm.indexOf(target)!==-1 || target.indexOf(nm)!==-1)) containsHit = _allJobsCache[i];
+    if (!numberHit && targetNum) {
+      var nmNum = extractJobNumber(raw);
+      if (nmNum && nmNum === targetNum) numberHit = _allJobsCache[i];
+    }
   }
-  return null;
+  var result = exactHit || containsHit || numberHit || null;
+  if (!result && window.console) {
+    console.warn('[Active Jobs] No index match for job "'+jobName+'" (normalized "'+target+'"). '
+      +'Index has '+_allJobsCache.length+' job(s), e.g.: '
+      + _allJobsCache.slice(0,5).map(function(j){ return '"'+j.name+'"'; }).join(', '));
+  }
+  return result;
 }
+
 // Find the indexed PDF path for a given list number within a job.
+// Compares both as exact trimmed strings and as bare numbers (so
+// "3" / "03" / "List 3" all line up).
 function findPdfForList(indexedJob, listNum) {
   if (!indexedJob || !indexedJob.lists) return null;
-  var target = String(listNum).trim();
+  var target    = String(listNum||'').trim();
+  var targetNum = extractJobNumber(target);
   for (var i=0; i<indexedJob.lists.length; i++) {
-    if (String(indexedJob.lists[i].listNum).trim() === target) return indexedJob.lists[i].pdfPath || null;
+    var l = indexedJob.lists[i];
+    var lRaw = String(l.listNum||'').trim();
+    if (lRaw === target) return l.pdfPath || null;
+    if (targetNum) {
+      var lNum = extractJobNumber(lRaw);
+      if (lNum && lNum === targetNum) return l.pdfPath || null;
+    }
   }
   return null;
 }
