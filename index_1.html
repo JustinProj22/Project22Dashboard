@@ -1439,7 +1439,20 @@ function openEventPopup(event) {
   if(!ts&&!loc&&!desc) html='<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
   document.getElementById('event-popup-body').innerHTML = html;
   document.getElementById('event-popup-overlay').classList.add('open');
-  if (source==='google' && evId) { openEventInstallerSection(evId); initPhotoSection('popup', title); }
+  if (source==='google' && evId) {
+    openEventInstallerSection(evId);
+    window._popupTitle = title;
+    initIndexedPhotoSection('popup', title);
+    // If the shared index hasn't loaded yet, refresh the photo folder
+    // once it arrives (same safety net as the Active Jobs modal).
+    if (_allJobsCache === null) {
+      ensureIndexLoaded(function() {
+        if (window._popupTitle===title && document.getElementById('event-popup-overlay').classList.contains('open')) {
+          initIndexedPhotoSection('popup', title);
+        }
+      });
+    }
+  }
   else { document.getElementById('installer-section').style.display='none'; document.getElementById('popup-photo-section').style.display='none'; }
 }
 function closeEventPopup() { document.getElementById('event-popup-overlay').classList.remove('open'); }
@@ -1898,16 +1911,18 @@ function pdfButtonHtml(pdfPath, label) {
 }
 
 // Use the indexed Dropbox folder path when we have it (instant); only
-// fall back to the live Apps Script folder search for jobs the index
-// doesn't know about yet (e.g. brand new jobs before the nightly rebuild).
-function initModalPhotoSection(jobName) {
-  var indexedJob = findIndexedJob(jobName);
+// fall back to the live Apps Script folder search for a job/event the
+// index doesn't know about yet (e.g. brand new job before the nightly
+// rebuild). Shared by the Active Jobs modal and the calendar event popup.
+function initIndexedPhotoSection(context, name) {
+  var indexedJob = findIndexedJob(name);
   if (indexedJob && indexedJob.path) {
-    initPhotoSectionDirect('modal', indexedJob.path, jobName.replace(/^#+\s*/, ''));
+    initPhotoSectionDirect(context, indexedJob.path, name.replace(/^#+\s*/, ''));
   } else {
-    initPhotoSection('modal', jobName);
+    initPhotoSection(context, name);
   }
 }
+function initModalPhotoSection(jobName) { initIndexedPhotoSection('modal', jobName); }
 
 function openJobModal(jobName) {
   document.getElementById('modal-title').textContent=jobName;
