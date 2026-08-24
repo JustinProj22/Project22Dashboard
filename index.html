@@ -425,15 +425,6 @@
   }
   .modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; }
   .modal-subtitle { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .modal-completion-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
-    padding: 8px 12px; margin: 10px 0 14px;
-  }
-  .modal-completion-label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
-  }
   .modal-close {
     background: none; border: 1px solid var(--border); color: var(--muted);
     width: 28px; height: 28px; border-radius: 3px; cursor: pointer; font-size: 16px;
@@ -624,7 +615,7 @@
           <div>Loading jobs…</div>
         </div>
         <table id="main-table" style="display:none">
-          <thead><tr><th>Job #</th><th>List #(s)</th><th>Delivery Date</th></tr></thead>
+          <thead><tr><th>Job #</th><th>List #(s)</th><th>Delivery Date</th><th>Completion Date</th></tr></thead>
           <tbody id="main-tbody"></tbody>
         </table>
       </div>
@@ -662,7 +653,7 @@
         <div>Loading jobs…</div>
       </div>
       <table id="mobile-table" style="display:none">
-        <thead><tr><th>Job #</th><th>List #(s)</th><th>Date</th></tr></thead>
+        <thead><tr><th>Job #</th><th>List #(s)</th><th>Date</th><th>Completion</th></tr></thead>
         <tbody id="mobile-tbody"></tbody>
       </table>
     </div>
@@ -841,7 +832,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbxJoUvS8JJyhEcO_7QNtlYDlSSmqOw7GYH7hs4k7l1dZ9u0jcrSU-m7zVxm7x5zutBz/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbyTQm5TurbEpnpnoxa6Cxb-nyqAMrY6xAPuEaowE6sZhkyE3qyi1r0aKEJI6g3A82YV/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -2128,6 +2119,8 @@ function buildRow(row, mob) {
   var tj=document.createElement('td'); tj.className='cell-job'; tj.textContent=row.job; tj.onclick=function(){ openJobModal(row.job); }; tr.appendChild(tj);
   var tl=document.createElement('td'); tl.className='cell-lists'; tl.textContent=row.lists; tl.onclick=function(){ openListModal(row.job,row.lists); }; tr.appendChild(tl);
   var td=document.createElement('td'); td.innerHTML=(!row.delivery||row.delivery==='')?'<span class="no-date">No Date</span>':'<span class="has-date">'+row.delivery+'</span>'; tr.appendChild(td);
+  // Quick-glance only — not clickable/editable here; edit via the job modal.
+  var tc=document.createElement('td'); tc.innerHTML=(!row.completion||row.completion==='')?'<span class="no-date">—</span>':'<span class="has-date">'+row.completion+'</span>'; tr.appendChild(tc);
   return tr;
 }
 
@@ -2266,23 +2259,23 @@ function renderModal(rows, jobName) {
   window._modalJobName=jobName;
   var indexedJob = findIndexedJob(jobName);
 
-  // Job-level Completion Date — extends the calendar event's end date.
-  // Lives here (same edit pattern as Date Required) rather than as its
-  // own column on the main dashboard table.
-  var completionHtml = '<div class="modal-completion-row">'
-    + '<span class="modal-completion-label">✅ Completion Date</span>'
-    + '<div class="date-cell" id="completion-date-cell"><span class="no-date">Loading…</span></div>'
-    + '</div>';
+  // Completion Date is job-level (one value, extends the calendar event's
+  // end date) but shown as its own column next to Date Required, same
+  // value repeated in every row — editing it from any row updates them all.
+  window._modalCompletionDate = '';
+  var compCell = '<div class="date-cell" id="completion-cell-PLACEHOLDER"><span class="no-date">…</span></div>';
 
-  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th><th>PDF</th></tr></thead><tbody>';
+  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th><th>Completion Date</th><th>PDF</th></tr></thead><tbody>';
   var tc='<div class="item-cards">';
   rows.forEach(function(r,idx) {
     var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
     var dc='<div class="date-cell" id="date-cell-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+')">✎ Edit</button></div>';
+    var cc=compCell.replace('PLACEHOLDER', idx);
+    var ccm=compCell.replace('PLACEHOLDER', 'm-'+idx);
     var pdfPath=findPdfForList(indexedJob, r.list);
     var pdfLabel='List '+String(r.list)+' — '+(r.item||'');
     var pdfBtn=pdfButtonHtml(pdfPath, pdfLabel);
-    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td><td>'+pdfBtn+'</td></tr>';
+    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td><td>'+cc+'</td><td>'+pdfBtn+'</td></tr>';
     tc+='<div class="item-card"><div class="card-top"><div class="card-list-num">List #'+esc(r.list)+'</div>'+(r.assigned?'<span class="assigned-tag">'+esc(r.assigned)+'</span>':'')+'</div>'
       +'<div class="card-item-name">'+esc(r.item)+'</div>'
       +'<div class="card-status-row">'
@@ -2292,46 +2285,60 @@ function renderModal(rows, jobName) {
       +'<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">'+icon(r.delivered)+'</span></div>'
       +'</div><div class="card-date-row"><span class="card-date-label">📅 Date Required</span>'
       +'<div class="date-cell" id="date-cell-m-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+',true)">✎ Edit</button></div>'
-      +'</div><div class="card-pdf-row">'+pdfBtn+'</div></div>';
+      +'</div><div class="card-date-row"><span class="card-date-label">✅ Completion Date</span>'+ccm+'</div>'
+      +'<div class="card-pdf-row">'+pdfBtn+'</div></div>';
   });
   th+='</tbody></table>'; tc+='</div>';
-  body.innerHTML=completionHtml+th+tc;
+  body.innerHTML=th+tc;
 
   // Fetch & render the job-level completion date separately (it isn't
-  // part of the 'job'/'lists' row data — it lives in JobMeta on the
-  // Apps Script side).
-  window._modalCompletionDate = '';
+  // part of the 'job'/'lists' row data — it's stored alongside the
+  // calendar sync data on the Apps Script side).
   apiFetch({ action:'getJobCompletion', job: jobName }, function(res) {
     if (window._modalJobName !== jobName) return; // modal moved on already
     window._modalCompletionDate = (res && res.completionDate) || '';
-    renderCompletionCell();
-  }, function(){ /* leave the cell showing "Loading…" → falls back below */ });
+    renderAllCompletionCells();
+  }, function(){ /* leave cells showing "…" */ });
 }
 
 function completionCellDisplay() {
   var val = window._modalCompletionDate || '';
   return val ? '<span class="has-date">'+esc(val)+'</span>' : '<span class="no-date">No Date</span>';
 }
-function renderCompletionCell() {
-  var el = document.getElementById('completion-date-cell'); if (!el) return;
-  el.innerHTML = completionCellDisplay() + '<button class="date-edit-btn" onclick="editCompletionDate()">✎ Edit</button>';
+// Refreshes every row's Completion Date cell (desktop table + mobile cards)
+// back to the shared read-only display — used after loading, saving, or
+// cancelling an edit, since every cell shows the same job-level value.
+function renderAllCompletionCells() {
+  var rows = window._modalRows || [];
+  var html = completionCellDisplay();
+  rows.forEach(function(r, idx) {
+    ['completion-cell-'+idx, 'completion-cell-m-'+idx].forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      el.innerHTML = html + '<button class="date-edit-btn" onclick="editCompletionDate('+idx+')">✎ Edit</button>';
+    });
+  });
 }
-function editCompletionDate() {
+function editCompletionDate(idx) {
   var val = window._modalCompletionDate || '', iv='';
   if (val) { var p=val.split('/'); if (p.length===3) iv=p[2]+'-'+p[1]+'-'+p[0]; }
-  document.getElementById('completion-date-cell').innerHTML =
-    '<div class="date-input-wrap"><input class="date-input" type="date" id="completion-date-input" value="'+iv+'">'
-    +'<button class="date-save-btn" onclick="saveCompletionDate()">Save</button>'
+  var inputHtml = '<div class="date-input-wrap"><input class="date-input" type="date" id="completion-date-input-'+idx+'" value="'+iv+'">'
+    +'<button class="date-save-btn" onclick="saveCompletionDate('+idx+')">Save</button>'
     +'<button class="date-cancel-btn" onclick="cancelCompletionEdit()">✕</button></div>';
+  ['completion-cell-'+idx, 'completion-cell-m-'+idx].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.innerHTML = inputHtml;
+  });
 }
-function cancelCompletionEdit() { renderCompletionCell(); }
-function saveCompletionDate() {
-  var inp = document.getElementById('completion-date-input'), val = inp.value;
-  var btn = document.querySelector('#completion-date-cell .date-save-btn'); btn.textContent='Saving…'; btn.disabled=true;
+function cancelCompletionEdit() { renderAllCompletionCells(); }
+function saveCompletionDate(idx) {
+  var inp = document.getElementById('completion-date-input-'+idx), val = inp ? inp.value : '';
+  ['completion-cell-'+idx, 'completion-cell-m-'+idx].forEach(function(id) {
+    var btn = document.querySelector('#'+id+' .date-save-btn');
+    if (btn) { btn.textContent='Saving…'; btn.disabled=true; }
+  });
   var disp=''; if(val){ var p=val.split('-'); disp=p[2]+'/'+p[1]+'/'+p[0]; }
   var evId = findEventIdForJob(window._modalJobName);
   apiFetch({ action:'saveCompletionDate', job: window._modalJobName, date: disp, eventId: evId||'' }, function(res) {
-    if (res && res.success) { window._modalCompletionDate = disp; renderCompletionCell(); loadCalendar(); }
+    if (res && res.success) { window._modalCompletionDate = disp; renderAllCompletionCells(); loadCalendar(); }
     else { alert('Error saving completion date: '+(res && res.error ? res.error : 'Unknown error')); cancelCompletionEdit(); }
   }, function(){ alert('Failed to save completion date.'); cancelCompletionEdit(); });
 }
