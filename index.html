@@ -359,6 +359,8 @@
   .event-popup-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
   .event-popup-text { font-size: 12px; color: var(--white); line-height: 1.4; }
   .event-popup-text.muted { color: var(--muted); }
+  .event-popup-link { text-decoration: none; border-bottom: 1px dotted var(--orange); cursor: pointer; }
+  .event-popup-link:hover { color: var(--orange); }
   .event-edit-open-btn {
     background: var(--panel); border: 1px solid var(--border); color: var(--white);
     border-radius: 3px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer;
@@ -832,7 +834,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbwL17Feg5m0SxlWm0Yfaw6ocB-5_FH5lnhrLahwtr0v_Hi8nMyMxvTfyXQT61yhEV5B/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbylh285uG_Zrt-0iIXz3kswCwv9-lWGPjVQzdThqg5twVWtE7uteKn7nsongw0xk__i/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -1543,17 +1545,66 @@ function openEventPopup(event) {
 
   var parsed = parseEventDescription(desc);
   window._popupParsedDesc = parsed;
+  window._popupAttachmentPaths = {}; // filled in once getJobAttachments resolves
 
+  document.getElementById('event-popup-overlay').classList.add('open');
+  // Reset any open edit form from a previous event
+  window._currentEventObj = event;
+  window._pendingAttachments = [];
+  var editWrap = document.getElementById('event-edit-wrap');
+
+  renderEventPopupBody(title, ts, loc, parsed);
+
+  if (source==='google' && evId) {
+    editWrap.innerHTML = '<button class="event-edit-open-btn" onclick="openEventEditForm()">✎ Edit Details</button>';
+    openEventInstallerSection(evId);
+    window._popupTitle = title;
+    initIndexedPhotoSection('popup', title);
+    // If the shared index hasn't loaded yet, refresh the photo folder —
+    // and re-render so any List # PDF buttons pick up a real path —
+    // once it arrives (same safety net as the Active Jobs modal).
+    if (_allJobsCache === null) {
+      ensureIndexLoaded(function() {
+        if (window._popupTitle===title && document.getElementById('event-popup-overlay').classList.contains('open')) {
+          initIndexedPhotoSection('popup', title);
+          renderEventPopupBody(title, ts, loc, parsed);
+        }
+      });
+    }
+    // Attachment paths (for the "View PDF"-style buttons) live in JobMeta,
+    // not the description — fetch them separately and re-render once in.
+    if (parsed.attachments.length) {
+      apiFetch({ action:'getJobAttachments', job: title }, function(res) {
+        if (window._popupTitle!==title || !document.getElementById('event-popup-overlay').classList.contains('open')) return;
+        (res && res.attachments || []).forEach(function(a){ window._popupAttachmentPaths[a.name] = a.path; });
+        renderEventPopupBody(title, ts, loc, parsed);
+      }, function(){ /* leave attachment buttons disabled */ });
+    }
+  }
+  else {
+    editWrap.innerHTML = '';
+    document.getElementById('installer-section').style.display='none'; document.getElementById('popup-photo-section').style.display='none';
+  }
+}
+
+function renderEventPopupBody(title, ts, loc, parsed) {
+  var indexedJob = findIndexedJob(title);
   var html='';
   if(ts)  html+='<div class="event-popup-row"><span class="event-popup-icon">🕐</span><span class="event-popup-text">'+esc(ts)+'</span></div>';
-  if(loc) html+='<div class="event-popup-row"><span class="event-popup-icon">📍</span><span class="event-popup-text">'+esc(loc)+'</span></div>';
+  if(loc) {
+    var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc);
+    html += '<div class="event-popup-row"><span class="event-popup-icon">📍</span><a class="event-popup-text event-popup-link" href="'+escAttr(mapsUrl)+'" target="_blank" rel="noopener">'+esc(loc)+'</a></div>';
+  }
   if(parsed.contact) html+='<div class="event-popup-row"><span class="event-popup-icon">☎️</span><span class="event-popup-text">'+esc(parsed.contact)+'</span></div>';
 
-  // List items — always shown, never editable, one clickable link per item
-  // when a matching PDF was found (opens the Dropbox link in a new tab).
+  // List items — always shown, never editable. Clickable exactly like the
+  // Active Jobs modal's "View PDF" buttons (same on-demand temp-link
+  // fetch), using the job index the popup already loads for photos.
   parsed.listItems.forEach(function(li) {
+    var pdfPath = findPdfForList(indexedJob, li.listNum);
+    var label = 'List '+String(li.listNum)+' — '+(li.desc||'');
     html += '<div class="event-popup-row"><span class="event-popup-icon">📄</span><span class="event-popup-text">List # '+esc(li.listNum)+' - '+esc(li.desc)+'</span>'
-      + (li.link ? '<button class="pdf-view-btn" style="margin-left:8px" onclick="window.open(\''+escAttr(li.link)+'\',\'_blank\')">🔗 Open</button>' : '')
+      + pdfButtonHtml(pdfPath, label)
       + '</div>';
   });
 
@@ -1562,9 +1613,8 @@ function openEventPopup(event) {
   if (parsed.attachments.length) {
     html += '<div class="event-popup-row"><span class="event-popup-icon">📎</span><span class="event-popup-text">'
       + parsed.attachments.map(function(a) {
-          return a.link
-            ? '<button class="pdf-view-btn" style="margin:2px 6px 2px 0" onclick="window.open(\''+escAttr(a.link)+'\',\'_blank\')">🔗 '+esc(a.name)+'</button>'
-            : esc(a.name);
+          var path = window._popupAttachmentPaths ? window._popupAttachmentPaths[a.name] : null;
+          return pdfButtonHtml(path, a.name, '📄 ' + a.name);
         }).join('')
       + '</span></div>';
   }
@@ -1573,30 +1623,6 @@ function openEventPopup(event) {
     html='<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
   }
   document.getElementById('event-popup-body').innerHTML = html;
-  document.getElementById('event-popup-overlay').classList.add('open');
-  // Reset any open edit form from a previous event
-  window._currentEventObj = event;
-  window._pendingAttachments = [];
-  var editWrap = document.getElementById('event-edit-wrap');
-  if (source==='google' && evId) {
-    editWrap.innerHTML = '<button class="event-edit-open-btn" onclick="openEventEditForm()">✎ Edit Details</button>';
-    openEventInstallerSection(evId);
-    window._popupTitle = title;
-    initIndexedPhotoSection('popup', title);
-    // If the shared index hasn't loaded yet, refresh the photo folder
-    // once it arrives (same safety net as the Active Jobs modal).
-    if (_allJobsCache === null) {
-      ensureIndexLoaded(function() {
-        if (window._popupTitle===title && document.getElementById('event-popup-overlay').classList.contains('open')) {
-          initIndexedPhotoSection('popup', title);
-        }
-      });
-    }
-  }
-  else {
-    editWrap.innerHTML = '';
-    document.getElementById('installer-section').style.display='none'; document.getElementById('popup-photo-section').style.display='none';
-  }
 }
 function closeEventPopup() {
   document.getElementById('event-popup-overlay').classList.remove('open');
@@ -2198,9 +2224,12 @@ function findPdfForList(indexedJob, listNum) {
   return null;
 }
 // Build a View PDF button — active if a path exists, greyed out/disabled if not.
-function pdfButtonHtml(pdfPath, label) {
-  if (pdfPath) return '<button class="pdf-view-btn" onclick="openPdfViewer(\''+escAttr(pdfPath)+'\',\''+esc(label)+'\')">📄 View PDF</button>';
-  return '<button class="pdf-view-btn" disabled title="PDF not available yet">📄 View PDF</button>';
+// btnText defaults to "📄 View PDF"; pass a custom one (e.g. a filename)
+// for buttons that should show something more specific.
+function pdfButtonHtml(pdfPath, label, btnText) {
+  btnText = btnText || '📄 View PDF';
+  if (pdfPath) return '<button class="pdf-view-btn" onclick="openPdfViewer(\''+escAttr(pdfPath)+'\',\''+esc(label)+'\')">'+esc(btnText)+'</button>';
+  return '<button class="pdf-view-btn" disabled title="File not available yet">'+esc(btnText)+'</button>';
 }
 
 // Use the indexed Dropbox folder path when we have it (instant); only
