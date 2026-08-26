@@ -191,28 +191,6 @@
     height: 100%; gap: 20px; color: var(--muted); padding-bottom: 40px;
   }
   table { width: 100%; border-collapse: collapse; }
-  /* Force delivery-schedule tables to a single row per item with ellipsis truncation */
-  #main-table, #alljobs-table {
-    table-layout: fixed;
-  }
-  #main-table th, #main-table td,
-  #alljobs-table th, #alljobs-table td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #main-table tbody td, #alljobs-table tbody td {
-    font-size: 11px;
-    padding: 3px 14px;
-  }
-  #main-table th:nth-child(1), #main-table td:nth-child(1) { width: 32%; }
-  #main-table th:nth-child(2), #main-table td:nth-child(2) { width: 28%; }
-  #main-table th:nth-child(3), #main-table td:nth-child(3) { width: 20%; }
-  #main-table th:nth-child(4), #main-table td:nth-child(4) { width: 20%; }
-
-  #alljobs-table th:nth-child(1), #alljobs-table td:nth-child(1) { width: 45%; }
-  #alljobs-table th:nth-child(2), #alljobs-table td:nth-child(2) { width: 35%; }
-  #alljobs-table th:nth-child(3), #alljobs-table td:nth-child(3) { width: 20%; }
   thead th {
     position: sticky; top: 0; background: var(--panel); color: var(--orange);
     font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px;
