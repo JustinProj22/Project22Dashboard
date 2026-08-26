@@ -759,7 +759,28 @@
       <button class="modal-close" onclick="closeEventPopup()">✕</button>
     </div>
     <div class="event-popup-body" id="event-popup-body"></div>
-    <div id="event-edit-wrap"></div>
+    <div class="event-edit-section" id="event-edit-section" style="display:none">
+      <div class="installer-section-label">📅 Schedule, address &amp; notes</div>
+      <div class="event-field-row">
+        <label>Delivery Date<input type="date" id="evt-start-date"></label>
+        <label>Completion Date<input type="date" id="evt-end-date"></label>
+      </div>
+      <div class="event-field-row">
+        <label>Start Time<input type="time" id="evt-start-time" value="07:00"></label>
+        <label>End Time<input type="time" id="evt-end-time" value="15:30"></label>
+      </div>
+      <label class="event-field-full">Address<input type="text" id="evt-location" placeholder="Site address for the invite"></label>
+      <label class="event-field-full">Notes / Description<textarea id="evt-notes" rows="3" placeholder="Shown on the calendar invite"></textarea></label>
+      <div class="event-field-full">📎 Attachments</div>
+      <div class="event-attach-list" id="evt-existing-attach-list"></div>
+      <div class="photo-btn-row" style="margin-bottom:6px">
+        <input type="file" id="evt-file-input" multiple style="display:none" onchange="handleEventFileSelect(event)">
+        <button type="button" class="photo-upload-btn" onclick="document.getElementById('evt-file-input').click()">📎 Attach files</button>
+      </div>
+      <div class="photo-status" id="evt-attach-status"></div>
+      <div class="event-attach-list" id="evt-attach-list"></div>
+      <button class="installer-add-btn evt-save-btn" id="evt-save-btn" onclick="saveEventDetails()">Save to Calendar</button>
+    </div>
     <div class="installer-section" id="installer-section" style="display:none">
       <div class="installer-section-label">👷 Installers</div>
       <div class="installer-tags" id="installer-tags"></div>
