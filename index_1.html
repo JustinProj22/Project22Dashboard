@@ -856,7 +856,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbyUsRzP3zSQuCQmIe0-2lZvder6XlEq2IrKjMEdm9_iHg-1_ACwPOVtNv6C95LQG8Q/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbya1yN1S_LZzVpY6a5l0oT2rD_ZBOSSmuLHDq5rQ41a-vN0FApproyF_cWzBdYuSLnI/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -1568,6 +1568,10 @@ function openEventPopup(event) {
   var parsed = parseEventDescription(desc);
   window._popupParsedDesc = parsed;
   window._popupAttachmentPaths = {}; // filled in once getJobAttachments resolves
+  // Stashed so saveEventDetails() can correctly re-render the read-only
+  // body after a save without re-deriving these from scratch.
+  window._popupTs = ts;
+  window._popupLoc = loc;
 
   document.getElementById('event-popup-overlay').classList.add('open');
   // Reset any open edit form from a previous event
@@ -1685,6 +1689,7 @@ function openEventEditForm() {
   }
 
   window._pendingAttachments = [];
+  window._pendingAttachmentRemovals = [];
   var html = ''
     +'<div class="event-edit-form" id="event-edit-form">'
       +'<div><label class="event-edit-label">📍 Address / Location</label>'
@@ -1699,7 +1704,8 @@ function openEventEditForm() {
       +'</div>'
       +'<div><label class="event-edit-label">✅ Completion Date</label>'
       +'<input class="event-edit-input" id="ee-completion-date" type="date" value="'+completionVal+'"></div>'
-      +'<div><label class="event-edit-label">📎 Attach Files</label>'
+      +'<div><label class="event-edit-label">📎 Attachments</label>'
+      +'<div class="event-attach-list" id="ee-existing-attach-list"></div>'
       +'<button class="event-edit-open-btn" type="button" onclick="document.getElementById(\'ee-file-input\').click()">+ Choose Files</button>'
       +'<input type="file" id="ee-file-input" multiple style="display:none" onchange="handleEventAttachmentSelect(event)">'
       +'<div class="event-attach-list" id="ee-attach-list"></div></div>'
@@ -1710,11 +1716,13 @@ function openEventEditForm() {
       +'</div>'
     +'</div>';
   document.getElementById('event-edit-wrap').innerHTML = html;
+  renderExistingAttachmentChips();
   renderAttachmentChips();
 }
 function closeEventEditForm() {
   document.getElementById('event-edit-wrap').innerHTML = '<button class="event-edit-open-btn" onclick="openEventEditForm()">✎ Edit Details</button>';
   window._pendingAttachments = [];
+  window._pendingAttachmentRemovals = [];
 }
 function handleEventAttachmentSelect(evt) {
   var files = Array.from(evt.target.files||[]);
@@ -1728,6 +1736,25 @@ function renderAttachmentChips() {
   el.innerHTML = (window._pendingAttachments||[]).map(function(f,i){
     return '<span class="event-attach-chip">'+esc(f.name)+'<button type="button" onclick="removeEventAttachment('+i+')">✕</button></span>';
   }).join('');
+}
+// Already-uploaded attachments (parsed from the event description). Removing
+// one here doesn't delete anything immediately — it's queued in
+// window._pendingAttachmentRemovals and only actually removed (from the
+// event, and best-effort from Dropbox) when Save Changes is clicked, same
+// as every other field in this form.
+function renderExistingAttachmentChips() {
+  var el = document.getElementById('ee-existing-attach-list'); if (!el) return;
+  var existing = (window._popupParsedDesc && window._popupParsedDesc.attachments) || [];
+  var removed = window._pendingAttachmentRemovals || [];
+  var visible = existing.filter(function(a){ return removed.indexOf(a.name) === -1; });
+  el.innerHTML = visible.map(function(a){
+    return '<span class="event-attach-chip">'+esc(a.name)+'<button type="button" onclick="removeExistingAttachment(\''+escAttr(a.name)+'\')">✕</button></span>';
+  }).join('');
+}
+function removeExistingAttachment(name) {
+  window._pendingAttachmentRemovals = window._pendingAttachmentRemovals || [];
+  if (window._pendingAttachmentRemovals.indexOf(name) === -1) window._pendingAttachmentRemovals.push(name);
+  renderExistingAttachmentChips();
 }
 function saveEventDetails() {
   var ev = window._currentEventObj; if (!ev || !ev.id) return;
@@ -1748,7 +1775,11 @@ function saveEventDetails() {
     // Attachments are uploaded server-side straight to Dropbox, into a
     // "Calendar Attachments" folder alongside "Upload Photos" — reusing
     // this same resolved job-folder path (no extra folder lookup needed).
-    dropboxFolder: _dropboxJobFolder['popup'] || ''
+    dropboxFolder: _dropboxJobFolder['popup'] || '',
+    // Already-uploaded attachments queued for removal — always dropped
+    // from the event; the backend also attempts (best-effort) to delete
+    // the underlying Dropbox file.
+    removedAttachments: window._pendingAttachmentRemovals || []
   };
   function sendPayload(attachments) {
     payload.attachments = attachments || [];
@@ -1776,6 +1807,16 @@ function saveEventDetails() {
               break;
             }
           }
+          // Re-parse from what the backend actually wrote so the popup
+          // (and a re-opened edit form) reflect the removal/upload right
+          // away, without waiting for a full reload.
+          if (res.event && typeof res.event.description === 'string') {
+            window._popupParsedDesc = parseEventDescription(res.event.description);
+          }
+          window._pendingAttachmentRemovals = [];
+          window._pendingAttachments = [];
+          window._popupLoc = payload.location;
+          renderEventPopupBody(window._popupTitle || ev.title || '', window._popupTs || '', window._popupLoc || '', window._popupParsedDesc);
           loadCalendar();
           setTimeout(closeEventEditForm, 900);
         } else {
