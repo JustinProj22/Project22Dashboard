@@ -347,7 +347,8 @@
   .event-popup-overlay.open { display: flex; }
   .event-popup {
     background: var(--dark); border: 1px solid var(--border); border-top: 3px solid var(--orange);
-    border-radius: 6px; width: 100%; max-width: 420px; animation: slideUp 0.15s ease;
+    border-radius: 6px; width: 100%; max-width: 480px; max-height: 90vh;
+    display: flex; flex-direction: column; animation: slideUp 0.15s ease;
   }
   .event-popup-header {
     padding: 14px 16px 10px; border-bottom: 1px solid var(--border);
@@ -359,49 +360,30 @@
   .event-popup-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
   .event-popup-text { font-size: 12px; color: var(--white); line-height: 1.4; }
   .event-popup-text.muted { color: var(--muted); }
-  .event-popup-link { text-decoration: none; border-bottom: 1px dotted var(--orange); cursor: pointer; }
-  .event-popup-link:hover { color: var(--orange); }
-  .event-edit-open-btn {
-    background: var(--panel); border: 1px solid var(--border); color: var(--white);
-    border-radius: 3px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer;
-    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; margin-top: 2px; transition: all 0.12s;
+  .event-edit-section { border-top: 1px solid var(--border); padding: 10px 16px 14px; overflow-y: auto; }
+  .event-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .event-field-full, .event-field-row label {
+    display: flex; flex-direction: column; gap: 4px; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
   }
-  .event-edit-open-btn:hover { border-color: var(--orange); color: var(--orange); }
-  .event-edit-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--border); }
-  .event-edit-label {
-    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; margin-bottom: 4px; display: block;
+  .event-field-full { margin-bottom: 8px; }
+  .event-field-full input, .event-field-full textarea, .event-field-row input {
+    background: var(--panel); border: 1px solid var(--border); color: var(--white); border-radius: 3px;
+    padding: 6px 8px; font-size: 12px; font-family: 'Barlow', sans-serif; outline: none; text-transform: none;
+    letter-spacing: 0; font-weight: 400; width: 100%;
   }
-  .event-edit-input, .event-edit-textarea {
-    width: 100%; background: var(--panel); border: 1px solid var(--border); color: var(--white);
-    border-radius: 3px; padding: 6px 8px; font-size: 12px; font-family: 'Barlow', sans-serif;
-    outline: none; box-sizing: border-box; transition: border-color 0.12s;
-  }
-  .event-edit-input:focus, .event-edit-textarea:focus { border-color: var(--orange); }
-  .event-edit-textarea { resize: vertical; min-height: 50px; font-family: 'Barlow', sans-serif; }
-  .event-edit-row2 { display: flex; gap: 8px; }
-  .event-edit-row2 > div { flex: 1; }
-  .event-edit-actions { display: flex; gap: 8px; margin-top: 2px; }
-  .event-edit-save-btn {
-    background: var(--orange); border: none; color: var(--black); border-radius: 3px;
-    padding: 7px 16px; font-size: 11px; font-weight: 700; cursor: pointer;
-    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; transition: opacity 0.12s;
-  }
-  .event-edit-save-btn:hover { opacity: 0.85; }
-  .event-edit-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .event-edit-cancel-btn {
-    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 3px;
-    padding: 7px 12px; font-size: 11px; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.12s;
-  }
-  .event-edit-cancel-btn:hover { border-color: var(--red); color: var(--red); }
-  .event-attach-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .event-field-full input:focus, .event-field-full textarea:focus, .event-field-row input:focus { border-color: var(--orange); }
+  .event-field-full textarea { resize: vertical; min-height: 64px; }
+  .event-attach-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+  .event-attach-item { font-size: 11px; color: var(--blue); word-break: break-all; }
+  .event-attach-item a { color: var(--blue); }
   .event-attach-chip {
     display: flex; align-items: center; gap: 5px; background: var(--panel); border: 1px solid var(--border);
     border-radius: 12px; padding: 3px 6px 3px 10px; font-size: 10px; color: var(--white);
   }
   .event-attach-chip button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; line-height: 1; padding: 0 2px; }
   .event-attach-chip button:hover { color: var(--red); }
-  .event-edit-status { font-size: 11px; color: var(--muted); font-style: italic; min-height: 14px; }
+  .evt-save-btn { width: 100%; margin-top: 4px; }
   .agenda-event { cursor: pointer; transition: background 0.12s; display: flex; flex-direction: column; padding: 7px 12px; border-bottom: 1px solid var(--border); gap: 2px; }
   .agenda-event:last-child { border-bottom: none; }
   .agenda-event:hover { background: var(--panel); }
@@ -655,7 +637,7 @@
         <div>Loading jobs…</div>
       </div>
       <table id="mobile-table" style="display:none">
-        <thead><tr><th>Job #</th><th>List #(s)</th><th>Date</th><th>Completion</th></tr></thead>
+        <thead><tr><th>Job #</th><th>List #(s)</th><th>Date</th><th>Finish</th></tr></thead>
         <tbody id="mobile-tbody"></tbody>
       </table>
     </div>
@@ -777,7 +759,28 @@
       <button class="modal-close" onclick="closeEventPopup()">✕</button>
     </div>
     <div class="event-popup-body" id="event-popup-body"></div>
-    <div id="event-edit-wrap"></div>
+    <div class="event-edit-section" id="event-edit-section" style="display:none">
+      <div class="installer-section-label">📅 Schedule, address &amp; notes</div>
+      <div class="event-field-row">
+        <label>Delivery Date<input type="date" id="evt-start-date"></label>
+        <label>Completion Date<input type="date" id="evt-end-date"></label>
+      </div>
+      <div class="event-field-row">
+        <label>Start Time<input type="time" id="evt-start-time" value="07:00"></label>
+        <label>End Time<input type="time" id="evt-end-time" value="15:30"></label>
+      </div>
+      <label class="event-field-full">Address<input type="text" id="evt-location" placeholder="Site address for the invite"></label>
+      <label class="event-field-full">Notes / Description<textarea id="evt-notes" rows="3" placeholder="Shown on the calendar invite"></textarea></label>
+      <div class="event-field-full">📎 Attachments</div>
+      <div class="event-attach-list" id="evt-existing-attach-list"></div>
+      <div class="photo-btn-row" style="margin-bottom:6px">
+        <input type="file" id="evt-file-input" multiple style="display:none" onchange="handleEventFileSelect(event)">
+        <button type="button" class="photo-upload-btn" onclick="document.getElementById('evt-file-input').click()">📎 Attach files</button>
+      </div>
+      <div class="photo-status" id="evt-attach-status"></div>
+      <div class="event-attach-list" id="evt-attach-list"></div>
+      <button class="installer-add-btn evt-save-btn" id="evt-save-btn" onclick="saveEventDetails()">Save to Calendar</button>
+    </div>
     <div class="installer-section" id="installer-section" style="display:none">
       <div class="installer-section-label">👷 Installers</div>
       <div class="installer-tags" id="installer-tags"></div>
@@ -834,7 +837,7 @@
 </div>
 <script>
 // ══ CONFIGURATION ══════════════════════════════════════════════
-var API_URL = 'https://script.google.com/macros/s/AKfycbya1yN1S_LZzVpY6a5l0oT2rD_ZBOSSmuLHDq5rQ41a-vN0FApproyF_cWzBdYuSLnI/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwy8-83zqV1QwCdvdYJPHoP9J9ETbl0XSyCkr7sXmBXcV1Mx50V9i8jS-XEO-j3nAIN/exec';
 
 var SPINNER_SVG = '<svg viewBox="0 0 752.81335 649.14667" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><g style="transform-origin:371.667px 324.613px;animation:spin 1s linear infinite"><path d="m 5575.45,4033.52 c -78.75,258.2 -212.91,461.98 -402.69,611.25 -186.16,149.25 -407.08,223.88 -662.75,223.88 H 1423.35 L 667.332,3784.76 H 4224.35 c 146.3,2.33 255.3,-53.3 327.07,-167.05 74.81,-106.6 96.57,-248.74 65.27,-426.42 -30.07,-170.61 -102.01,-312.75 -215.67,-426.45 -110.21,-104.29 -238.82,-159.95 -385.94,-167.03 H 458.047 L 0,0 h 1010.11 l 268.21,1521.02 h 2641.45 c 255.62,0 502.64,73.4 741.05,220.33 242.39,149.25 447.31,351.82 614.89,607.69 171.55,258.19 284.12,538.94 337.62,842.25 53.87,305.61 41.24,586.36 -37.88,842.23" fill="#ffffff" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/><path d="M 1428.74,9.17969 H 4883.25 L 5072.5,1082.39 H 1617.98 L 1428.74,9.17969" fill="#f9a72b" fill-rule="nonzero" stroke="none" transform="matrix(0.13333333,0,0,-0.13333333,0,649.14667)"/></g></svg>';
 
@@ -902,6 +905,7 @@ function calToday(m) { if (!m && _fcMonth)  { _fcMonth.today(); updateCalTitle()
 
 function initCalendars(events) {
   _allEvents = events;
+  if (window._jobsRows) renderMain(window._jobsRows);
   var today = new Date(), tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   var startOfWeek = new Date(today);
@@ -1014,15 +1018,100 @@ var _CACHE_TTL   = 10800000;   // 3 hours in ms
 var _IMG_EXTS    = /\.(jpg|jpeg|png|gif|heic|webp)$/i;
 
 var _dropboxFolder = { modal:null, popup:null, alljob:null };
-// The job's own Dropbox folder (one level up from _dropboxFolder, which
-// points at the "Upload Photos" subfolder) — kept so the calendar event
-// editor can upload attachments into a sibling "Calendar Attachments" folder
-// using this same resolved-folder cache, without a second lookup.
+var _dropboxUploadFolder = { modal:null, popup:null, alljob:null };
 var _dropboxJobFolder = { modal:null, popup:null, alljob:null };
-// Job photos always live in this subfolder inside each job's Dropbox folder
-// (not loose in the job's parent folder) — used for both listing and uploads.
-var UPLOAD_PHOTOS_SUBFOLDER = 'Upload Photos';
 var _slideshow     = { photos:[], index:0, context:null, title:'' };
+var _pendingAttachments = [];
+var _pendingAttachmentRemovals = [];
+
+// Parses an event description written by
+// buildEventDescriptionForJobDateWithNotes (Apps Script side) back apart
+// into its pieces: the auto "List # n - x" lines, then — after the "———"
+// marker — Contact / Notes / Attachments. Kept in sync with the same
+// parser in Index_1.html (PC dashboard) — see notes there.
+var EVENT_EXTRA_MARKER = '\n\n———\n';
+function parseEventDescription(desc) {
+  desc = desc || '';
+  var markerIdx = desc.indexOf(EVENT_EXTRA_MARKER);
+  var body  = markerIdx === -1 ? desc : desc.substring(0, markerIdx);
+  var extra = markerIdx === -1 ? ''   : desc.substring(markerIdx + EVENT_EXTRA_MARKER.length);
+
+  var bodyLines = body.split('\n');
+  var listItems = [];
+  for (var i=0;i<bodyLines.length;i++) {
+    var m = bodyLines[i].match(/^List # (\S+) - (.+)$/);
+    if (!m) continue;
+    var link = '';
+    if (i+1 < bodyLines.length && /^https?:\/\//.test(bodyLines[i+1])) { link = bodyLines[i+1]; i++; }
+    listItems.push({ listNum: m[1], desc: m[2], link: link });
+  }
+
+  var contact = '', notes = '', attachments = [];
+  if (extra) {
+    var contactTag = '☎️ Contact:\n', notesTag = '📝 Notes:\n', attTag = '📎 Attachments:\n';
+    var contactIdx = extra.indexOf(contactTag);
+    var notesIdx   = extra.indexOf(notesTag);
+    var attIdx     = extra.indexOf(attTag);
+    var boundaries = [contactIdx, notesIdx, attIdx].filter(function(x){ return x !== -1; }).sort(function(a,b){ return a-b; });
+    function sectionEnd(start) {
+      for (var b=0;b<boundaries.length;b++) { if (boundaries[b] > start) return boundaries[b]; }
+      return extra.length;
+    }
+    if (contactIdx !== -1) contact = extra.substring(contactIdx+contactTag.length, sectionEnd(contactIdx)).replace(/\n+$/,'');
+    if (notesIdx   !== -1) notes   = extra.substring(notesIdx+notesTag.length, sectionEnd(notesIdx)).replace(/\n+$/,'');
+    if (attIdx !== -1) {
+      var attBlock = extra.substring(attIdx+attTag.length, sectionEnd(attIdx));
+      var attLines = attBlock.split('\n');
+      for (var j=0;j<attLines.length;j++) {
+        var al = attLines[j]; if (!al) continue;
+        var alink = '';
+        if (j+1 < attLines.length && /^https?:\/\//.test(attLines[j+1])) { alink = attLines[j+1]; j++; }
+        attachments.push({ name: al, link: alink });
+      }
+    }
+  }
+  return { listItems: listItems, contact: contact, notes: notes, attachments: attachments };
+}
+
+function toUploadPhotosPath(jobPath) {
+  var p = String(jobPath || '').replace(/\/+$/,'');
+  if (!p) return p;
+  if (/\/Upload Photos$/i.test(p)) return p;
+  return p + '/Upload Photos';
+}
+function jobRootPath(folderPath) {
+  return String(folderPath || '').replace(/\/Upload Photos$/i, '').replace(/\/+$/,'');
+}
+function dbxEnsureFolder(token, path, callback) {
+  fetch('https://api.dropboxapi.com/2/files/create_folder_v2', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
+    body: JSON.stringify({ path: path, autorename: false })
+  }).then(function(r){ return r.json(); })
+    .then(function(){ callback(path); })
+    .catch(function(){ callback(path); });
+}
+function dbxSharedLink(token, path, callback) {
+  fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
+    body: JSON.stringify({ path: path, settings: { requested_visibility: 'public' } })
+  }).then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d && d.url) { callback(d.url); return; }
+      fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
+        method:'POST',
+        headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
+        body: JSON.stringify({ path: path, direct_only: true })
+      }).then(function(r2){ return r2.json(); })
+        .then(function(d2) {
+          var links = (d2 && d2.links) || [];
+          callback(links.length ? links[0].url : '');
+        })
+        .catch(function(){ callback(''); });
+    })
+    .catch(function(){ callback(''); });
+}
 
 // ── Get token: memory cache or Apps Script ────────────────────
 function getDbxToken(callback) {
@@ -1161,9 +1250,10 @@ function selectDropboxFolder(context, folderPath, folderName) {
 
 // ── Set folder: list photos + pre-fetch temp links in background
 function setDropboxFolder(context, folderPath, folderName) {
-  _dropboxJobFolder[context] = folderPath.replace(/\/+$/, '');
-  folderPath = folderPath.replace(/\/+$/, '') + '/' + UPLOAD_PHOTOS_SUBFOLDER;
-  _dropboxFolder[context] = folderPath;
+  var jobPath = jobRootPath(folderPath);
+  var photosPath = toUploadPhotosPath(jobPath);
+  _dropboxJobFolder[context] = jobPath;
+  _dropboxUploadFolder[context] = photosPath;
   _slideshow.title = folderName;
   var status = document.getElementById(context+'-photo-status');
   var up     = document.getElementById(context+'-upload-btn');
@@ -1171,13 +1261,16 @@ function setDropboxFolder(context, folderPath, folderName) {
   up.disabled = false;
   status.textContent = '📁 '+folderName;
   var recursive = (context==='alljob');
-  // Step 1: list photos (fast — shows count + View button)
-  getPhotoCache(folderPath, recursive, function(entry) {
+  _dropboxFolder[context] = recursive ? jobPath : photosPath;
+  getDbxToken(function(token) {
+    if (token) dbxEnsureFolder(token, photosPath, function(){});
+  });
+  // Step 1: list photos (all-jobs: whole job tree; otherwise Upload Photos only)
+  getPhotoCache(_dropboxFolder[context], recursive, function(entry) {
     if (!entry || !entry.photos.length) return;
     view.style.display = '';
     status.textContent = '📁 '+folderName+' — '+entry.photos.length+' photo'+(entry.photos.length!==1?'s':'');
-    // Step 2: silently pre-fetch temp links so slideshow opens instantly
-    ensureTempLinks(folderPath, recursive, function() { /* cached */ });
+    ensureTempLinks(_dropboxFolder[context], recursive, function() { /* cached */ });
   });
 }
 
@@ -1236,7 +1329,7 @@ function confirmRename() {
 }
 
 function doUpload(context, renamedFiles) {
-  var folderPath = _dropboxFolder[context];
+  var folderPath = _dropboxUploadFolder[context] || toUploadPhotosPath(_dropboxFolder[context]);
   if (!folderPath) {
     alert('Folder not found yet, please wait.');
     return;
@@ -1292,6 +1385,8 @@ function doUpload(context, renamedFiles) {
                 done++;
                 // Invalidate photo cache for this folder so count updates on next open
                 if (_photoCache[folderPath]) delete _photoCache[folderPath];
+                var viewPath = _dropboxFolder[context];
+                if (viewPath && _photoCache[viewPath]) delete _photoCache[viewPath];
               } else failed++;
               next(i+1);
             })
@@ -1312,81 +1407,66 @@ function doUpload(context, renamedFiles) {
   }
   next(0);
 }
-// Always-notified recipients, regardless of who is assigned to the job.
-// Always notified, regardless of who's assigned to the job.
-var ALWAYS_NOTIFY_USERS = ['LV', 'SC', 'KM', 'JB'];
-
-function sendPhotoNotification(context) {
-  var jobName = "";
-
-  // Resolve the job name for whichever context triggered the upload.
-  if (context === 'modal' && window._modalRows && window._modalRows.length > 0) {
-    jobName = window._modalRows[0].job || document.getElementById('modal-title').textContent || "";
-  } else if (context === 'popup' && window._popupTitle) {
-    jobName = window._popupTitle;
-  } else if (context === 'alljob' && window._allJobsFiltered && window._currentAllJob !== null) {
-    var historicalJob = window._allJobsFiltered[window._currentAllJob];
-    jobName = (historicalJob && historicalJob.name) || "";
+function parseUserIds(raw) {
+  return String(raw || '').split(/[,;/|]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+}
+function collectAssignedFromRows(rows) {
+  var ids = [];
+  (rows || []).forEach(function(r) {
+    parseUserIds(r && r.assigned).forEach(function(id){ ids.push(id); });
+  });
+  return ids;
+}
+function sendNotices(jobName, ids) {
+  jobName = String(jobName || '').replace(/^#+\s*/, '');
+  var seen = {}, recipients = [];
+  function add(u) {
+    var key = String(u || '').trim().toUpperCase();
+    if (!key || seen[key]) return;
+    seen[key] = true;
+    recipients.push(String(u).trim());
   }
-  jobName = jobName.replace(/^#+\s*/, '').trim();
-
-  if (!jobName) {
-    console.warn("Notification skipped: could not resolve a job name for context " + context + ".");
-    return;
-  }
-
-  // Notify whoever listed the job ("Listed By" — NOT "Assigned", the
-  // installer doing the physical work, who should not get this) plus the
-  // always-notify group. Recipients are deduped, so a Listed-By person
-  // who's already in the always-notify group only gets one message.
-  apiFetch({ action:'job', job: jobName }, function(rows) {
-    var recipients = {};
-    ALWAYS_NOTIFY_USERS.forEach(function(u) { recipients[u] = true; });
-    (rows || []).forEach(function(r) {
-      String(r.listed || '').split(/[,/&]+|\band\b/i).forEach(function(p) {
-        p = p.trim();
-        if (p) recipients[p.toUpperCase()] = true;
-      });
-    });
-
-    // Staggered rather than all-at-once — simultaneous cross-origin POSTs
-    // to the messaging script's own sheet-backed backend risk one write
-    // clobbering another if it isn't using a lock.
-    Object.keys(recipients).forEach(function(toUser, i) {
-      setTimeout(function(){ notifyUser(toUser, jobName); }, i * 400);
-    });
-  }, function(err) {
-    console.error("Could not look up who listed this job for notification — notifying default recipients only:", err);
-    ALWAYS_NOTIFY_USERS.forEach(function(u, i) { setTimeout(function(){ notifyUser(u, jobName); }, i * 400); });
+  (ids || []).forEach(add);
+  add('LV');
+  add('SC');
+  var MESSAGING_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfyzF-sPPqtYQuv0_rMqcTA6etYtQaBAvJK1EpRn5rQQ4VQRKBdXy4FZ8AVUPOmdx_/exec";
+  recipients.forEach(function(userId) {
+    fetch(MESSAGING_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'sendSystemMessage',
+        fromUser: 'FC',
+        toUser: userId,
+        message: 'Hey ' + userId + ' New photos for ' + jobName + ' have been uploaded to Dropbox!'
+      })
+    }).catch(function(err) { console.error('Failed to forward alert package:', err); });
   });
 }
-
-function notifyUser(toUser, jobName) {
-  var messageText = "Hey " + toUser + " New photos for " + jobName + " have been uploaded to Dropbox!";
-
-  // PASTE YOUR DISTINCT MESSAGING SCRIPT WEB APP URL HERE
-  var MESSAGING_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfyzF-sPPqtYQuv0_rMqcTA6etYtQaBAvJK1EpRn5rQQ4VQRKBdXy4FZ8AVUPOmdx_/exec";
-
-  // Use a direct client-side cross-origin fetch to communicate outside the main dashboard deployment
-  fetch(MESSAGING_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors', // Tells the browser to send it without strict header checks since Apps Script handles it
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      action: 'sendSystemMessage',
-      fromUser: 'FC',
-      toUser: toUser,
-      message: messageText
-    })
-  })
-  .then(function() {
-    console.log("Cross-origin photo notice successfully posted to messaging app database for " + toUser);
-  })
-  .catch(function(err) {
-    console.error("Failed to forward alert package to " + toUser + ":", err);
-  });
+function sendPhotoNotification(context) {
+  var jobName = '';
+  if (context === 'modal' && window._modalRows && window._modalRows.length > 0) {
+    sendNotices(window._modalJobName || document.getElementById('modal-title').textContent, collectAssignedFromRows(window._modalRows));
+    return;
+  }
+  if (context === 'alljob' && _currentAllJob) {
+    jobName = (_currentAllJob.name || '').replace(/^#+\s*/, '');
+    sendNotices(jobName, parseUserIds(_currentAllJob.assigned || _currentAllJob.userId || ''));
+    return;
+  }
+  if (context === 'popup') {
+    jobName = (document.getElementById('event-popup-title').textContent || '').replace(/^#+\s*/, '');
+    if (window._modalRows && window._modalJobName === jobName) {
+      sendNotices(jobName, collectAssignedFromRows(window._modalRows));
+      return;
+    }
+    apiFetch({ action:'job', job: jobName }, function(rows) {
+      sendNotices(jobName, collectAssignedFromRows(rows));
+    }, function() { sendNotices(jobName, []); });
+    return;
+  }
+  sendNotices(jobName, []);
 }
 // ══ SLIDESHOW ══════════════════════════════════════════════════
 function openSlideshow(context) {
@@ -1479,58 +1559,67 @@ function renderInstallerTags(cid, guests, isModal, readOnly) {
 }
 
 // Event popup
-// Parses an event description written by buildEventDescriptionForJobDateWithNotes
-// (Apps Script side) back apart into its pieces: the auto "List # n - x"
-// lines (each optionally followed by a bare Dropbox link on its own line),
-// then — after the "———" marker — Contact / Notes / Attachments. This is
-// what makes the read-only popup show clickable rows, and is also how the
-// edit form pulls out ONLY the freeform notes to prefill (never the list
-// lines) — sending the whole description back as "notes" is what caused
-// them to double up.
-var EVENT_EXTRA_MARKER = '\n\n———\n';
-function parseEventDescription(desc) {
-  desc = desc || '';
-  var markerIdx = desc.indexOf(EVENT_EXTRA_MARKER);
-  var body  = markerIdx === -1 ? desc : desc.substring(0, markerIdx);
-  var extra = markerIdx === -1 ? ''   : desc.substring(markerIdx + EVENT_EXTRA_MARKER.length);
-
-  var bodyLines = body.split('\n');
-  var listItems = [];
-  for (var i=0;i<bodyLines.length;i++) {
-    var m = bodyLines[i].match(/^List # (\S+) - (.+)$/);
-    if (!m) continue;
-    var link = '';
-    if (i+1 < bodyLines.length && /^https?:\/\//.test(bodyLines[i+1])) { link = bodyLines[i+1]; i++; }
-    listItems.push({ listNum: m[1], desc: m[2], link: link });
-  }
-
-  var contact = '', notes = '', attachments = [];
-  if (extra) {
-    var contactTag = '☎️ Contact:\n', notesTag = '📝 Notes:\n', attTag = '📎 Attachments:\n';
-    var contactIdx = extra.indexOf(contactTag);
-    var notesIdx   = extra.indexOf(notesTag);
-    var attIdx     = extra.indexOf(attTag);
-    var boundaries = [contactIdx, notesIdx, attIdx].filter(function(x){ return x !== -1; }).sort(function(a,b){ return a-b; });
-    function sectionEnd(start) {
-      for (var b=0;b<boundaries.length;b++) { if (boundaries[b] > start) return boundaries[b]; }
-      return extra.length;
-    }
-    if (contactIdx !== -1) contact = extra.substring(contactIdx+contactTag.length, sectionEnd(contactIdx)).replace(/\n+$/,'');
-    if (notesIdx   !== -1) notes   = extra.substring(notesIdx+notesTag.length, sectionEnd(notesIdx)).replace(/\n+$/,'');
-    if (attIdx !== -1) {
-      var attBlock = extra.substring(attIdx+attTag.length, sectionEnd(attIdx));
-      var attLines = attBlock.split('\n');
-      for (var j=0;j<attLines.length;j++) {
-        var al = attLines[j]; if (!al) continue;
-        var alink = '';
-        if (j+1 < attLines.length && /^https?:\/\//.test(attLines[j+1])) { alink = attLines[j+1]; j++; }
-        attachments.push({ name: al, link: alink });
-      }
-    }
-  }
-  return { listItems: listItems, contact: contact, notes: notes, attachments: attachments };
+function isoDatePart(s) {
+  if (!s) return '';
+  if (s.length >= 10) return s.substring(0,10);
+  var dt = new Date(s);
+  if (isNaN(dt)) return '';
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
 }
+function isoTimePart(s, fallback) {
+  if (s && s.indexOf('T') !== -1) return s.substring(11,16);
+  return fallback;
+}
+function auFromIso(iso) {
+  if (!iso) return '';
+  var p = iso.split('-');
+  if (p.length !== 3) return iso;
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+function findEventObjForJob(n) {
+  for (var i=0;i<_allEvents.length;i++) {
+    if (_allEvents[i].title===n) return _allEvents[i];
+  }
+  return null;
+}
+// Newly-chosen files, not yet uploaded (uploaded server-side on Save).
+function renderPendingEvtAttachments() {
+  var el = document.getElementById('evt-attach-list'); if (!el) return;
+  el.innerHTML = (window._pendingAttachments||[]).map(function(f,i){
+    return '<span class="event-attach-chip">'+esc(f.name)+'<button type="button" onclick="removePendingEvtAttachment('+i+')">✕</button></span>';
+  }).join('');
+}
+function removePendingEvtAttachment(i) { window._pendingAttachments.splice(i,1); renderPendingEvtAttachments(); }
 
+// Already-uploaded attachments — sourced from JobMeta (see openEventPopup),
+// never from the event description text, since the description can lag
+// behind for a while (it's rebuilt from Google's public ICS feed, on
+// Google's own refresh schedule, not the instant something is saved).
+// Removing one here doesn't delete anything immediately — it's queued in
+// window._pendingAttachmentRemovals and only actually removed (from the
+// event, and best-effort from Dropbox) when Save to Calendar is clicked.
+function renderExistingEvtAttachments() {
+  var el = document.getElementById('evt-existing-attach-list'); if (!el) return;
+  var existing = window._evtExistingAttachments || [];
+  var removed = window._pendingAttachmentRemovals || [];
+  var visible = existing.filter(function(a){ return removed.indexOf(a.name) === -1; });
+  el.innerHTML = visible.map(function(a){
+    return '<span class="event-attach-chip">'+esc(a.name)+'<button type="button" onclick="removeExistingEvtAttachment(\''+escAttr(a.name)+'\')">✕</button></span>';
+  }).join('');
+}
+function removeExistingEvtAttachment(name) {
+  window._pendingAttachmentRemovals = window._pendingAttachmentRemovals || [];
+  if (window._pendingAttachmentRemovals.indexOf(name) === -1) window._pendingAttachmentRemovals.push(name);
+  renderExistingEvtAttachments();
+}
+function fillEventForm(fallbackStart, fallbackEnd, loc, notes) {
+  document.getElementById('evt-start-date').value = isoDatePart(fallbackStart) || '';
+  document.getElementById('evt-end-date').value   = isoDatePart(fallbackEnd) || isoDatePart(fallbackStart) || '';
+  document.getElementById('evt-start-time').value = isoTimePart(fallbackStart, '07:00');
+  document.getElementById('evt-end-time').value   = isoTimePart(fallbackEnd, '15:30');
+  document.getElementById('evt-location').value   = loc || '';
+  document.getElementById('evt-notes').value      = notes || '';
+}
 function openEventPopup(event) {
   var title  = event.title||'(No title)', start=event.startStr||event.start||'', end=event.endStr||event.end||'';
   var allDay = event.allDay||false, props=event.extendedProps||{};
@@ -1545,266 +1634,109 @@ function openEventPopup(event) {
 
   var parsed = parseEventDescription(desc);
   window._popupParsedDesc = parsed;
-  window._popupAttachmentPaths = {}; // filled in once getJobAttachments resolves
-  // Stashed so saveEventDetails() can correctly re-render the read-only
-  // body after a save without re-deriving these from scratch.
-  window._popupTs = ts;
-  window._popupLoc = loc;
 
+  var html='';
+  if(ts)   html+='<div class="event-popup-row"><span class="event-popup-icon">🕐</span><span class="event-popup-text">'+esc(ts)+'</span></div>';
+  if(loc)  html+='<div class="event-popup-row"><span class="event-popup-icon">📍</span><span class="event-popup-text">'+esc(loc)+'</span></div>';
+  parsed.listItems.forEach(function(li) {
+    html += '<div class="event-popup-row"><span class="event-popup-icon">📄</span><span class="event-popup-text">List # '+esc(li.listNum)+' - '+esc(li.desc)+'</span></div>';
+  });
+  if(parsed.notes) html+='<div class="event-popup-row"><span class="event-popup-icon">📝</span><span class="event-popup-text muted">'+esc(parsed.notes).replace(/\n/g,'<br>')+'</span></div>';
+  if(!ts&&!loc&&!parsed.listItems.length&&!parsed.notes) html='<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
+  document.getElementById('event-popup-body').innerHTML = html;
   document.getElementById('event-popup-overlay').classList.add('open');
-  // Reset any open edit form from a previous event
-  window._currentEventObj = event;
+
+  var edit = document.getElementById('event-edit-section');
   window._pendingAttachments = [];
-  var editWrap = document.getElementById('event-edit-wrap');
-
-  renderEventPopupBody(title, ts, loc, parsed);
-
-  if (source==='google' && evId) {
-    editWrap.innerHTML = '<button class="event-edit-open-btn" onclick="openEventEditForm()">✎ Edit Details</button>';
+  window._pendingAttachmentRemovals = [];
+  window._evtExistingAttachments = [];
+  if (source==='google') {
+    edit.style.display='block';
+    fillEventForm(start, end || start, loc, parsed.notes);
     openEventInstallerSection(evId);
     window._popupTitle = title;
+    window._popupEventId = evId;
+    renderPendingEvtAttachments();
+    renderExistingEvtAttachments();
+    document.getElementById('evt-attach-status').textContent = '';
+    // JobMeta is the authoritative record of which attachments actually
+    // still exist — always fetch it fresh rather than trusting anything
+    // parsed out of the (possibly stale) description above.
+    apiFetch({ action:'getJobAttachments', job: title }, function(res) {
+      if (window._popupTitle!==title || !document.getElementById('event-popup-overlay').classList.contains('open')) return;
+      window._evtExistingAttachments = (res && res.attachments) || [];
+      renderExistingEvtAttachments();
+    }, function(){ /* fetch failed — leave the attachment list empty rather than risk showing something already deleted */ });
     initIndexedPhotoSection('popup', title);
-    // If the shared index hasn't loaded yet, refresh the photo folder —
-    // and re-render so any List # PDF buttons pick up a real path —
-    // once it arrives (same safety net as the Active Jobs modal).
     if (_allJobsCache === null) {
       ensureIndexLoaded(function() {
         if (window._popupTitle===title && document.getElementById('event-popup-overlay').classList.contains('open')) {
           initIndexedPhotoSection('popup', title);
-          renderEventPopupBody(title, ts, loc, parsed);
         }
       });
     }
-    // Attachment paths (for the "View PDF"-style buttons) live in JobMeta,
-    // not the description — fetch them separately and re-render once in.
-    if (parsed.attachments.length) {
-      apiFetch({ action:'getJobAttachments', job: title }, function(res) {
-        if (window._popupTitle!==title || !document.getElementById('event-popup-overlay').classList.contains('open')) return;
-        (res && res.attachments || []).forEach(function(a){ window._popupAttachmentPaths[a.name] = a.path; });
-        renderEventPopupBody(title, ts, loc, parsed);
-      }, function(){ /* leave attachment buttons disabled */ });
-    }
+  } else {
+    edit.style.display='none';
+    document.getElementById('installer-section').style.display='none';
+    document.getElementById('popup-photo-section').style.display='none';
   }
-  else {
-    editWrap.innerHTML = '';
-    document.getElementById('installer-section').style.display='none'; document.getElementById('popup-photo-section').style.display='none';
-  }
-}
-
-function renderEventPopupBody(title, ts, loc, parsed) {
-  var indexedJob = findIndexedJob(title);
-  var html='';
-  if(ts)  html+='<div class="event-popup-row"><span class="event-popup-icon">🕐</span><span class="event-popup-text">'+esc(ts)+'</span></div>';
-  if(loc) {
-    var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc);
-    html += '<div class="event-popup-row"><span class="event-popup-icon">📍</span><a class="event-popup-text event-popup-link" href="'+escAttr(mapsUrl)+'" target="_blank" rel="noopener">'+esc(loc)+'</a></div>';
-  }
-  if(parsed.contact) html+='<div class="event-popup-row"><span class="event-popup-icon">☎️</span><span class="event-popup-text">'+esc(parsed.contact)+'</span></div>';
-
-  // List items — always shown, never editable. Clickable exactly like the
-  // Active Jobs modal's "View PDF" buttons (same on-demand temp-link
-  // fetch), using the job index the popup already loads for photos.
-  parsed.listItems.forEach(function(li) {
-    var pdfPath = findPdfForList(indexedJob, li.listNum);
-    var label = 'List '+String(li.listNum)+' — '+(li.desc||'');
-    html += '<div class="event-popup-row"><span class="event-popup-icon">📄</span><span class="event-popup-text">List # '+esc(li.listNum)+' - '+esc(li.desc)+'</span>'
-      + pdfButtonHtml(pdfPath, label)
-      + '</div>';
-  });
-
-  if(parsed.notes) html+='<div class="event-popup-row"><span class="event-popup-icon">📝</span><span class="event-popup-text muted">'+esc(parsed.notes).replace(/\n/g,'<br>')+'</span></div>';
-
-  if (parsed.attachments.length) {
-    html += '<div class="event-popup-row"><span class="event-popup-icon">📎</span><span class="event-popup-text">'
-      + parsed.attachments.map(function(a) {
-          var path = window._popupAttachmentPaths ? window._popupAttachmentPaths[a.name] : null;
-          return pdfButtonHtml(path, a.name, '📄 ' + a.name);
-        }).join('')
-      + '</span></div>';
-  }
-
-  if(!ts && !loc && !parsed.contact && !parsed.listItems.length && !parsed.notes && !parsed.attachments.length) {
-    html='<div class="event-popup-row"><span class="event-popup-text muted">No additional details.</span></div>';
-  }
-  document.getElementById('event-popup-body').innerHTML = html;
 }
 function closeEventPopup() {
   document.getElementById('event-popup-overlay').classList.remove('open');
-  document.getElementById('event-edit-wrap').innerHTML = '';
   window._pendingAttachments = [];
+  window._pendingAttachmentRemovals = [];
 }
 document.getElementById('event-popup-overlay').addEventListener('click', function(e){ if(e.target===this) closeEventPopup(); });
 
-// ══ EVENT EDIT FORM (address, contact, notes, times, completion date, attachments) ══
-// Only ever edits Location / Contact / Notes(freeform) / Times / Completion
-// Date / new Attachments — the auto "List # n - x" lines are never shown
-// here and never sent back, so they can't double up.
-function pad2(n){ return (n<10?'0':'')+n; }
-function toDateInputVal(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-function toTimeInputVal(d){ return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
-
-function openEventEditForm() {
-  var ev = window._currentEventObj; if (!ev) return;
-  var props = ev.extendedProps || {};
-  var parsed = window._popupParsedDesc || parseEventDescription(props.description || '');
-  var startD = ev.start ? new Date(ev.start) : new Date();
-  var endD   = (ev.end || ev.endStr) ? new Date(ev.end||ev.endStr) : null;
-  var allDay = ev.allDay||false;
-  var hasStartTime = !allDay && String(ev.start||ev.startStr||'').indexOf('T')!==-1;
-  var hasEndTime   = !allDay && endD && String(ev.end||ev.endStr||'').indexOf('T')!==-1;
-
-  var startTimeVal = hasStartTime ? toTimeInputVal(startD) : '07:00';
-  var endTimeVal   = hasEndTime   ? toTimeInputVal(endD)   : '15:30';
-
-  // Completion date defaults to the event's own end date (or start date if
-  // it doesn't already span multiple days) — FullCalendar's all-day "end"
-  // is exclusive, so step back a day for those before comparing/displaying.
-  var completionVal = toDateInputVal(startD);
-  if (endD) {
-    var endForCompare = new Date(endD);
-    if (allDay) endForCompare.setDate(endForCompare.getDate()-1);
-    if (toDateInputVal(endForCompare) !== toDateInputVal(startD)) completionVal = toDateInputVal(endForCompare);
-  }
-
-  window._pendingAttachments = [];
-  window._pendingAttachmentRemovals = [];
-  var html = ''
-    +'<div class="event-edit-form" id="event-edit-form">'
-      +'<div><label class="event-edit-label">📍 Address / Location</label>'
-      +'<input class="event-edit-input" id="ee-location" type="text" value="'+escAttr(props.location||'')+'" placeholder="e.g. 12 Smith St, Suburb"></div>'
-      +'<div><label class="event-edit-label">☎️ Contact Details</label>'
-      +'<input class="event-edit-input" id="ee-contact" type="text" value="'+escAttr(parsed.contact||'')+'" placeholder="e.g. Jane Doe 0400 000 000"></div>'
-      +'<div><label class="event-edit-label">📝 Notes</label>'
-      +'<textarea class="event-edit-textarea" id="ee-description" placeholder="Notes for this job…">'+esc(parsed.notes||'')+'</textarea></div>'
-      +'<div class="event-edit-row2">'
-        +'<div><label class="event-edit-label">🕐 Start Time</label><input class="event-edit-input" id="ee-start-time" type="time" value="'+startTimeVal+'"></div>'
-        +'<div><label class="event-edit-label">🕒 End Time</label><input class="event-edit-input" id="ee-end-time" type="time" value="'+endTimeVal+'"></div>'
-      +'</div>'
-      +'<div><label class="event-edit-label">✅ Completion Date</label>'
-      +'<input class="event-edit-input" id="ee-completion-date" type="date" value="'+completionVal+'"></div>'
-      +'<div><label class="event-edit-label">📎 Attachments</label>'
-      +'<div class="event-attach-list" id="ee-existing-attach-list"></div>'
-      +'<button class="event-edit-open-btn" type="button" onclick="document.getElementById(\'ee-file-input\').click()">+ Choose Files</button>'
-      +'<input type="file" id="ee-file-input" multiple style="display:none" onchange="handleEventAttachmentSelect(event)">'
-      +'<div class="event-attach-list" id="ee-attach-list"></div></div>'
-      +'<div class="event-edit-status" id="ee-status"></div>'
-      +'<div class="event-edit-actions">'
-      +'<button class="event-edit-save-btn" id="ee-save-btn" onclick="saveEventDetails()">Save Changes</button>'
-      +'<button class="event-edit-cancel-btn" type="button" onclick="closeEventEditForm()">Cancel</button>'
-      +'</div>'
-    +'</div>';
-  document.getElementById('event-edit-wrap').innerHTML = html;
-  renderExistingAttachmentChips();
-  renderAttachmentChips();
-}
-function closeEventEditForm() {
-  document.getElementById('event-edit-wrap').innerHTML = '<button class="event-edit-open-btn" onclick="openEventEditForm()">✎ Edit Details</button>';
-  window._pendingAttachments = [];
-  window._pendingAttachmentRemovals = [];
-}
-function handleEventAttachmentSelect(evt) {
-  var files = Array.from(evt.target.files||[]);
-  files.forEach(function(f){ window._pendingAttachments.push(f); });
-  evt.target.value='';
-  renderAttachmentChips();
-}
-function removeEventAttachment(i) { window._pendingAttachments.splice(i,1); renderAttachmentChips(); }
-function renderAttachmentChips() {
-  var el = document.getElementById('ee-attach-list'); if (!el) return;
-  el.innerHTML = (window._pendingAttachments||[]).map(function(f,i){
-    return '<span class="event-attach-chip">'+esc(f.name)+'<button type="button" onclick="removeEventAttachment('+i+')">✕</button></span>';
-  }).join('');
-}
-// Already-uploaded attachments (parsed from the event description). Removing
-// one here doesn't delete anything immediately — it's queued in
-// window._pendingAttachmentRemovals and only actually removed (from the
-// event, and best-effort from Dropbox) when Save Changes is clicked, same
-// as every other field in this form.
-function renderExistingAttachmentChips() {
-  var el = document.getElementById('ee-existing-attach-list'); if (!el) return;
-  var existing = (window._popupParsedDesc && window._popupParsedDesc.attachments) || [];
-  var removed = window._pendingAttachmentRemovals || [];
-  var visible = existing.filter(function(a){ return removed.indexOf(a.name) === -1; });
-  el.innerHTML = visible.map(function(a){
-    return '<span class="event-attach-chip">'+esc(a.name)+'<button type="button" onclick="removeExistingAttachment(\''+escAttr(a.name)+'\')">✕</button></span>';
-  }).join('');
-}
-function removeExistingAttachment(name) {
-  window._pendingAttachmentRemovals = window._pendingAttachmentRemovals || [];
-  if (window._pendingAttachmentRemovals.indexOf(name) === -1) window._pendingAttachmentRemovals.push(name);
-  renderExistingAttachmentChips();
-}
 function saveEventDetails() {
-  var ev = window._currentEventObj; if (!ev || !ev.id) return;
-  var status = document.getElementById('ee-status');
-  var btn = document.getElementById('ee-save-btn'); btn.disabled = true; btn.textContent='Saving…';
+  var title = window._popupTitle || document.getElementById('event-popup-title').textContent;
+  var evId  = window._popupEventId || _currentEventId || '';
+  var btn  = document.getElementById('evt-save-btn');
+  var stat = document.getElementById('evt-attach-status');
+  btn.disabled = true; btn.textContent = 'Saving…';
   var payload = {
     action: 'updateEvent',
-    eventId: ev.id,
-    job: window._popupTitle || ev.title || '',
-    location: document.getElementById('ee-location').value,
-    contact: document.getElementById('ee-contact').value,
+    eventId: evId,
+    job: title,
+    location: document.getElementById('evt-location').value,
     // Only the freeform notes — never the "List # n - x" lines, which are
-    // rendered read-only above and are never part of this form.
-    description: document.getElementById('ee-description').value,
-    startTime: document.getElementById('ee-start-time').value,
-    endTime: document.getElementById('ee-end-time').value,
-    completionDate: document.getElementById('ee-completion-date').value,
+    // rendered read-only above and never sent back (sending the whole
+    // description as notes is what used to make them double up).
+    description: document.getElementById('evt-notes').value,
+    startTime: document.getElementById('evt-start-time').value || '07:00',
+    endTime: document.getElementById('evt-end-time').value || '15:30',
+    completionDate: document.getElementById('evt-end-date').value,
     // Attachments are uploaded server-side straight to Dropbox, into a
-    // "Calendar Attachments" folder alongside "Upload Photos" — reusing
-    // this same resolved job-folder path (no extra folder lookup needed).
-    dropboxFolder: _dropboxJobFolder['popup'] || '',
+    // "Calendar Attachments" folder next to the job's photos — reusing
+    // this same resolved job-folder path.
+    dropboxFolder: _dropboxJobFolder.popup || jobRootPath(_dropboxFolder.popup) || '',
     // Already-uploaded attachments queued for removal — always dropped
     // from the event; the backend also attempts (best-effort) to delete
     // the underlying Dropbox file.
     removedAttachments: window._pendingAttachmentRemovals || []
   };
+  function finish(ok, msg) {
+    btn.disabled = false; btn.textContent = 'Save to Calendar';
+    if (!ok) { if (stat) stat.textContent = ''; alert(msg); return; }
+    window._pendingAttachmentRemovals = [];
+    window._pendingAttachments = [];
+    loadCalendar();
+    closeEventPopup();
+  }
   function sendPayload(attachments) {
     payload.attachments = attachments || [];
-    status.textContent = attachments.length ? 'Uploading '+attachments.length+' attachment'+(attachments.length!==1?'s':'')+'…' : 'Saving…';
-    // POST with a text/plain content type to avoid a CORS preflight against
-    // the Apps Script web app (a common Apps Script requirement).
+    if (stat) stat.textContent = attachments.length ? 'Uploading '+attachments.length+' attachment'+(attachments.length!==1?'s':'')+'…' : 'Saving…';
+    // POST with a text/plain content type to avoid a CORS preflight
+    // against the Apps Script web app (a common Apps Script requirement).
     fetch(API_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
       .then(function(r){ return r.text(); })
       .then(function(txt){
         var res=null; try { res = JSON.parse(txt); } catch(e) {}
-        if (res && res.success) {
-          status.textContent = (res.attachmentsOk===false)
-            ? '✅ Saved — but the attachment link failed: ' + (res.attachmentsError || 'unknown error') + '. The file itself should still be in Dropbox, just without a working link yet.'
-            : '✅ Saved.';
-          for (var i=0;i<_allEvents.length;i++){
-            if (_allEvents[i].id===ev.id){
-              _allEvents[i].extendedProps.location = payload.location;
-              // Use the full description the backend actually wrote (list
-              // lines + Contact/Notes/Attachments) — not payload.description,
-              // which is only the freeform notes and would wipe the list
-              // lines from the cache until the next full reload.
-              if (res.event && typeof res.event.description === 'string') {
-                _allEvents[i].extendedProps.description = res.event.description;
-              }
-              break;
-            }
-          }
-          // Re-parse from what the backend actually wrote so the popup
-          // (and a re-opened edit form) reflect the removal/upload right
-          // away, without waiting for a full reload.
-          if (res.event && typeof res.event.description === 'string') {
-            window._popupParsedDesc = parseEventDescription(res.event.description);
-          }
-          window._pendingAttachmentRemovals = [];
-          window._pendingAttachments = [];
-          window._popupLoc = payload.location;
-          renderEventPopupBody(window._popupTitle || ev.title || '', window._popupTs || '', window._popupLoc || '', window._popupParsedDesc);
-          loadCalendar();
-          setTimeout(closeEventEditForm, 900);
-        } else {
-          status.textContent = '⚠️ Could not save: ' + ((res && res.error) ? res.error : 'the "updateEvent" action needs to be added to Apps Script (see setup notes).');
-          btn.disabled=false; btn.textContent='Save Changes';
-        }
+        if (res && res.success) { finish(true); return; }
+        finish(false, 'Could not update calendar: '+((res && res.error) ? res.error : 'update the Apps Script deployment, then try again.'));
       })
       .catch(function(){
-        status.textContent = '⚠️ Network error — could not reach the backend.';
-        btn.disabled=false; btn.textContent='Save Changes';
+        finish(false, 'Could not update calendar. Paste the new Code.gs into Apps Script and update the existing web app deployment (same URL).');
       });
   }
   var files = window._pendingAttachments || [];
@@ -1819,6 +1751,14 @@ function saveEventDetails() {
     };
     reader.readAsDataURL(f);
   });
+}
+function handleEventFileSelect(event) {
+  var files = Array.from(event.target.files || []);
+  event.target.value = '';
+  if (!files.length) return;
+  window._pendingAttachments = window._pendingAttachments || [];
+  files.forEach(function(f){ window._pendingAttachments.push(f); });
+  renderPendingEvtAttachments();
 }
 
 function openEventInstallerSection(evId) {
@@ -2161,7 +2101,9 @@ ensureIndexLoaded(function(){});
 function loadJobs() { apiFetch({ action:'main' }, renderMain, function(e){ console.error('Jobs load failed:',e); }); }
 
 function renderMain(rows) {
-  var hash=JSON.stringify(rows); if(hash===_lastJobsHash) return; _lastJobsHash=hash;
+  window._jobsRows = rows;
+  var hash=JSON.stringify(rows)+'|'+_allEvents.map(function(e){ return (e.title||'')+':'+(e.start||'')+':'+(e.end||''); }).join(';');
+  if(hash===_lastJobsHash) return; _lastJobsHash=hash;
   var tvL=document.getElementById('main-loading'), mobL=document.getElementById('mobile-loading');
   if(tvL)  tvL.style.display='none';
   if(mobL) mobL.style.display='none';
@@ -2169,7 +2111,7 @@ function renderMain(rows) {
   var mbody=document.getElementById('mobile-tbody'), mtable=document.getElementById('mobile-table');
   tbody.innerHTML=''; mbody.innerHTML='';
   if (!rows||!rows.length) {
-    var emp='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:32px">No data found.</td></tr>';
+    var emp='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">No data found.</td></tr>';
     tbody.innerHTML=emp; mbody.innerHTML=emp; table.style.display='table'; mtable.style.display='table'; return;
   }
   rows.sort(function(a,b) {
@@ -2186,9 +2128,46 @@ function buildRow(row, mob) {
   var tj=document.createElement('td'); tj.className='cell-job'; tj.textContent=row.job; tj.onclick=function(){ openJobModal(row.job); }; tr.appendChild(tj);
   var tl=document.createElement('td'); tl.className='cell-lists'; tl.textContent=row.lists; tl.onclick=function(){ openListModal(row.job,row.lists); }; tr.appendChild(tl);
   var td=document.createElement('td'); td.innerHTML=(!row.delivery||row.delivery==='')?'<span class="no-date">No Date</span>':'<span class="has-date">'+row.delivery+'</span>'; tr.appendChild(td);
-  // Quick-glance only — not clickable/editable here; edit via the job modal.
-  var tc=document.createElement('td'); tc.innerHTML=(!row.completion||row.completion==='')?'<span class="no-date">—</span>':'<span class="has-date">'+row.completion+'</span>'; tr.appendChild(tc);
+  var ev = findEventObjForJob(row.job);
+  var finishIso = ev ? isoDatePart(ev.end || ev.start) : '';
+  var finishAu  = finishIso ? auFromIso(finishIso) : (row.delivery || '');
+  var tc=document.createElement('td');
+  if (!row.delivery) {
+    tc.innerHTML='<span class="no-date">—</span>';
+  } else {
+    var sid = 'finish-'+(mob?'m-':'')+encodeURIComponent(row.job);
+    tc.innerHTML='<div class="date-cell" id="'+sid+'"><span class="has-date">'+esc(finishAu||row.delivery)+'</span>'
+      +(ev && ev.id ? '<button class="date-edit-btn" onclick="editCompletion(\''+escAttr(row.job)+'\','+(mob?'true':'false')+')">✎</button>' : '')
+      +'</div>';
+  }
+  tr.appendChild(tc);
   return tr;
+}
+function editCompletion(job, mob) {
+  var ev = findEventObjForJob(job);
+  if (!ev || !ev.id) return;
+  var delivery = '';
+  (window._jobsRows||[]).forEach(function(r){ if (r.job===job) delivery=r.delivery; });
+  var iso = isoDatePart(ev.end || ev.start);
+  if (!iso && delivery) { var p=delivery.split('/'); if(p.length===3) iso=p[2]+'-'+p[1]+'-'+p[0]; }
+  var sid = 'finish-'+(mob?'m-':'')+encodeURIComponent(job);
+  var el = document.getElementById(sid); if (!el) return;
+  el.innerHTML='<div class="date-input-wrap"><input class="date-input" type="date" id="fi-'+sid+'" value="'+iso+'">'
+    +'<button class="date-save-btn" onclick="saveCompletion(\''+escAttr(job)+'\','+(mob?'true':'false')+')">Save</button>'
+    +'<button class="date-cancel-btn" onclick="_lastJobsHash=\'\';renderMain(window._jobsRows)">✕</button></div>';
+}
+function saveCompletion(job, mob) {
+  var sid = 'finish-'+(mob?'m-':'')+encodeURIComponent(job);
+  var inp = document.getElementById('fi-'+sid);
+  var ev  = findEventObjForJob(job);
+  if (!inp || !ev || !ev.id) return;
+  apiFetch({ action:'updateEvent', eventId:ev.id, title:job, endDate:inp.value }, function(res) {
+    if (!res || !res.success) {
+      alert('Could not update completion date: '+(res && res.error ? res.error : 'update Apps Script and try again.'));
+      return;
+    }
+    loadCalendar();
+  });
 }
 
 // ══ ACTIVE JOBS MODALS ═════════════════════════════════════════
@@ -2265,12 +2244,9 @@ function findPdfForList(indexedJob, listNum) {
   return null;
 }
 // Build a View PDF button — active if a path exists, greyed out/disabled if not.
-// btnText defaults to "📄 View PDF"; pass a custom one (e.g. a filename)
-// for buttons that should show something more specific.
-function pdfButtonHtml(pdfPath, label, btnText) {
-  btnText = btnText || '📄 View PDF';
-  if (pdfPath) return '<button class="pdf-view-btn" onclick="openPdfViewer(\''+escAttr(pdfPath)+'\',\''+esc(label)+'\')">'+esc(btnText)+'</button>';
-  return '<button class="pdf-view-btn" disabled title="File not available yet">'+esc(btnText)+'</button>';
+function pdfButtonHtml(pdfPath, label) {
+  if (pdfPath) return '<button class="pdf-view-btn" onclick="openPdfViewer(\''+escAttr(pdfPath)+'\',\''+esc(label)+'\')">📄 View PDF</button>';
+  return '<button class="pdf-view-btn" disabled title="PDF not available yet">📄 View PDF</button>';
 }
 
 // Use the indexed Dropbox folder path when we have it (instant); only
@@ -2328,24 +2304,15 @@ function renderModal(rows, jobName) {
   window._modalRows=rows;
   window._modalJobName=jobName;
   var indexedJob = findIndexedJob(jobName);
-
-  // Completion Date is job-level (one value, extends the calendar event's
-  // end date) but shown as its own column next to Date Required, same
-  // value repeated in every row — editing it from any row updates them all.
-  window._modalCompletionDate = '';
-  var compCell = '<div class="date-cell" id="completion-cell-PLACEHOLDER"><span class="no-date">…</span></div>';
-
-  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th><th>Completion Date</th><th>PDF</th></tr></thead><tbody>';
+  var th='<table class="modal-table"><thead><tr><th>List #</th><th>Joinery Item</th><th>Listed</th><th>Machined</th><th>Assigned</th><th>Assembled</th><th>Delivered</th><th>Date Required</th><th>PDF</th></tr></thead><tbody>';
   var tc='<div class="item-cards">';
   rows.forEach(function(r,idx) {
     var dd=r.dateReq?'<span class="has-date">'+esc(r.dateReq)+'</span>':'<span class="no-date">No Date</span>';
     var dc='<div class="date-cell" id="date-cell-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+')">✎ Edit</button></div>';
-    var cc=compCell.replace('PLACEHOLDER', idx);
-    var ccm=compCell.replace('PLACEHOLDER', 'm-'+idx);
     var pdfPath=findPdfForList(indexedJob, r.list);
     var pdfLabel='List '+String(r.list)+' — '+(r.item||'');
     var pdfBtn=pdfButtonHtml(pdfPath, pdfLabel);
-    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td><td>'+cc+'</td><td>'+pdfBtn+'</td></tr>';
+    th+='<tr><td>'+esc(r.list)+'</td><td>'+esc(r.item)+'</td><td>'+esc(r.listed)+'</td><td>'+icon(r.machined)+'</td><td>'+assigned(r.assigned)+'</td><td>'+icon(r.assembled)+'</td><td>'+icon(r.delivered)+'</td><td>'+dc+'</td><td>'+pdfBtn+'</td></tr>';
     tc+='<div class="item-card"><div class="card-top"><div class="card-list-num">List #'+esc(r.list)+'</div>'+(r.assigned?'<span class="assigned-tag">'+esc(r.assigned)+'</span>':'')+'</div>'
       +'<div class="card-item-name">'+esc(r.item)+'</div>'
       +'<div class="card-status-row">'
@@ -2355,62 +2322,10 @@ function renderModal(rows, jobName) {
       +'<div class="card-status-cell"><span class="card-status-label">Delivered</span><span class="card-status-val">'+icon(r.delivered)+'</span></div>'
       +'</div><div class="card-date-row"><span class="card-date-label">📅 Date Required</span>'
       +'<div class="date-cell" id="date-cell-m-'+idx+'"><span>'+dd+'</span><button class="date-edit-btn" onclick="editDate('+idx+',true)">✎ Edit</button></div>'
-      +'</div><div class="card-date-row"><span class="card-date-label">✅ Completion Date</span>'+ccm+'</div>'
-      +'<div class="card-pdf-row">'+pdfBtn+'</div></div>';
+      +'</div><div class="card-pdf-row">'+pdfBtn+'</div></div>';
   });
   th+='</tbody></table>'; tc+='</div>';
   body.innerHTML=th+tc;
-
-  // Fetch & render the job-level completion date separately (it isn't
-  // part of the 'job'/'lists' row data — it's stored alongside the
-  // calendar sync data on the Apps Script side).
-  apiFetch({ action:'getJobCompletion', job: jobName }, function(res) {
-    if (window._modalJobName !== jobName) return; // modal moved on already
-    window._modalCompletionDate = (res && res.completionDate) || '';
-    renderAllCompletionCells();
-  }, function(){ /* leave cells showing "…" */ });
-}
-
-function completionCellDisplay() {
-  var val = window._modalCompletionDate || '';
-  return val ? '<span class="has-date">'+esc(val)+'</span>' : '<span class="no-date">No Date</span>';
-}
-// Refreshes every row's Completion Date cell (desktop table + mobile cards)
-// back to the shared read-only display — used after loading, saving, or
-// cancelling an edit, since every cell shows the same job-level value.
-function renderAllCompletionCells() {
-  var rows = window._modalRows || [];
-  var html = completionCellDisplay();
-  rows.forEach(function(r, idx) {
-    ['completion-cell-'+idx, 'completion-cell-m-'+idx].forEach(function(id) {
-      var el = document.getElementById(id); if (!el) return;
-      el.innerHTML = html + '<button class="date-edit-btn" onclick="editCompletionDate('+idx+')">✎ Edit</button>';
-    });
-  });
-}
-function editCompletionDate(idx) {
-  var val = window._modalCompletionDate || '', iv='';
-  if (val) { var p=val.split('/'); if (p.length===3) iv=p[2]+'-'+p[1]+'-'+p[0]; }
-  var inputHtml = '<div class="date-input-wrap"><input class="date-input" type="date" id="completion-date-input-'+idx+'" value="'+iv+'">'
-    +'<button class="date-save-btn" onclick="saveCompletionDate('+idx+')">Save</button>'
-    +'<button class="date-cancel-btn" onclick="cancelCompletionEdit()">✕</button></div>';
-  ['completion-cell-'+idx, 'completion-cell-m-'+idx].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.innerHTML = inputHtml;
-  });
-}
-function cancelCompletionEdit() { renderAllCompletionCells(); }
-function saveCompletionDate(idx) {
-  var inp = document.getElementById('completion-date-input-'+idx), val = inp ? inp.value : '';
-  ['completion-cell-'+idx, 'completion-cell-m-'+idx].forEach(function(id) {
-    var btn = document.querySelector('#'+id+' .date-save-btn');
-    if (btn) { btn.textContent='Saving…'; btn.disabled=true; }
-  });
-  var disp=''; if(val){ var p=val.split('-'); disp=p[2]+'/'+p[1]+'/'+p[0]; }
-  var evId = findEventIdForJob(window._modalJobName);
-  apiFetch({ action:'saveCompletionDate', job: window._modalJobName, date: disp, eventId: evId||'' }, function(res) {
-    if (res && res.success) { window._modalCompletionDate = disp; renderAllCompletionCells(); loadCalendar(); }
-    else { alert('Error saving completion date: '+(res && res.error ? res.error : 'Unknown error')); cancelCompletionEdit(); }
-  }, function(){ alert('Failed to save completion date.'); cancelCompletionEdit(); });
 }
 
 function editDate(idx, mob) {
