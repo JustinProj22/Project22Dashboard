@@ -1597,15 +1597,24 @@ function openEventPopup(event) {
         }
       });
     }
-    // Attachment paths (for the "View PDF"-style buttons) live in JobMeta,
-    // not the description — fetch them separately and re-render once in.
-    if (parsed.attachments.length) {
-      apiFetch({ action:'getJobAttachments', job: title }, function(res) {
-        if (window._popupTitle!==title || !document.getElementById('event-popup-overlay').classList.contains('open')) return;
-        (res && res.attachments || []).forEach(function(a){ window._popupAttachmentPaths[a.name] = a.path; });
-        renderEventPopupBody(title, ts, loc, parsed);
-      }, function(){ /* leave attachment buttons disabled */ });
-    }
+    // JobMeta (fetched here) is the authoritative record of which
+    // attachments actually still exist. The event description text can
+    // lag behind for a while — it's rebuilt from Google's public ICS
+    // feed, which Google refreshes on its own schedule, not the instant
+    // something is saved — so a just-deleted attachment can still be
+    // sitting in `parsed.attachments` at this point. Always check, and
+    // REPLACE (not merge) parsed.attachments with the live list, so a
+    // deletion is reflected immediately instead of showing a stale,
+    // greyed-out "View PDF" button for a file that's already gone.
+    apiFetch({ action:'getJobAttachments', job: title }, function(res) {
+      if (window._popupTitle!==title || !document.getElementById('event-popup-overlay').classList.contains('open')) return;
+      var live = (res && res.attachments) || [];
+      live.forEach(function(a){ window._popupAttachmentPaths[a.name] = a.path; });
+      parsed.attachments = live.map(function(a){ return { name: a.name, link: a.url || '' }; });
+      window._popupParsedDesc = parsed;
+      renderEventPopupBody(title, ts, loc, parsed);
+      renderExistingAttachmentChips();
+    }, function(){ /* fetch failed — leave whatever the description parsed */ });
   }
   else {
     editWrap.innerHTML = '';
