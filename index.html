@@ -1335,29 +1335,13 @@ function sendPhotoNotification(context) {
     return;
   }
 
-  // Notify whoever listed the job ("Listed By" — NOT "Assigned", the
-  // installer doing the physical work, who should not get this) plus the
-  // always-notify group. Recipients are deduped, so a Listed-By person
-  // who's already in the always-notify group only gets one message.
-  apiFetch({ action:'job', job: jobName }, function(rows) {
-    var recipients = {};
-    ALWAYS_NOTIFY_USERS.forEach(function(u) { recipients[u] = true; });
-    (rows || []).forEach(function(r) {
-      String(r.listed || '').split(/[,/&]+|\band\b/i).forEach(function(p) {
-        p = p.trim();
-        if (p) recipients[p.toUpperCase()] = true;
-      });
-    });
-
-    // Staggered rather than all-at-once — simultaneous cross-origin POSTs
-    // to the messaging script's own sheet-backed backend risk one write
-    // clobbering another if it isn't using a lock.
-    Object.keys(recipients).forEach(function(toUser, i) {
-      setTimeout(function(){ notifyUser(toUser, jobName); }, i * 400);
-    });
-  }, function(err) {
-    console.error("Could not look up who listed this job for notification — notifying default recipients only:", err);
-    ALWAYS_NOTIFY_USERS.forEach(function(u, i) { setTimeout(function(){ notifyUser(u, jobName); }, i * 400); });
+  // Notify only the fixed always-notify group. (Previously this also
+  // looked up the job's "Listed By" field and notified those people too,
+  // via a live, uncached call to the Active Jobs sheet on every upload —
+  // that's both why extra people were getting notified and one more hit
+  // against the Sheets API quota. Removed.)
+  ALWAYS_NOTIFY_USERS.forEach(function(u, i) {
+    setTimeout(function(){ notifyUser(u, jobName); }, i * 400);
   });
 }
 
