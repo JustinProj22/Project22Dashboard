@@ -376,22 +376,17 @@
         <div class="icon" id="icon">⚠️</div>
         <h1>Remove from Stock</h1>
         
-        <div class="offcut-id"><?= offcutId ?></div>
+        <div class="offcut-id" id="offcutIdText"></div>
         
         <!-- Offcut Details (Size & Material) -->
         <div class="offcut-details">
             <div class="detail-label">📏 Size & Material</div>
-            <div class="detail-value"><?= dimensions ?> <?= material ?></div>
+            <div class="detail-value" id="detailValue">Loading...</div>
         </div>
         
         <!-- Job Assignment Status -->
-        <div class="job-status <?= jobAssignment ? 'job-assigned' : 'job-unassigned' ?>" id="jobStatus">
-            <? if (jobAssignment) { ?>
-                <div>📋 This offcut is assigned to:</div>
-                <div class="job-name"><?= jobAssignment ?></div>
-            <? } else { ?>
-                <div>ℹ️ This offcut has not been assigned to a job</div>
-            <? } ?>
+        <div class="job-status job-unassigned" id="jobStatus">
+            <div>Loading...</div>
         </div>
         
         <div class="warning" id="confirmSection">
@@ -424,9 +419,36 @@
     </div>
 
     <script>
-        const offcutId = '<?= offcutId ?>';
-        const spreadsheetId = '<?= spreadsheetId ?>';
-        const sheetName = '<?= sheetName ?>';
+        // Apps Script web app (doPost) that reads/deletes the stock row
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzbAo_Km78ZpM2B69rjQe1q1O0EdDUxqR8RaKNxF0QSYc7y_iMicOF77jcOhZxTTdKu/exec';
+        const params = new URLSearchParams(window.location.search);
+        const offcutId = params.get('id') || '';
+        const spreadsheetId = params.get('spreadsheetId') || '';
+        const sheetName = params.get('sheet') || 'Offcuts';
+
+        // Plain-text body keeps this a "simple" request (no CORS preflight, which Apps Script can't answer)
+        function callScript(action) {
+            return fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: action, offcutId: offcutId, spreadsheetId: spreadsheetId, sheetName: sheetName })
+            }).then(function(r) { return r.json(); });
+        }
+
+        document.getElementById('offcutIdText').textContent = offcutId;
+        callScript('getStockItem').then(function(d) {
+            document.getElementById('detailValue').textContent = d.dimensions + ' ' + d.material;
+            const jobStatus = document.getElementById('jobStatus');
+            if (d.jobAssignment) {
+                jobStatus.className = 'job-status job-assigned';
+                jobStatus.innerHTML = '<div>📋 This offcut is assigned to:</div><div class="job-name"></div>';
+                jobStatus.querySelector('.job-name').textContent = d.jobAssignment;
+            } else {
+                jobStatus.innerHTML = '<div>ℹ️ This offcut has not been assigned to a job</div>';
+            }
+        }).catch(function() {
+            document.getElementById('detailValue').textContent = 'Error loading';
+            document.getElementById('jobStatus').innerHTML = '<div>Could not load details</div>';
+        });
         let confirmStage = false;
         
         function handleDelete() {
@@ -467,10 +489,7 @@
             document.getElementById('deleteBtn').textContent = 'Removing...';
             
             // Call the server-side function
-            google.script.run
-                .withSuccessHandler(onSuccess)
-                .withFailureHandler(onError)
-                .deleteOffcutFromSheet(offcutId, spreadsheetId, sheetName);
+            callScript('deleteStockItem').then(onSuccess).catch(onError);
         }
         
         function onSuccess(result) {
