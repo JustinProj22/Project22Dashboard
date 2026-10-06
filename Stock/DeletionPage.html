@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Remove from Stock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #FBB040 0%, #FBB840 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-size: 18px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px 25px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 100%;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+
+	   .logo img {
+   	    width: 100%;
+   	    height: auto;
+ 	    max-height: 100%;
+    	    object-fit: contain;
+	    }
+
+        .logo-text {
+            font-size: 22px;
+            color: #666;
+        }
+        
+        .icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            background: #fff3cd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+        }
+        
+        .icon.success {
+            background: #d4edda;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 32px;
+            line-height: 1.3;
+        }
+        
+        .offcut-id {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+        
+        .offcut-details {
+            font-size: 20px;
+            margin: 20px 0;
+            padding: 18px;
+            background: #e7f3ff;
+            border: 3px solid #2196F3;
+            border-radius: 12px;
+            color: #004085;
+            font-weight: 500;
+        }
+        
+        .detail-label {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .detail-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .job-status {
+            font-size: 22px;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+        
+        .job-assigned {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            color: #856404;
+        }
+        
+        .job-unassigned {
+            background: #e7f3ff;
+            border: 3px solid #2196F3;
+            color: #004085;
+        }
+        
+        .job-name {
+            font-weight: bold;
+            font-size: 24px;
+            margin-top: 10px;
+            color: #333;
+        }
+        
+        .warning {
+            background: #fee;
+            border: 3px solid #dc3545;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #721c24;
+            font-size: 20px;
+        }
+        
+        .warning-title {
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .warning ul {
+            text-align: left;
+            margin: 15px 0;
+            padding-left: 30px;
+            font-size: 19px;
+        }
+        
+        .warning li {
+            margin: 10px 0;
+        }
+        
+        .success-msg {
+            background: #d4edda;
+            border: 3px solid #28a745;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #155724;
+            font-size: 20px;
+        }
+        
+        .error-msg {
+            background: #f8d7da;
+            border: 3px solid #dc3545;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #721c24;
+            font-size: 20px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 20px 25px;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 65px;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-delete:hover:not(:disabled):not(.confirm-mode) {
+            background: #c82333;
+            transform: translateY(-3px);
+            box-shadow: 0 9px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        .btn-delete.confirm-mode {
+            background: #ff6b6b;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-cancel:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-3px);
+            box-shadow: 0 9px 20px rgba(108, 117, 125, 0.4);
+        }
+        
+        .spinner {
+            display: none;
+            width: 90px;
+            height: 90px;
+            margin: 35px auto;
+            border: 9px solid #f3f3f3;
+            border-top: 9px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading .spinner {
+            display: block;
+        }
+        
+        .confirm-text {
+            display: none;
+            font-size: 18px;
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 15px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Mobile styles - larger text for touch screens */
+        @media (max-width: 768px) {
+            body {
+                font-size: 27px;
+            }
+            
+            .container {
+                padding: 35px 25px;
+                border-radius: 30px;
+                max-width: 900px;
+            }
+            
+            .logo {
+                height: 105px;
+                font-size: 36px;
+            }
+            
+            .icon {
+                width: 150px;
+                height: 150px;
+                font-size: 80px;
+            }
+            
+            h1 {
+                font-size: 40px;
+            }
+            
+            .offcut-id {
+                font-size: 36px;
+                padding: 25px;
+            }
+            
+            .offcut-details {
+                font-size: 26px;
+                padding: 22px;
+            }
+            
+            .detail-value {
+                font-size: 30px;
+            }
+            
+            .job-status {
+                font-size: 28px;
+                padding: 25px;
+            }
+            
+            .job-name {
+                font-size: 32px;
+            }
+            
+            .warning {
+                font-size: 26px;
+                padding: 25px;
+            }
+            
+            .warning-title {
+                font-size: 32px;
+            }
+            
+            .warning ul {
+                font-size: 24px;
+            }
+            
+            .success-msg, .error-msg {
+                font-size: 26px;
+                padding: 25px;
+            }
+            
+            button {
+                font-size: 26px;
+                padding: 25px 28px;
+                min-height: 85px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+	   .logo img {
+   	    width: 100%;
+   	    height: auto;
+ 	    max-height: 100%;
+    	    object-fit: contain;
+	    }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Company Logo Placeholder -->
+        <div class="logo">
+            <img src='https://i.postimg.cc/dttzSyHy/project22-primary-transparent.png' border='0' alt='Project22'>
+        </div>
+        
+        <div class="icon" id="icon">⚠️</div>
+        <h1>Remove from Stock</h1>
+        
+        <div class="offcut-id"><?= offcutId ?></div>
+        
+        <!-- Offcut Details (Size & Material) -->
+        <div class="offcut-details">
+            <div class="detail-label">📏 Size & Material</div>
+            <div class="detail-value"><?= dimensions ?> <?= material ?></div>
+        </div>
+        
+        <!-- Job Assignment Status -->
+        <div class="job-status <?= jobAssignment ? 'job-assigned' : 'job-unassigned' ?>" id="jobStatus">
+            <? if (jobAssignment) { ?>
+                <div>📋 This offcut is assigned to:</div>
+                <div class="job-name"><?= jobAssignment ?></div>
+            <? } else { ?>
+                <div>ℹ️ This offcut has not been assigned to a job</div>
+            <? } ?>
+        </div>
+        
+        <div class="warning" id="confirmSection">
+            <div class="warning-title">⚠️ Warning: Permanent Action!</div>
+            <p style="margin: 18px 0;">Removing this offcut will permanently delete:</p>
+            <ul>
+                <li>Offcut record from database</li>
+            </ul>
+            <div class="confirm-text" id="confirmText">
+                👆 Tap "Remove from Stock" again to confirm
+            </div>
+        </div>
+        
+        <div class="spinner" id="spinner"></div>
+        
+        <div id="resultSection" style="display: none;">
+            <div class="success-msg" id="successMsg" style="display: none;">
+                <p style="font-weight: bold; font-size: 33px;">✅ Success!</p>
+                <p id="successText" style="margin-top: 18px;"></p>
+            </div>
+            <div class="error-msg" id="errorMsg" style="display: none;">
+                <p style="font-weight: bold; font-size: 33px;">❌ Error!</p>
+                <p id="errorText" style="margin-top: 18px;"></p>
+            </div>
+        </div>
+        
+        <div class="button-group" id="buttonGroup">
+            <button class="btn-delete" onclick="handleDelete()" id="deleteBtn">Remove from Stock</button>
+        </div>
+    </div>
+
+    <script>
+        const offcutId = '<?= offcutId ?>';
+        const spreadsheetId = '<?= spreadsheetId ?>';
+        const sheetName = '<?= sheetName ?>';
+        let confirmStage = false;
+        
+        function handleDelete() {
+            if (!confirmStage) {
+                // First click - show confirmation
+                confirmStage = true;
+                const deleteBtn = document.getElementById('deleteBtn');
+                deleteBtn.classList.add('confirm-mode');
+                deleteBtn.textContent = 'Confirm Removal';
+                document.getElementById('confirmText').style.display = 'block';
+                
+                // Reset after 5 seconds if no confirmation
+                setTimeout(function() {
+                    if (confirmStage) {
+                        resetConfirmation();
+                    }
+                }, 5000);
+            } else {
+                // Second click - actually delete
+                confirmDelete();
+            }
+        }
+        
+        function resetConfirmation() {
+            confirmStage = false;
+            const deleteBtn = document.getElementById('deleteBtn');
+            deleteBtn.classList.remove('confirm-mode');
+            deleteBtn.textContent = 'Remove from Stock';
+            document.getElementById('confirmText').style.display = 'none';
+        }
+        
+        function confirmDelete() {
+            // Show loading state
+            document.getElementById('confirmSection').style.display = 'none';
+            document.getElementById('jobStatus').style.display = 'none';
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('deleteBtn').disabled = true;
+            document.getElementById('deleteBtn').textContent = 'Removing...';
+            
+            // Call the server-side function
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onError)
+                .deleteOffcutFromSheet(offcutId, spreadsheetId, sheetName);
+        }
+        
+        function onSuccess(result) {
+            // Hide spinner
+            document.getElementById('spinner').style.display = 'none';
+            
+            if (result.success) {
+                // Show success
+                document.getElementById('icon').textContent = '✅';
+                document.getElementById('icon').classList.add('success');
+                document.getElementById('resultSection').style.display = 'block';
+                document.getElementById('successMsg').style.display = 'block';
+                
+                let message = 'Offcut "' + result.message + '" has been removed from stock.';
+                if (result.filesDeleted && result.filesDeleted.length > 0) {
+                    message += '\n\nDeleted files: ' + result.filesDeleted.join(', ');
+                }
+                if (result.assignedJob) {
+                    message += '\n\nJob assignment: ' + result.assignedJob;
+                }
+                document.getElementById('successText').textContent = message;
+                
+               // Hide buttons
+                document.getElementById('buttonGroup').style.display = 'none';
+                    
+                // Auto-close after 4 seconds
+                setTimeout(function() {
+                    window.close();
+                }, 4000);
+            } else {
+                // Show error
+                document.getElementById('icon').textContent = '❌';
+                document.getElementById('resultSection').style.display = 'block';
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('errorText').textContent = result.message;
+                
+                // Re-enable button
+                document.getElementById('deleteBtn').disabled = false;
+                document.getElementById('deleteBtn').textContent = 'Try Again';
+            }
+        }
+        
+        function onError(error) {
+            // Hide spinner
+            document.getElementById('spinner').style.display = 'none';
+            
+            // Show error
+            document.getElementById('icon').textContent = '❌';
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorText').textContent = 'An error occurred: ' + error.message;
+            
+            // Re-enable button
+            document.getElementById('deleteBtn').disabled = false;
+            document.getElementById('deleteBtn').textContent = 'Try Again';
+        }
+    </script>
+</body>
+</html>
