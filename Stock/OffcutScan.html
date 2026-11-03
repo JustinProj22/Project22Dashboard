@@ -30,6 +30,7 @@
         .racks { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 15px 0; }
         .racks button { min-height: 56px; padding: 0; font-size: 22px; background: #f1f3f5; color: #333; border: 3px solid #dee2e6; }
         .racks button.on { background: #FBB040; border-color: #c98a20; color: #000; }
+        textarea { width: 100%; font: inherit; font-size: 20px; padding: 12px; border: 3px solid #dee2e6; border-radius: 12px; margin: 6px 0 10px; }
         .msg { border-radius: 12px; padding: 20px; margin: 20px 0; font-size: 20px; }
         .ok { background: #d4edda; border: 3px solid #28a745; color: #155724; }
         .err { background: #f8d7da; border: 3px solid #dc3545; color: #721c24; }
@@ -84,6 +85,8 @@
         <div id="rackSection" hidden>
             <div class="detail-label" id="rackLabel">Put it in rack</div>
             <div class="racks" id="racks"></div>
+            <div id="notesBox"><label class="detail-label" for="notes">Notes</label>
+                <textarea id="notes" rows="3" maxlength="500" placeholder="Optional - e.g. a chip on one edge"></textarea></div>
             <button class="btn-main" id="saveBtn" onclick="saveRack()" disabled>Choose a rack</button>
         </div>
     </div>
@@ -110,6 +113,7 @@
         function showRacks(isMove) {
             moving = isMove; rack = ''; $('removeSection').hidden = true; $('rackSection').hidden = false;
             $('rackLabel').textContent = isMove ? 'Move it to rack' : 'Put it in rack';
+            $('notesBox').hidden = isMove;   // notes when it's added (the sheet's Notes column)
             $('racks').innerHTML = '';
             RACKS.forEach(function (r) {
                 const b = document.createElement('button'); b.textContent = r;
@@ -138,7 +142,7 @@
         function saveRack() {
             if (!rack) return;
             $('saveBtn').disabled = true; busy(true); $('msg').hidden = true;
-            const call = moving ? callScript('setStockRack', { code: offcut.code, rack: rack }) : callScript('addStockItem', Object.assign({}, offcut, { rack: rack }));
+            const call = moving ? callScript('setStockRack', { code: offcut.code, rack: rack }) : callScript('addStockItem', Object.assign({}, offcut, { rack: rack, notes: $('notes').value }));
             call.then(function (r) {
                 busy(false);
                 if (!r.success) { say(r.message || 'Not saved', false); $('saveBtn').disabled = false; return; }
